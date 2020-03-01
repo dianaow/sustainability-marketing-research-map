@@ -1,0 +1,103 @@
+/*
+ * Define the widths: play around with these to get a best fit.
+ */
+/*
+ * Basic styles, good for a large display. Everything fits in
+ * one row, no wrapping. All text based cells grow equally.
+ */
+
+.Table {
+  width: 100%;
+  height: 500px;
+  margin: 20px 0px;
+  overflow-y: scroll;
+  border: 1px dashed white;
+  display: flex;
+}
+
+.Table__default {
+  padding: 20px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.container-fluid {
+  width: 100%;
+}
+
+.table-row {
+  display: flex;
+  display: -webkit-flex;
+  flex-direction: row;
+  -webkit-flex-direction: row;
+  flex-wrap: no-wrap;
+  -webkit-flex-wrap: no-wrap;
+  width: 100%;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+.wrapper {
+  display: flex;
+  display: -webkit-flex;
+  flex-direction: row;
+  -webkit-flex-direction: row;
+  flex-grow: 0;
+  -webkit-flex-grow: 0;
+}
+.text-4,
+.text-2,
+.text {
+  flex-grow: 0;
+  -webkit-flex-grow: 0;
+}
+.text {
+  display: flex;
+  align-items: center;
+  width: 100px;
+  font-size: 11px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  padding: 0px 5px;
+}
+.num {
+  display: flex;
+  align-items: center;
+  width: 30px;
+  font-size: 10px;
+  padding: 0px 5px;
+}
+
+/*
+ * General good-look styles, not mandatory.
+ */
+.table-row {
+  border-bottom: 1px solid #e0e0e0;
+  border-collapse: collapse;
+  padding-top: 5px;
+}
+.table-row.header {
+  font-weight: bold;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+.selected {
+  background-color: white;
+  opacity: 0.8;
+  color: #011C54; 
+}
+/* Some borders to show the behaviour. Uncomment to see it in action */
+/*
+.text-2, .num-2 {
+  border: 1px solid green;
+  padding: 2px;
+  margin: 2px;
+}
+
+.text-4, .num-4 {
+  border: 1px solid red;
+  margin: 2px;
+}
+*/

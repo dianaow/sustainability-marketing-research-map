@@ -1,0 +1,75 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Karla', sans-serif;
+  position: relative;
+  background-color: #011C54;   
+  color: white;
+}
+
+p {
+  margin: 5px 0px;
+}
+h4 {
+  margin: 5px 0px;
+  font-size: 10px;
+}
+
+.App__wrapper {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.SideBarLeft {
+  width: 25vw;
+  height: 100%;
+  padding: 10px 0px 10px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.Title {
+  width: 100%;
+  height: 220px;
+}
+
+.Legend {
+  width: 100%;
+  height: auto;
+}
+
+.Main {
+  width: 50vw;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 20px;
+}
+
+.SideBarRight {
+  width: 25vw;
+  height: 100%;
+  padding: 10px 20px 10px 0px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.viewButton {
+  margin: 0px;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.Board__circle {
+    fill: #9980FA;
+    fill-opacity: 0.1;
+}
+

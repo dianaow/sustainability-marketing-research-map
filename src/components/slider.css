@@ -1,0 +1,75 @@
+.slider-container {
+ position: relative;
+}
+
+.slider-selected-scale {
+}
+.slider {
+  position: relative;
+  user-select:none;
+
+}
+
+.slider-scale {
+}
+
+.slider-thumb {
+  position: absolute;
+  background-color:white;
+  height:20px;
+  width:20px;
+  border-radius:50%;
+  top: -5px;
+  touch-action: none;
+}
+
+.slider-thumb-min {
+  background-color:white;
+}
+
+.slider-thumb-max {
+  background-color: white;
+}
+
+.slot {
+  text-align: center;
+  display:inline-block;
+  width:20px;
+  height:10px;
+  background-color:none;
+}
+
+.scale-mark {
+ position: absolute;
+ border: 0.5px solid lightgray;
+ height: 5px;
+}
+
+.slot-scale {
+  text-align: center;
+  display:inline-block;
+  width:20px;
+  height:10px;
+  color: lightgray;
+  user-select: none;
+  font-size: 10px;
+}
+
+.slot >.slider-thumb {
+  top:3px
+}
+
+.line {
+  position: absolute;
+  background-color: white;
+  opacity: 0.5;
+  height:2px;
+  width: 20px;
+  top: 12px;
+}
+
+.line-selected {
+  height: 4px;
+  opacity: 1;
+  background-color: white;
+}
