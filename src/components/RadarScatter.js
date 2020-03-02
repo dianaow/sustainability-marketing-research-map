@@ -135,10 +135,12 @@ const getNewCoords = (data, version, direction, rScale, config) => {
 
 const Radar = ({ data, config, ...props }) => {
 
-  const [ref, dms] = useChartDimensions({'width': window.innerWidth*0.9, 'height': window.innerHeight*0.9})
+  const dimensions = {'width': window.innerWidth*0.9, 'height': window.innerHeight*0.9}
+  const radius = Math.min(dimensions.width/2, dimensions.height/2) - 30
+  //const [ref, dms] = useChartDimensions({'width': window.innerWidth*0.9, 'height': window.innerHeight*0.9})
+  //const radius = Math.min(dms.boundedWidth/2, dms.boundedHeight/2) - 30
   const DEFAULT_PIE = 0
 
-  const radius = Math.min(dms.boundedWidth/2, dms.boundedHeight/2) - 30
   const rScale = d3.scalePow()
     .exponent(0.5)
     .range([radius, 0])
@@ -221,8 +223,8 @@ const Radar = ({ data, config, ...props }) => {
   }
 
   return (
-    <div className="Radar" ref={ref} style={{'width': window.innerWidth*0.9, 'height': window.innerHeight*0.9}}>
-      <Chart dimensions={dms}>
+    <div className="Radar" style={{'width': window.innerWidth*0.9, 'height': window.innerHeight*0.9}}>
+      <Chart dimensions={dimensions}>
         <Board
           data={range}
           keyAccessor={(d, i) => 'board-' + i}

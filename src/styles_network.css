@@ -1,0 +1,184 @@
+.Entity__Left {
+  width: 25%;
+  height: 100%;
+}
+.Entity__Right {
+  position: relative;
+  width: 75%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ------------------------------------------ */
+/* --------------- GRAPH NETWORK ------------ */
+/* ------------------------------------------ */
+.Network {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+  position: relative;
+}
+.link {
+  pointer-events: all;
+  fill: none;
+}
+.node {
+  pointer-events: all;
+  cursor: pointer;
+}
+div.tooltip {
+  position: absolute;
+  max-width: 100px;
+  color: white;
+  background-color: #011C54; 
+  border: 1px solid white; 
+  border-radius: 0px; 
+  padding: 6px 12px;
+  text-align: center;
+  display: inline-block;
+  font-size: 0.65em;
+  margin: 4px 2px;
+  pointer-events: none;
+}
+
+/* color control buttons + legend */
+.Chart_legend_section {
+  position: absolute;
+  top: 20px;
+  left: 40px;
+  width: 180px;
+  height: auto; 
+  background: rgba(1, 28, 84, 0.6); 
+  z-index: 99; 
+}
+.Chart_legend_section .legend-header {
+  fill: white;
+  font-size: 0.65em;
+  font-weight: bold;
+}
+.Chart_legend_section .legend-content-text {
+  fill: white;
+  font-size: 0.6em;
+  alignment-baseline: middle;
+  text-anchor: left;
+}
+.Chart_legend_section p {
+  color: white;
+  background-color: #011C54;
+  border-bottom: 1px solid white; 
+  padding: 5px;
+}
+
+/* color scheme selection buttons */
+.Chart_color_section {
+  position: absolute;
+  top: 20px;
+  right: 80px;
+  background: rgba(1, 28, 84, 0.6);
+}
+.selected {
+  background-color: white;
+  color: #011C54; 
+}
+
+/* zoomable control buttons */
+.Chart_controls_section {
+  position: absolute;
+  top: 23px;
+  right: 40px;
+}
+.button {
+  width: 20px;
+  height: 20px;
+  border: 1px solid white;
+  color: white; 
+  background-color: transparent;  
+  font-size: 20px;  
+  text-align: center;
+  vertical-align: middle;
+  line-height: 20px;  
+  cursor: pointer;
+}
+
+/* ------------------------------------------ */
+/* --------- NETWORK SUMMARY SECTION -------- */
+/* ------------------------------------------ */
+.Chart_info_section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  width:100%;
+  color: white;
+  top: 20px;
+  background: rgba(1, 28, 84, 0.6);
+}
+
+.chart-statistics {
+  width: 200px;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  /*position: absolute;
+  top: 80px;
+  right: 40px;
+  border: 1px solid white;*/
+}
+.chart-statistics-total {
+  width: 100%;
+  height: 25%;       
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+.chart-statistics-breakdown{
+  width: 100%;
+  height: 75%; 
+  /*border: 1px solid white;*/
+}
+.nodes_stats, .edges_stats{
+  width: 50%;
+  text-align: center;
+  /*border: 1px solid white;*/
+}
+.nodes_stats h2, .edges_stats h2{
+  margin: 0px;
+}
+.nodes_stats p, .edges_stats p{
+  margin: 0px;
+  font-size: 0.6em;
+}
+.nodes_stats_total, .edges_stats_total{
+  height: 35px;
+}
+
+/* ---------------------- */
+/* ----- TIMELINE ------- */
+/* ---------------------- */
+.slider {
+  fill: white;
+  color: white;
+}
+
+#loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+/* Timeline date display */
+.time {
+  width: 150px;
+}
+/*#time {
+  position: absolute;
+  top: 20px;
+  right: 80px;
+  color: white;       
+} */

@@ -7,7 +7,7 @@ export const useChartDimensions = () => useContext(ChartContext)
 const Chart = ({ dimensions, children }) => (
   <ChartContext.Provider value={dimensions}>
     <svg className="Chart" width={dimensions.width} height={dimensions.height}>
-      <g transform={`translate(${dimensions.width/2}, ${dimensions.height/2})`}>
+      <g>
         { children }
       </g>
     </svg>

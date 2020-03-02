@@ -1,0 +1,109 @@
+/* --------------------------------- */
+/* -------------- CARD ------------- */
+/* --------------------------------- */
+.Card {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 0;
+}
+.Card__content {
+  display: flex;
+  flex-direction: row;
+  margin-top: 16px;
+}
+.Card__content .list{
+  width: 70%;
+}  
+.Card__content .image{
+  width: 30%;
+}  
+
+.Card__section {
+  position: relative;
+  margin: 20px 15px 0px 15px;
+}
+.card-title {
+  height: 10%;
+  margin: 0px 15px 0px 15px;
+}
+.card-title-name {
+  font-size: 2em;
+  padding: 20px 0px 10px 0px;
+}
+.card-info {
+  height: 20%;
+  border: 1px solid white;
+}
+.card-notes {
+  height: 15%;
+  border: 1px solid white;
+}
+.card-key-positions{
+  height: 15%;
+  border: 1px solid white;
+}
+.card-events {
+  height: 40%;
+  border: 1px solid white;  
+  margin-bottom: 35px;     
+}
+/* Card header formatting */
+.header {
+  color: white;
+  background-color: #011C54;
+  border: 1px solid white; 
+  padding: 5px;
+  position: absolute;
+  top:-12px;
+  left: 16px;
+  z-index: 99;
+}
+
+/* Card table formatting */
+.table-row-header {
+  background-color: white;
+  color: #011C54;
+  opacity: 0.5;
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  border-bottom: 1px solid white;
+  padding-top: 10px;
+} 
+.table-row-contents {
+  height: calc(100% - 40px);
+  overflow-y: scroll;
+}
+.row {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  flex-grow: 0; 
+}
+.cell {
+  display: flex;
+  align-items: center;
+  padding: 6px 0px 6px 8px;
+}
+.cell-15 {
+  min-width: 15%;
+}
+.cell-20 {
+  min-width: 20%;
+}
+.cell-50 {
+  width: 40%;
+  min-width: 140px;
+}
+.cell-80 {
+  min-width: 80%;
+  min-width: 200px;
+}
+.value {
+  font-size: 11px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}

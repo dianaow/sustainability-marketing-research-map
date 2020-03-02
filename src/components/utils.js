@@ -205,3 +205,20 @@ export const findConnections = (data, id) => {
   return links
 
 }
+
+export const calculateAspectRatioFit = (srcWidth, srcHeight, maxWidth, maxHeight) => {
+  var ratio = Math.min(maxWidth / srcWidth, maxHeight / srcHeight);
+  return { width: srcWidth*ratio, height: srcHeight*ratio };
+}
+
+export const onlyUnique = (value, index, self) => { 
+  return self.indexOf(value) === index;
+}
+
+export const randBetween = (min, max) => {
+  return min + (max - min) * Math.random();
+} 
+
+export const getRandomArbitrary = (min, max) => {
+  return Math.round(Math.random() * (max - min) + min)
+}

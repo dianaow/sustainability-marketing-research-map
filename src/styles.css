@@ -5,16 +5,21 @@
 body {
   font-family: 'Karla', sans-serif;
   position: relative;
-  background-color: #011C54;   
+  background-color: #011C54;  
   color: white;
+  margin: 0px;
+  opacity: 0.85;
 }
-
 p {
-  margin: 5px 0px;
+  font-size: 0.75em;
+  margin: 0px;
 }
 h4 {
   margin: 5px 0px;
   font-size: 10px;
+}
+text {
+  pointer-events: none;
 }
 
 .App__wrapper {
@@ -36,7 +41,37 @@ h4 {
 
 .Title {
   width: 100%;
-  height: 220px;
+  height: auto;
+}
+
+.Search {
+  width: 100%;
+  height: 140px;
+  padding: 20px 0px;
+  z-index: 99;
+}
+.NavButtons {
+  margin: 20px 0px 10px 0px; 
+}
+.btn {
+  color: white;
+  background: transparent; 
+  border: 1px solid white; 
+  border-radius: 0px; 
+  padding: 6px 12px;
+  text-align: center;
+  display: inline-block;
+  font-size: 0.7em;
+  margin: 4px 2px;
+  -webkit-transition-duration: 0.4s; /* Safari */
+  transition-duration: 0.4s;
+  cursor: pointer;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+.btn:hover {
+  background-color: white;
+  color: #011C54;
 }
 
 .Legend {

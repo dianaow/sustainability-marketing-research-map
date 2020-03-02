@@ -23,3 +23,36 @@ export const fociRadius = d3.scaleSqrt()
 export const bufferInRad = 10 * (Math.PI / 180)
 
 export const angleSlice = (Math.PI * 2) / categories.length
+
+// set node, link, text color and dimensions
+export const rootRadius = 35
+export const nodeRadius = 40
+export const nodeStrokeWidth = 2
+export const nodeStroke = 'white'
+export const nodeFill = '#011C54'
+export const nodeOpacity = 1
+export const nodeTextFill = 'white'
+export const nodeTextOpacity = 0.5
+export const childnodeTextOpacity = 0.5
+export const nodeTextSize = 8
+
+export const linkStrokeWidth = 0.6
+export const linkStroke = 'white'
+export const linkOpacity = 0.5
+export const linkTextFill = 'white'
+export const linkTextOpacity = 0.5
+export const linkTextSize = 8
+export const transitionDuration = 2000
+
+export const linkedByIndex = {}
+
+export const formatYear = d3.timeFormat("%Y")
+export const formatDate = d3.timeFormat("%b %Y")
+export const parseDate = d3.timeParse("%Y-%m-%d")
+export const parseDate1 = d3.timeParse("%Y")
+export const parseDate2 = d3.timeParse("%b %Y")
+export const parseDate3 = d3.timeParse("%d-%b-%Y")
+export const currentDateString = '2020-02-01'
+export const currentDate = parseDate(currentDateString)
+
+export const ROOT_ID = 80114141
