@@ -13,6 +13,22 @@
 /* ------------------------------------------ */
 /* --------------- GRAPH NETWORK ------------ */
 /* ------------------------------------------ */
+.Loading {
+  display: flex;
+  justify-content: center;
+  vertical-align: center;
+  height: 100%;
+  width: 100%;
+}
+.Loading .ui.dimmer {
+  background-color: #011C54;
+}
+.Loading .ui.segment {
+  border: 0px;
+}
+/* ------------------------------------------ */
+/* --------------- GRAPH NETWORK ------------ */
+/* ------------------------------------------ */
 .Network {
   display: flex;
   flex-direction: row;

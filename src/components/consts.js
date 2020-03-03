@@ -33,14 +33,14 @@ export const nodeFill = '#011C54'
 export const nodeOpacity = 1
 export const nodeTextFill = 'white'
 export const nodeTextOpacity = 0.5
-export const childnodeTextOpacity = 0.5
+export const childnodeTextOpacity = 0
 export const nodeTextSize = 8
 
 export const linkStrokeWidth = 0.6
 export const linkStroke = 'white'
 export const linkOpacity = 0.5
 export const linkTextFill = 'white'
-export const linkTextOpacity = 0.5
+export const linkTextOpacity = 0
 export const linkTextSize = 8
 export const transitionDuration = 2000
 

@@ -222,3 +222,7 @@ export const randBetween = (min, max) => {
 export const getRandomArbitrary = (min, max) => {
   return Math.round(Math.random() * (max - min) + min)
 }
+
+export const round = (d) => {
+  return Math.round(d * 100)/100
+}

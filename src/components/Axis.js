@@ -30,7 +30,7 @@ Axis.defaultProps = {
   scale: null,
   formatTick: d3.format(","),
   label: null,
-  textColor: 'white',
+  fill: 'white',
   textAnchor: 'middle',
   fontSize: '9px',
   stroke: 'white',
@@ -42,7 +42,6 @@ export default Axis
 
 function AxisHorizontal ({ dimensions, label, formatTick, scale, ...props }) {
   const numberOfTicks = 5
-
   const ticks = scale.ticks(numberOfTicks)
 
   return (
@@ -55,18 +54,29 @@ function AxisHorizontal ({ dimensions, label, formatTick, scale, ...props }) {
       />
 
       {ticks.map((tick, i) => (
-        <text
-          key={tick}
-          className="Axis__tick"
-          transform={`translate(${scale(tick)}, 10)`}
-          fill={props.textColor} 
-          textAnchor={props.textAnchor}
-          fontSize={props.fontSize}    
-        >
-          { formatTick(tick) }
-        </text>
+        <React.Fragment>  
+          <line {...props}
+            key={'h-line-' + i}
+            className="Axis__line"
+            transform={`translate(${scale(tick)}, 0)`}
+            y2='10'
+            fill={props.textColor} 
+            textAnchor={props.textAnchor}
+            fontSize={props.fontSize}    
+          />
+          <text
+            key={'h-tick-' + i}
+            className="Axis__tick"
+            transform={`translate(${scale(tick)}, 20)`}
+            fill={props.textColor} 
+            textAnchor={props.textAnchor}
+            fontSize={props.fontSize}    
+          >
+            { formatTick(tick) }
+          </text>
+        </React.Fragment>
       ))}
-
+    
       {label && (
         <text
           className="Axis__label"
@@ -83,28 +93,42 @@ function AxisHorizontal ({ dimensions, label, formatTick, scale, ...props }) {
 }
 
 function AxisVertical ({ dimensions, label, formatTick, scale, ...props }) {
-  const numberOfTicks = dimensions.boundedHeight / 70
-
+  const numberOfTicks = 3
   const ticks = scale.ticks(numberOfTicks)
 
   return (
-    <g className="Axis AxisVertical" {...props}>
+    <g className="Axis AxisVertical">
       <line
         className="Axis__line"
+        transform={`translate(-10, 0)`}
         y2={dimensions.boundedHeight}
+        stroke={props.stroke} 
+        strokeWidth={props.strokeWidth}
       />
 
       {ticks.map((tick, i) => (
-        <text
-          key={tick}
-          className="Axis__tick"
-          transform={`translate(-16, ${scale(tick)})`}
-          fill={props.textColor} 
-          textAnchor={props.textAnchor}
-          fontSize={props.fontSize}    
-        >
-          { formatTick(tick) }
-        </text>
+        <React.Fragment> 
+          <line {...props}
+            key={'v-line-' + i}
+            className="Axis__line"
+            transform={`translate(-20, ${scale(tick)})`}
+            x1='0'
+            x2='10'
+            fill={props.textColor} 
+            textAnchor={props.textAnchor}
+            fontSize={props.fontSize}    
+          />
+          <text
+            key={'v-tick-' + i}
+            className="Axis__tick"
+            transform={`translate(-30, ${scale(tick)})`}
+            fill={props.textColor} 
+            textAnchor={props.textAnchor}
+            fontSize={props.fontSize}    
+          >
+            { formatTick(tick) }
+          </text>
+        </React.Fragment>
       ))}
 
       {label && (

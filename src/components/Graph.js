@@ -1,18 +1,56 @@
-import React, { useRef } from "react"
+import React, { useRef, useEffect, useContext, useState } from "react"
 import * as d3 from "d3"
 import Chart from "./Chart"
 import * as Consts from "./consts"
-import { useChartDimensions, onlyUnique, getRandomArbitrary }  from "./utils"
+import { useChartDimensions, onlyUnique, getRandomArbitrary, round }  from "./utils"
+import Timeline from "./Timeline"
+import { MyContext } from "../NetworkPage"
+
+let childnodeTextOpacity = Consts.childnodeTextOpacity
+let linkTextOpacity = Consts.linkTextOpacity
+
+const simulation = d3.forceSimulation()
+  .force("link", d3.forceLink()
+    .distance(function(d) { return d.distance })
+    .strength(function(d) { return d.strength })
+  )
+  .force("charge", d3.forceManyBody().strength(-40))
+  .force("collide", d3.forceCollide(function(d){ return d.radius * 2 }))
+  .alphaTarget(0.8)
 
 const Network = ({data, scales}) => {
 
+  //////////////// Create a zoom and set initial zoom level /////////////
+  const zoom = d3.zoom().scaleExtent([0.5, 2]).on("zoom", ()=>setZoomState(d3.event.transform));
+  const [zoomState, setZoomState] = useState({ x:0,y:0,k:1 })
+
+  const svg = d3.selectAll('.networkWrapper')
+  svg.call(zoom).on("dblclick.zoom", null);
+
+  useEffect(() => {
+
+    if(zoomState.k >= 1.4){
+      childnodeTextOpacity = 0.5
+      linkTextOpacity = 0.5
+    }
+    if(zoomState.k < 1.4){
+      childnodeTextOpacity = Consts.childnodeTextOpacity
+      linkTextOpacity = Consts.linkTextOpacity
+    }
+    d3.selectAll('.edge-label').attr('opacity', linkTextOpacity)
+    d3.selectAll('.children-node-label').attr('opacity', childnodeTextOpacity)
+
+  }, [zoomState])
+
+  const { current, dispatch } = useContext(MyContext)
+
   const ROOT_ID = Consts.ROOT_ID
-  const { nodes, links } = data
+  const { nodes, links, timeData } = data
   const [ref, dms] = useChartDimensions()
 
   // label nodes and edges so that appropriate style is assigned
-  const root_targets = links.filter(d=>d.source.id == ROOT_ID)
-  const parentIDs = root_targets.map(d=>d.target.id).filter(onlyUnique)
+  const root_targets = links.filter(d=>d.start_id == ROOT_ID)
+  const parentIDs = root_targets.map(d=>d.end_id).filter(onlyUnique)
   const orgIDs = nodes.filter(d=>d.node_type == 'organization').map(d=>d.id).filter(onlyUnique)
   const rootAccessor = d => [ROOT_ID].indexOf(d.id) != -1
   const parentAccessor = d => parentIDs.indexOf(d.id) != -1
@@ -29,15 +67,55 @@ const Network = ({data, scales}) => {
   data.ROOT_ID = ROOT_ID
   data.parentIDs = parentIDs
 
-  if(dms.width>0 & dms.height>0){
-    updateGraph(data, Consts.formatYear(Consts.currentDate), accessors, scales, {width: dms.width/2, height: dms.height/2-60}) 
+  useEffect(() => {
+
+    simulation.stop()
+
+    // update score in center of root node
+    d3.selectAll('.root-label-score').html(current.score)
+
+    // temporarily only allow the network to be updated for the following dates
+    let tempDates = ['Jan 2015', 'Jan 2016', 'Jan 2017', 'Jan 2018', 'Jan 2019']
+    let formattedDate = Consts.formatDate(current.date)
+    let toUpdate = tempDates.indexOf(formattedDate) != -1
+    if(toUpdate==true ){
+      let graph = updateGraph(data, Consts.formatYear(current.date), accessors, scales, {width: dms.width/2, height: dms.height/2-60}) 
+      dispatch({ type: 'SET_STATS', nodesCount: graph.nodes.length, linksCount: graph.links.length })
+    }
+  }, [current.date])
+
+  useEffect(() => {
+    console.log(dms)
+    if(current.date === Consts.currentDate){
+      if(dms.width>0 & dms.height>0){
+        let graph = updateGraph(data, Consts.formatYear(current.date), accessors, scales, {width: dms.width/2, height: dms.height/2-60}) 
+      }
+    }
+  }, [dms.width, dms.height])
+
+  const showNavButtons = () => {
+    return(
+      <div className='NavButtons'>
+        <input name="nav" 
+          type="button" 
+          className='btn nav_1'
+          value="Network"/>
+        <input name="nav" 
+          type="button" 
+          className="btn nav_2"
+          value="Events"/>
+      </div>
+    )
   }
-  
+
   return(
     <div className="Network" ref={ref}>
       <Chart dimensions={dms}>
-        <g className='links'></g>
-        <g className='nodes'></g>
+        <g className='network' transform={`translate(${zoomState.x}, ${zoomState.y}) scale(${zoomState.k})`}>
+          <g className='links'></g>
+          <g className='nodes'></g>
+        </g>
+        <Timeline data={timeData} dimensions={dms} />
       </Chart>
     </div>
   )
@@ -46,10 +124,11 @@ const Network = ({data, scales}) => {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////// Graph Network: Create node and link elements ////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-function drawNodes(nodes, accessors) {
+function draw(nodes, links, accessors) {
 
   let { root, parent, rootparent, organization, berects } = accessors
 
+  // DRAW NODES
   let graphNodesGroup = d3.select('.Network').select('.nodes')
   let graphNodesData = graphNodesGroup.selectAll("g").data(nodes, d => d.id)
 
@@ -64,6 +143,9 @@ function drawNodes(nodes, accessors) {
     .transition().duration(Consts.transitionDuration)
     .attr("width", 0)
     .attr("height", 0)
+    .remove()
+
+  graphNodesData.exit().select("text")
     .remove()
 
   graphNodesEnter
@@ -139,7 +221,7 @@ function drawNodes(nodes, accessors) {
     .attr('font-size', '24px')
     .attr('x', d => berects(d) ? d.radius : 0)
     .attr('y', d => berects(d) ? d.radius : 0)
-    .text(d => Math.round(d.score * 100)/100)
+    .text(d => round(d.score))
 
   graphNodesData = graphNodesEnter.merge(graphNodesData)
 
@@ -170,10 +252,12 @@ function drawNodes(nodes, accessors) {
           .attr('height', function(d) {return d.radius*2}) 
     })
 
-} //drawNodes: update nodes of graph
+  graphNodesData.selectAll('.node')
+    .filter(d=>!root(d))
+    .on('mouseover.fade', hoverOver())
+    .on('mouseout.fade', hoverOut())
 
-function drawLinks(links) {
-
+  // DRAW LINKS
   let graphLinksGroup = d3.select('.Network').select('.links')
   let graphLinksData = graphLinksGroup.selectAll("g").data(links, d => d.source.id.toString() + "-" + d.target.id.toString())
 
@@ -228,14 +312,51 @@ function drawLinks(links) {
         d.target.x + "," + d.target.y
   })
 
-}//drawLinks: update edges of graph
+  // INTERACTIVITY
+  function hoverOver() {
+    return d => {
+      graphNodesData.selectAll('.node')
+        .attr('stroke-opacity', function (o) {
+          const thisOpacity =  isConnected(d, o) ? 1 : 0.2
+          this.setAttribute('fill-opacity', thisOpacity)
+          return thisOpacity
+        })
+      graphNodesData.selectAll('.root-label text').attr('opacity', o => (isConnected(d, o) ? 1 : 0.4))
+      graphNodesData.selectAll('.root-label image').attr('opacity', o => (isConnected(d, o) ? 1 : 0.4))
+      graphNodesData.selectAll('text').attr('opacity', o => (isConnected(d, o) ? 1 : 0))
+
+      graphLinksData.selectAll('.link')
+        .attr('stroke-opacity', o => (o.source === d || o.target === d ? 1 : 0.2))
+        .attr('marker-mid', o => (o.source === d || o.target === d) ? 'url(#arrowheadOpaque)' : 'url(#arrowhead)')
+      graphLinksData.selectAll('.edge-label').attr('opacity', o => (o.source === d || o.target === d ? Consts.linkTextOpacity : 0))
+    }
+  }
+
+  function hoverOut() {
+    return d => {
+      graphNodesData.selectAll('.node')
+        .attr('stroke-opacity', Consts.nodeOpacity)
+        .attr('fill-opacity', Consts.nodeOpacity)
+      graphNodesData.selectAll('.root-label text').attr('opacity', 1)
+      graphNodesData.selectAll('.root-label image').attr('opacity', 1)
+      graphNodesData.selectAll('text.parent-node-label').attr('opacity', Consts.nodeTextOpacity)
+      graphNodesData.selectAll('text.children-node-label').attr('opacity', childnodeTextOpacity)
+
+      graphLinksData.selectAll('.link')
+        .attr('stroke-opacity', Consts.linkOpacity)
+        .attr('marker-mid','url(#arrowhead)')
+      graphLinksData.selectAll('.edge-label').attr('opacity', linkTextOpacity)
+
+    }
+  }
+
+}//draw: update nodes and edges of graph
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////// Graph Network: Update node and link styles ////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-function updateScales(data, accessors, scales){
+function updateScales(nodes, links, accessors, scales){
 
-  const { nodes, links, ROOT_ID, parentIDs } = data
   const { colorScale, nodeRadiusScale} = scales
   const { root, parent, rootparent, organization, berects } = accessors
 
@@ -273,7 +394,7 @@ function updateScales(data, accessors, scales){
     .range([80, 100])
 
   nodes.forEach((d,i) => {
-    d.score = d.id==ROOT_ID ? 0.8 : d.score
+    d.score = d.score
     d.strokeWidth = Consts.nodeStrokeWidth
     d.opacity = Consts.nodeOpacity
   })
@@ -346,7 +467,7 @@ function updateGraph(data, selectedTime, accessors, scales, dimensions) {
 
   if(selectedTime==2018){
     let removeID = nodes.filter(d=>d.type=='parent').map(d=>d.id)[0] //remove the first parent node
-    let removeIDs = links.filter(d=>(d.target.id == removeID)).map(d=>d.start_id) // remove nodes connected to the parent node
+    let removeIDs = links.filter(d=>(d.end_id == removeID)).map(d=>d.start_id) // remove nodes connected to the parent node
     removeIDs = removeIDs.filter(d=>d != ROOT_ID)
     links = links.filter(d=>d.end_id != removeID)
     links = links.filter(d=>removeIDs.indexOf(d.start_id) == -1)
@@ -367,6 +488,11 @@ function updateGraph(data, selectedTime, accessors, scales, dimensions) {
     nodes = nodes.filter(d=>singleParents.indexOf(d.id) == -1)
   }
 
+  links.forEach((d,i)=>{
+    d.source = nodes.find(el=>el.id == d.start_id)
+    d.target = nodes.find(el=>el.id == d.end_id)
+  })
+
   nodes.forEach((d,i) => {
     let edge = links.find(el=>el.source.id == d.id)
     d.parent_id = edge ? edge.target.id : d.id
@@ -376,11 +502,6 @@ function updateGraph(data, selectedTime, accessors, scales, dimensions) {
   links.forEach((d,i) => {
     d.type = findType(d.source.id, ROOT_ID, parentIDs)
     Consts.linkedByIndex[`${d.source.id},${d.target.id}`] = 1;
-  })
-
-  links.forEach((d,i)=>{
-    d.source = nodes.find(el=>el.id == d.start_id)
-    d.target = nodes.find(el=>el.id == d.end_id)
   })
 
   nodes.forEach((d,i) => {
@@ -394,30 +515,50 @@ function updateGraph(data, selectedTime, accessors, scales, dimensions) {
     d.y0 = d.y
   })
 
-  let newEle = updateScales(data, accessors, scales)
+  let newEle = updateScales(nodes, links, accessors, scales)
   nodes = newEle.nodes
   links = newEle.links
 
-  const simulation = d3.forceSimulation()
-    .force("link", d3.forceLink()
-      .distance(function(d) { return d.distance })
-      .strength(function(d) { return d.strength })
-    )
-    .force("charge", d3.forceManyBody().strength(-40))
-    .force("collide", d3.forceCollide(function(d){ return d.radius * 2 }))
-    .force('center', d3.forceCenter(dimensions.width, dimensions.height))
-    .alphaTarget(0.8)
-
-  simulation.nodes(nodes);
-  simulation.force("link").links(links);
+  simulation.force('center', d3.forceCenter(dimensions.width, dimensions.height))
+  simulation.nodes(nodes)
+  simulation.force("link").links(links)
+  simulation.alpha(0.3).restart()
   for (var i = 0, n = 300; i < n; ++i) {
-    simulation.tick();
+    simulation.tick()
   }
 
-  drawNodes(nodes, accessors)
-  drawLinks(links, accessors)
+  if(selectedTime==2020){
+    nodes.forEach((d,i) => {
+      d.x0 = d.x
+      d.y0 = d.y    
+    })
+  }
+
+  draw(nodes, links, accessors)
+
+  return {nodes: nodes, links: links}
 
 } //updateSlider: things to do once marker on slider is moved
 
+
+function isConnected(a, b) {
+  return Consts.linkedByIndex[`${a.id},${b.id}`] || Consts.linkedByIndex[`${b.id},${a.id}`] || a.id === b.id;
+}
+
+function comparerLinks(otherArray){
+  return function(current){
+    return otherArray.filter(function(other){
+      return other.source.id == current.source.id && other.target.id == current.target.id
+    }).length == 0;
+  }
+}
+
+function comparerNodes(otherArray){
+  return function(current){
+    return otherArray.filter(function(other){
+      return other.id == current.id
+    }).length == 0;
+  }
+}
 
 export default Network

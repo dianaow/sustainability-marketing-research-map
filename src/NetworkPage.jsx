@@ -1,18 +1,21 @@
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useReducer } from "react"
 import Legend from "./components/NetworkLegend"
 import Card from "./components/Card"
 import Network from "./components/Graph"
 import * as Consts from "./components/consts"
 import * as d3 from "d3"
+import { round }  from "./components/utils"
 
 import graph from './data/test_graph.json';
 import timeline from './data/test_timeline.json';
+import { Dimmer, Loader, Image, Segment } from 'semantic-ui-react'
 
 import "./styles_network.css"
 
+export const MyContext = React.createContext(null)
+
 const organizations = ['BOC Aviation Pte. Ltd', 'Neptune Orient Lines Limited', 'BlackRock (Singapore) Holdco Pte. Limited', 'MGPA (Bermuda) Limited', 'Ernst & Young - Singapore']
 const ROOT_ID = Consts.ROOT_ID
-
 const entityData = {
   entity: ROOT_ID,
   name: 'Najib Razak',
@@ -28,17 +31,6 @@ const entityData = {
   ]
 }
 
-const timeData = timeline.map((d,i) => {
-  let rand = 0.75 + (Math.random()/10)*3
-  return {
-    date: d.key,
-    node_id: ROOT_ID,
-    key: Consts.parseDate(d.key), //convert string date to datetime format
-    value: rand > 1 ? 1 : rand, // TEMPORARILY ASSIGN RANDOM SCORE
-    type: d.key === Consts.currentDateString ? 'present' : (Consts.parseDate(d.key)> Consts.currentDate ? 'predicted' : 'past')
-  }
-})
-
 // node radius size is scaled based on total number of connections to node (only applied to root or parent nodes)
 const nodeRadiusScale = d3.scaleSqrt()
   .domain([1, 50])
@@ -52,23 +44,90 @@ const colorScale1 = d3.scaleLinear()
   .domain([0, 0.5, 1])
   .range(['#71C3B4', "white", '#E00217'])
 
+const scales = {
+  colorScale: colorScale,
+  colorScale1: colorScale1,
+  nodeRadiusScale: nodeRadiusScale
+}
+
+const showLoader = () => (
+  <div className='Loading'>
+    <Segment>
+      <Dimmer active>
+        <Loader size='huge'>Loading</Loader>
+      </Dimmer>
+
+      <Image src='https://react.semantic-ui.com/images/wireframe/short-paragraph.png' />
+    </Segment>
+
+  </div>
+)
+
+function processData(timeline) {
+
+  const timeData = timeline.map((d,i) => {
+    let rand = 0.75 + (Math.random()/10)*3
+    return {
+      date: d.key,
+      node_id: ROOT_ID,
+      key: Consts.parseDate(d.key), //convert string date to datetime format
+      value: rand > 1 ? 1 : rand, // TEMPORARILY ASSIGN RANDOM SCORE
+      type: d.key === Consts.currentDateString ? 'present' : (Consts.parseDate(d.key)> Consts.currentDate ? 'predicted' : 'past')
+    }
+  })
+  return timeData
+
+}
+
+const getData = (graph, timeline) => {
+  return{
+    nodes: graph.nodes, 
+    links: graph.links,
+    timeData: processData(timeline)
+  }
+}
+
 const NetworkPage = () => {
 
-  const getData = (graph, timeline) => {
-    return{
-      nodes: graph.nodes, 
-      links: graph.links,
-      timeData: timeline
+  const [data, setData] = useState(getData(graph, timeline))
+  const [loading, setLoading] = useState({ loading: true })
+  
+  const initialState = {
+    date: Consts.currentDate, 
+    score: round(data.timeData.find(d=>d.type === 'present').value), 
+    nodesCount: data.nodes.length, 
+    linksCount: data.links.length,
+    zoomTransform: null
+  }
+
+  function reducer(state, action) {
+    switch (action.type) {
+      case 'SET_DATE':
+        return {
+          date: action.date,
+          score: action.score,
+          nodesCount: state.nodesCount,
+          linksCount: state.linksCount
+        }
+      case 'SET_STATS':
+        return {
+          date: state.date,
+          score: state.score,
+          nodesCount: action.nodesCount,
+          linksCount: action.linksCount
+        }
+      default:
+        return initialState
     }
   }
 
-  const scales = {
-    colorScale: colorScale,
-    colorScale1: colorScale1,
-    nodeRadiusScale: nodeRadiusScale
-  }
-  
-  const [data, setData] = useState(getData(graph, timeline))
+  const [current, dispatch] = useReducer(reducer, initialState)
+
+  useEffect(() => {
+    setTimeout(function(){
+      setLoading({ loading: false })
+    }, 500)
+  }, [data])
 
   return(
     <div className='App__wrapper'>
@@ -79,22 +138,26 @@ const NetworkPage = () => {
 
       <div className="Entity__Right">
 
-        <Network data={data} scales={scales} />
+        { loading.loading && showLoader() }
+
+        <MyContext.Provider value={{ current, dispatch }}>
+          { loading.loading === false && <Network data={data} scales={scales} /> }
+        </MyContext.Provider>
 
         <Legend size={nodeRadiusScale} />
 
         <div className='Chart_info_section'>
           <div className='time'>
-            <h2></h2>
+            <h2>{ Consts.formatDate(current.date) }</h2>
           </div>
           <div className='chart-statistics'>
             <div className='chart-statistics-total'>
               <div className='nodes_stats'>
-                <div className='nodes_stats_total'>0</div>
+                <div className='nodes_stats_total'><h2>{ current.nodesCount }</h2></div>
                 <p>NODES</p>
               </div>
               <div className='edges_stats'>
-                <div className='edges_stats_total'>0</div>
+                <div className='edges_stats_total'><h2>{ current.linksCount }</h2></div>
                 <p>RELATIONSHIPS</p>
               </div>
             </div>

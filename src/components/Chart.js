@@ -6,10 +6,8 @@ export const useChartDimensions = () => useContext(ChartContext)
 
 const Chart = ({ dimensions, children }) => (
   <ChartContext.Provider value={dimensions}>
-    <svg className="Chart" width={dimensions.width} height={dimensions.height}>
-      <g>
-        { children }
-      </g>
+    <svg className="networkWrapper" width={dimensions.width} height={dimensions.height}>
+      { children }
     </svg>
   </ChartContext.Provider>
 )
