@@ -59,18 +59,12 @@ function AxisHorizontal ({ dimensions, label, formatTick, scale, ...props }) {
             key={'h-line-' + i}
             className="Axis__line"
             transform={`translate(${scale(tick)}, 0)`}
-            y2='10'
-            fill={props.textColor} 
-            textAnchor={props.textAnchor}
-            fontSize={props.fontSize}    
+            y2='10'  
           />
-          <text
+          <text {...props}
             key={'h-tick-' + i}
             className="Axis__tick"
-            transform={`translate(${scale(tick)}, 20)`}
-            fill={props.textColor} 
-            textAnchor={props.textAnchor}
-            fontSize={props.fontSize}    
+            transform={`translate(${scale(tick)}, 15)`}  
           >
             { formatTick(tick) }
           </text>
@@ -78,12 +72,9 @@ function AxisHorizontal ({ dimensions, label, formatTick, scale, ...props }) {
       ))}
     
       {label && (
-        <text
+        <text {...props}
           className="Axis__label"
-          transform={`translate(${dimensions.boundedWidth / 2}, 25)`} 
-          fill={props.textColor} 
-          textAnchor={props.textAnchor}
-          fontSize={props.fontSize}  
+          transform={`translate(${dimensions.boundedWidth / 2}, 30)`} 
         >
           { label }
         </text>
@@ -113,18 +104,12 @@ function AxisVertical ({ dimensions, label, formatTick, scale, ...props }) {
             className="Axis__line"
             transform={`translate(-20, ${scale(tick)})`}
             x1='0'
-            x2='10'
-            fill={props.textColor} 
-            textAnchor={props.textAnchor}
-            fontSize={props.fontSize}    
+            x2='10'  
           />
-          <text
+          <text {...props}
             key={'v-tick-' + i}
             className="Axis__tick"
-            transform={`translate(-30, ${scale(tick)})`}
-            fill={props.textColor} 
-            textAnchor={props.textAnchor}
-            fontSize={props.fontSize}    
+            transform={`translate(-30, ${scale(tick)})`} 
           >
             { formatTick(tick) }
           </text>
@@ -132,11 +117,8 @@ function AxisVertical ({ dimensions, label, formatTick, scale, ...props }) {
       ))}
 
       {label && (
-        <text
+        <text {...props}
           className="Axis__label"
-          fill={props.textColor} 
-          textAnchor={props.textAnchor}
-          fontSize={props.fontSize}  
           style={{
             transform: `translate(-56px, ${dimensions.boundedHeight / 2}px) rotate(-90deg)`
           }}

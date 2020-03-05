@@ -80,10 +80,12 @@ const MainPage = () => {
   const showNavButtons = () => {
     return(
       <div className='NavButtons'>
+      <Link to='/network'>
         <input name="nav" 
           type="button" 
           className='btn nav_1'
           value="Network"/>
+        </Link>
         <input name="nav" 
           type="button" 
           className="btn nav_2"

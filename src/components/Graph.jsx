@@ -4,10 +4,32 @@ import Chart from "./Chart"
 import * as Consts from "./consts"
 import { useChartDimensions, onlyUnique, getRandomArbitrary, round }  from "./utils"
 import Timeline from "./Timeline"
+import Legend from "./NetworkLegend"
 import { MyContext } from "../NetworkPage"
 
 let childnodeTextOpacity = Consts.childnodeTextOpacity
 let linkTextOpacity = Consts.linkTextOpacity
+const ROOT_ID = Consts.ROOT_ID
+
+// node radius size is scaled based on total number of connections to node (only applied to root or parent nodes)
+const nodeRadiusScale = d3.scaleSqrt()
+  .domain([1, 50])
+  .range([3, Consts.nodeRadius])
+
+const regionScale = d3.scaleOrdinal()
+  .domain(Consts.region)
+  .range(['aqua', 'fuchsia', 'gold', 'white', 'white'])
+
+const scoreScale = d3.scaleLinear()
+  .domain([0, 0.5, 1])
+  .range(['#71C3B4', "white", '#E00217'])
+
+const scales = {
+  colorAccessor: d => regionScale(d.countries), // default is to color code nodes by region
+  colorScale: regionScale, 
+  colorScale1: scoreScale,
+  nodeRadiusScale: nodeRadiusScale
+}
 
 const simulation = d3.forceSimulation()
   .force("link", d3.forceLink()
@@ -18,7 +40,40 @@ const simulation = d3.forceSimulation()
   .force("collide", d3.forceCollide(function(d){ return d.radius * 2 }))
   .alphaTarget(0.8)
 
-const Network = ({data, scales}) => {
+const Network = () => {
+
+  const { current, dispatch } = useContext(MyContext)
+
+  ////////////////////////////// Initialize Graph /////////////////////////
+  const [ref, dms] = useChartDimensions()
+
+  useEffect(() => {
+    if(current.date === Consts.currentDate){
+      if(dms.width>0 & dms.height>0){
+        console.log('initial render')
+        let graph = updateGraph(current, scales, {width: dms.width/2, height: dms.height/2-60}) 
+      }
+    }
+
+  }, [dms.width, dms.height])
+
+  //////////////////////////////// Update Graph ///////////////////////////
+  useEffect(() => {
+
+    simulation.stop()
+
+    d3.selectAll('.root-label-score').html(current.score) // update score in center of root node
+
+    // temporarily only allow the network to be updated for the following dates
+    let tempDates = ['Jan 2015', 'Jan 2016', 'Jan 2017', 'Jan 2018', 'Jan 2019']
+    let formattedDate = Consts.formatDate(current.date)
+    let toUpdate = tempDates.indexOf(formattedDate) != -1
+    if(toUpdate==true ){
+      console.log('update graph')
+      let graph = updateGraph(current, scales, {width: dms.width/2, height: dms.height/2-60}) 
+      dispatch({ type: 'SET_STATS', nodes: graph.nodes, links: graph.links })
+    }
+  }, [current.date])
 
   //////////////// Create a zoom and set initial zoom level /////////////
   const zoom = d3.zoom().scaleExtent([0.5, 2]).on("zoom", ()=>setZoomState(d3.event.transform));
@@ -42,69 +97,89 @@ const Network = ({data, scales}) => {
 
   }, [zoomState])
 
-  const { current, dispatch } = useContext(MyContext)
+  //////////////// Control panel logic and set initial setting /////////////
+  const [panelState, setPanelState] = useState({ 'country': true, 'score': false, 'person': true, 'organization': true, 'clicked': null })
 
-  const ROOT_ID = Consts.ROOT_ID
-  const { nodes, links, timeData } = data
-  const [ref, dms] = useChartDimensions()
+  useEffect(() => {
 
-  // label nodes and edges so that appropriate style is assigned
-  const root_targets = links.filter(d=>d.start_id == ROOT_ID)
-  const parentIDs = root_targets.map(d=>d.end_id).filter(onlyUnique)
-  const orgIDs = nodes.filter(d=>d.node_type == 'organization').map(d=>d.id).filter(onlyUnique)
-  const rootAccessor = d => [ROOT_ID].indexOf(d.id) != -1
-  const parentAccessor = d => parentIDs.indexOf(d.id) != -1
-  const rootparentAccessor = d => parentIDs.concat([ROOT_ID]).indexOf(d.id) != -1
-  const organizationAccessor = d => orgIDs.indexOf(d.id) != -1
-  const berectsAccessor = organizationAccessor // choose node types to be rendered as rectangles
-  const accessors = {
-    root: rootAccessor,
-    parent: parentAccessor,
-    rootparent: rootparentAccessor,
-    organization: organizationAccessor,
-    berects: berectsAccessor
+    let val = panelState.clicked
+    
+    let graphNodesGroup = d3.select('.Network').select('.nodes')
+    let graphLinksGroup = d3.select('.Network').select('.links')
+
+    // find all nodes in selected category except for the root node which can never be changed
+    let nodesToRemove = current.nodes.filter(d=>d.node_type==val & d.type!='root')
+
+    let linksToRemove = []
+    nodesToRemove.map(d=>{
+      // find links connected to any node to be changed
+      linksToRemove.push(...current.links.filter(o => o.source.id === d.id || o.target.id === d.id))
+      graphNodesGroup.select('#node-' + d.id)
+        .attr('fill-opacity', panelState[val] ? Consts.nodeOpacity : 0.2) // change opacity
+        .attr('stroke-opacity', panelState[val] ? Consts.nodeOpacity : 0.2)
+    })
+
+    linksToRemove.map(d=>{
+      graphNodesGroup.select('#path-' + d.source.id.toString() + "-" + d.target.id.toString())
+        .attr('stroke-opacity', panelState[val] ? Consts.linkOpacity : 0.1) // change opacity
+    })
+
+  }, [panelState.person, panelState.organization])
+
+  const checkActiveBtn = (name) => {
+    let activeFilter = Object.keys(panelState).filter(id=>panelState[id])
+    return (activeFilter.indexOf(name) != -1) ? "btn active" : "btn";
   }
-  data.ROOT_ID = ROOT_ID
-  data.parentIDs = parentIDs
 
-  useEffect(() => {
-
-    simulation.stop()
-
-    // update score in center of root node
-    d3.selectAll('.root-label-score').html(current.score)
-
-    // temporarily only allow the network to be updated for the following dates
-    let tempDates = ['Jan 2015', 'Jan 2016', 'Jan 2017', 'Jan 2018', 'Jan 2019']
-    let formattedDate = Consts.formatDate(current.date)
-    let toUpdate = tempDates.indexOf(formattedDate) != -1
-    if(toUpdate==true ){
-      let graph = updateGraph(data, Consts.formatYear(current.date), accessors, scales, {width: dms.width/2, height: dms.height/2-60}) 
-      dispatch({ type: 'SET_STATS', nodesCount: graph.nodes.length, linksCount: graph.links.length })
-    }
-  }, [current.date])
-
-  useEffect(() => {
-    console.log(dms)
-    if(current.date === Consts.currentDate){
-      if(dms.width>0 & dms.height>0){
-        let graph = updateGraph(data, Consts.formatYear(current.date), accessors, scales, {width: dms.width/2, height: dms.height/2-60}) 
-      }
-    }
-  }, [dms.width, dms.height])
-
-  const showNavButtons = () => {
+  const showControlPanel = () => {
     return(
-      <div className='NavButtons'>
-        <input name="nav" 
-          type="button" 
-          className='btn nav_1'
-          value="Network"/>
-        <input name="nav" 
-          type="button" 
-          className="btn nav_2"
-          value="Events"/>
-      </div>
+      <React.Fragment>
+        <div className='Chart_color_section'>
+          <p>Color nodes by:</p>
+          <input name="color_scale" 
+                 type="button" 
+                 className={checkActiveBtn('country')}
+                 onClick={() => {
+                  setPanelState({'country': true, 'score': false, 'person': panelState.person, 'organization': panelState.organization, 'clicked': 'country'})
+                  scales.colorAccessor = d => regionScale(d.countries)
+                  let newEle = updateAttributes(current.nodes, current.links, scales)
+                  draw(newEle.nodes, newEle.links, newEle.accessors)
+                 }}
+                 value="Country"/>
+          <input name="color_scale" 
+                 type="button"
+                 className={checkActiveBtn('score')} 
+                 onClick={() => {
+                  setPanelState({'country': false, 'score': true, 'person': panelState.person, 'organization': panelState.organization, 'clicked': 'score'})
+                  scales.colorAccessor = d => scoreScale(d.score)
+                  let newEle = updateAttributes(current.nodes, current.links, scales)
+                  draw(newEle.nodes, newEle.links, newEle.accessors)
+                 }}
+                 value="Score"/>
+          <p>Only show:</p>
+          <input name="entity_filter" 
+                 type="button" 
+                 className={checkActiveBtn('person')}
+                 onClick={() => setPanelState({ 'country': panelState.country, 'score': panelState.score, 'person': !panelState.person, 'organization': panelState.organization, 'clicked': 'person'})}
+                 value="Person"/>
+          <input name="entity_filter" 
+                 type="button" 
+                 className={checkActiveBtn('organization')}
+                 onClick={() => setPanelState({ 'country': panelState.country, 'score': panelState.score, 'person': panelState.person, 'organization': !panelState.organization, 'clicked': 'organization'})}
+                 value="Organization"/>
+        </div>
+
+        <div className='Chart_controls_section'>
+          <div className="button zoom_in" onClick={ ()=> {
+            setZoomState({ x:zoomState.x, y:zoomState.y, k:zoomState.k*1.2 })
+            zoom.scaleBy(svg.transition().duration(750), 1.2);
+           } }>+</div>
+          <div className="button zoom_out" onClick={ ()=> {
+            setZoomState({ x:zoomState.x, y:zoomState.y, k:zoomState.k*0.8 })
+            zoom.scaleBy(svg.transition().duration(750), 0.8);
+          } }>-</div>
+        </div>
+      </React.Fragment>
     )
   }
 
@@ -115,8 +190,10 @@ const Network = ({data, scales}) => {
           <g className='links'></g>
           <g className='nodes'></g>
         </g>
-        <Timeline data={timeData} dimensions={dms} />
+        <Timeline dimensions={dms} />
       </Chart>
+      {showControlPanel()}
+      <Legend scales={scales} bool={panelState.country} />
     </div>
   )
 }
@@ -127,9 +204,10 @@ const Network = ({data, scales}) => {
 function draw(nodes, links, accessors) {
 
   let { root, parent, rootparent, organization, berects } = accessors
+  let graphNodesGroup = d3.select('.Network').select('.nodes')
+  let graphLinksGroup = d3.select('.Network').select('.links')
 
   // DRAW NODES
-  let graphNodesGroup = d3.select('.Network').select('.nodes')
   let graphNodesData = graphNodesGroup.selectAll("g").data(nodes, d => d.id)
 
   let graphNodesEnter = graphNodesData.enter().append("g")
@@ -243,6 +321,8 @@ function draw(nodes, links, accessors) {
   graphNodesData.selectAll('.node-circle')
     .call(function(node) { node.transition()
       .attr('r', function(d) {return d.radius}) 
+      .attr('fill', d=>d.color)
+      .attr('stroke', d=>d.strokeColor)
     })
 
   graphNodesData.selectAll('.node-rect')
@@ -250,6 +330,8 @@ function draw(nodes, links, accessors) {
         node.transition()
           .attr('width', function(d) {return d.radius*2}) 
           .attr('height', function(d) {return d.radius*2}) 
+          .attr('fill', d=>d.color)
+          .attr('stroke', d=>d.strokeColor)
     })
 
   graphNodesData.selectAll('.node')
@@ -258,7 +340,6 @@ function draw(nodes, links, accessors) {
     .on('mouseout.fade', hoverOut())
 
   // DRAW LINKS
-  let graphLinksGroup = d3.select('.Network').select('.links')
   let graphLinksData = graphLinksGroup.selectAll("g").data(links, d => d.source.id.toString() + "-" + d.target.id.toString())
 
   let graphLinksEnter = graphLinksData.enter().append("g")
@@ -355,15 +436,31 @@ function draw(nodes, links, accessors) {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////// Graph Network: Update node and link styles ////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-function updateScales(nodes, links, accessors, scales){
+function updateAttributes(nodes, links, scales){
 
-  const { colorScale, nodeRadiusScale} = scales
-  const { root, parent, rootparent, organization, berects } = accessors
+  const { colorAccessor, nodeRadiusScale } = scales
+  const root_targets = links.filter(d=>d.start_id == ROOT_ID)
+  const parentIDs = root_targets.map(d=>d.end_id).filter(onlyUnique)
+  const orgIDs = nodes.filter(d=>d.node_type == 'organization').map(d=>d.id).filter(onlyUnique)
+
+  // set up accessors
+  const root = d => [ROOT_ID].indexOf(d.id) != -1
+  const parent = d => parentIDs.indexOf(d.id) != -1
+  const rootparent = d => parentIDs.concat([ROOT_ID]).indexOf(d.id) != -1
+  const organization = d => orgIDs.indexOf(d.id) != -1
+  const berects = organization // choose node types to be rendered as rectangles
+  const accessors = {
+    root: root,
+    parent: parent,
+    rootparent: rootparent,
+    organization: organization,
+    berects: berects
+  }
 
   var linksTarget_nested = d3.nest()
     .key(function(d) { return d.target.id })
     .rollup(function(leaves) { return leaves.length; })
-    .entries(links)
+    .entries(links) 
 
   var linksSource_nested = d3.nest()
     .key(function(d) { return d.source.id })
@@ -408,8 +505,8 @@ function updateScales(nodes, links, accessors, scales){
   nodes.forEach((d,i) => {
     let conn = linkAllNodes.find(l=>l.key==d.id)
     d.radius = root(d) ? Consts.rootRadius : conn ? nodeRadiusScale(conn.value) : 1
-    d.color = parent(d) ? Consts.nodeFill : colorScale(d.countries)
-    d.strokeColor = root(d) ? Consts.nodeStroke : colorScale(d.countries)
+    d.color = parent(d) ? Consts.nodeFill : colorAccessor(d)
+    d.strokeColor = root(d) ? Consts.nodeStroke : colorAccessor(d)
   })
 
   links.forEach((d,i) => {
@@ -418,20 +515,24 @@ function updateScales(nodes, links, accessors, scales){
     d.distance = d.type=='root' ? 150 : 50
   })
 
-  return { 'nodes': nodes, 'links': links }
-} //updateScales: update attribute values assigned to nodes and edges
+  return { 'nodes': nodes, 'links': links, 'accessors': accessors }
+} //updateAttributes: update attribute values assigned to nodes and edges
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////// Graph Network: Update graph layout ////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-function updateGraph(data, selectedTime, accessors, scales, dimensions) {
+function updateGraph(data, scales, dimensions) {
 
-  let { nodes, links, ROOT_ID, parentIDs } = data
+  let { nodes, links, date } = data 
+  const selectedTime = Consts.formatYear(date)
 
-  function findType(d, rootID, parentIDs){
+  const root_targets = links.filter(d=>d.start_id == ROOT_ID)
+  const parentIDs = root_targets.map(d=>d.end_id).filter(onlyUnique)
+
+  function findType(d){
     if(parentIDs.indexOf(d) != -1) {
       return 'parent'
-    } else if(d==rootID){
+    } else if(d==ROOT_ID){
       return 'root'
     } else {
       return 'children'
@@ -452,7 +553,6 @@ function updateGraph(data, selectedTime, accessors, scales, dimensions) {
     } else {
       let parent = links.find(el=>el.end_id == d.id)
       return { x: parent ? parent.source.x : undefined, y: parent ? parent.source.y : undefined}
-      //return {x: undefined, y: undefined}
     }
   }
 
@@ -460,7 +560,7 @@ function updateGraph(data, selectedTime, accessors, scales, dimensions) {
   if(selectedTime==2019){
     d3.range(0, 10).map(d=>{
       let ID = parseInt(selectedTime + d)
-      nodes.push({id: ID, type: 'children', score: Math.random(), countries: Consts.region[getRandomArbitrary(0,5)]})
+      nodes.push({id: ID, type: 'children', node_type: 'person', score: Math.random(), countries: Consts.region[getRandomArbitrary(0,5)]})
       links.push({"start_id": 82007088, "end_id": ID, type: 'children', link: "treasurer of"}) 
     })
   }
@@ -496,11 +596,11 @@ function updateGraph(data, selectedTime, accessors, scales, dimensions) {
   nodes.forEach((d,i) => {
     let edge = links.find(el=>el.source.id == d.id)
     d.parent_id = edge ? edge.target.id : d.id
-    d.type = findType(d.id, ROOT_ID, parentIDs)
+    d.type = findType(d.id)
   })
 
   links.forEach((d,i) => {
-    d.type = findType(d.source.id, ROOT_ID, parentIDs)
+    d.type = findType(d.source.id)
     Consts.linkedByIndex[`${d.source.id},${d.target.id}`] = 1;
   })
 
@@ -515,7 +615,7 @@ function updateGraph(data, selectedTime, accessors, scales, dimensions) {
     d.y0 = d.y
   })
 
-  let newEle = updateScales(nodes, links, accessors, scales)
+  let newEle = updateAttributes(nodes, links, scales)
   nodes = newEle.nodes
   links = newEle.links
 
@@ -534,11 +634,11 @@ function updateGraph(data, selectedTime, accessors, scales, dimensions) {
     })
   }
 
-  draw(nodes, links, accessors)
+  draw(nodes, links, newEle.accessors)
 
   return {nodes: nodes, links: links}
 
-} //updateSlider: things to do once marker on slider is moved
+} //updateGraph: things to do once marker on slider is moved
 
 
 function isConnected(a, b) {

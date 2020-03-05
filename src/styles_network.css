@@ -96,10 +96,6 @@ div.tooltip {
   right: 80px;
   background: rgba(1, 28, 84, 0.6);
 }
-.selected {
-  background-color: white;
-  color: #011C54; 
-}
 
 /* zoomable control buttons */
 .Chart_controls_section {

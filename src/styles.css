@@ -69,9 +69,13 @@ text {
   text-decoration: none;
   text-transform: uppercase;
 }
-.btn:hover {
+/*.btn:hover {
   background-color: white;
   color: #011C54;
+}*/
+.btn.active {
+  background-color: white;
+  color: #011C54; 
 }
 
 .Legend {

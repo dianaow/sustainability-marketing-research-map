@@ -225,32 +225,33 @@ const Radar = ({ data, config, ...props }) => {
   return (
     <div className="Radar" style={{'width': window.innerWidth*0.9, 'height': window.innerHeight*0.9}}>
       <Chart dimensions={dimensions}>
-        <Board
-          data={range}
-          keyAccessor={(d, i) => 'board-' + i}
-          rAccessor={rAccessor}
-        />
-        <Axis
-          data={categories} 
-          keyAccessor={(d, i) => 'axis-' + i}
-          scale={rScale}
-        />
-        <path {...props}
-          className="Radar__arc"
-          d={arc(DEFAULT_PIE)}
-        />
-        {labels.map((label, i) => (
-          <text {...props}
-            className="Radar__arcText"
-            key={"Radar__arcText-" + i}
-            x={label.x}
-            y={label.y}
-          >
-            { label.text }
-          </text> 
-        ))}
-        {NodesVersion}
-
+       <g transform={`translate(${dimensions.width/2}, ${dimensions.height/2})`}>
+          <Board
+            data={range}
+            keyAccessor={(d, i) => 'board-' + i}
+            rAccessor={rAccessor}
+          />
+          <Axis
+            data={categories} 
+            keyAccessor={(d, i) => 'axis-' + i}
+            scale={rScale}
+          />
+          <path {...props}
+            className="Radar__arc"
+            d={arc(DEFAULT_PIE)}
+          />
+          {labels.map((label, i) => (
+            <text {...props}
+              className="Radar__arcText"
+              key={"Radar__arcText-" + i}
+              x={label.x}
+              y={label.y}
+            >
+              { label.text }
+            </text> 
+          ))}
+          {NodesVersion}
+        </g>
       </Chart>
     </div>
   )

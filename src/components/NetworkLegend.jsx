@@ -1,20 +1,24 @@
 import React from "react"
-import { region, colorScale } from "./consts"
+import { region } from "./consts"
+import { round }  from "./utils"
 
-const NetworkLegend = ({size}) => {
+const NetworkLegend = ({scales, bool}) => {
+
+  const { nodeRadiusScale, colorScale, colorScale1 } = scales
   return(
     <div className="Chart_legend_section">
       <p>LEGEND</p>  
       <div className='legend'>
         {drawShapeLegend()}
-        {drawRadiusLegend(size)}
+        {drawRadiusLegend(nodeRadiusScale)}
       </div>
-      {drawCategoryLegend()}
+      { bool ? drawCategoryLegend(colorScale) : drawScoreLegend(colorScale1) }
     </div>
   )
+
 }
 
-const drawCategoryLegend = () => {
+const drawCategoryLegend = (colorScale) => {
   return(
     <div className='legend-color'>
       <svg width='100%' height='100px'>
@@ -42,6 +46,38 @@ const drawCategoryLegend = () => {
   )
 }
 
+const drawScoreLegend = (colorScale) => {
+
+  const gridSize = 15
+  const legendElementWidth = gridSize * 1.5
+  const data = [0, 0.2, 0.4, 0.6, 0.8, 1]
+
+  return(
+    <div className='legend-color'>
+      <svg width='100%' height={legendElementWidth*3}>
+        <g className='legend__score' transform="translate(0,20)">
+          <text className='legend-header' x={data.length / 2} y='10'>OVERALL SCORE</text>
+          {data.map((d,i) => (
+            <g className='legend__colorEle'>
+              <rect
+                x={legendElementWidth * i}
+                y={legendElementWidth}
+                width={legendElementWidth}
+                height={legendElementWidth / 2}
+                fill={colorScale(d)}/>
+              <text
+                className='legend-content-text'
+                x={(legendElementWidth * i) + (legendElementWidth / 2)}
+                y={legendElementWidth * 2}>
+                { round(d) }
+              </text>
+            </g>
+          ))}
+        </g>
+      </svg>
+    </div>
+  )
+}
 
 const drawRadiusLegend = (size) => {
   const valuesToShow = [1, 10, 30]

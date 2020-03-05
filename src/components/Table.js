@@ -11,8 +11,8 @@ const Table = () => {
   return (
     <div className='Table'>
       {tooltip.show ? (
-        <div className = 'container-fluid'>
-          <div className="table-row header">
+        <div className = 'table-container'>
+          <div className="table-row">
             <div className="wrapper text-4">
               <div className="wrapper text-2">
                 <div className="num"></div>

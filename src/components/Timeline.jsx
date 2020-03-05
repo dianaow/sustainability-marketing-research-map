@@ -4,8 +4,28 @@ import Axis from "./Axis"
 import * as Consts from "./consts"
 import { MyContext } from "../NetworkPage"
 import { round } from "./utils"
+import timeline from '../data/test_timeline.json';
 
-const Timeline = ({data, dimensions}) => {
+let data = processData(timeline)
+data = data.filter(d=>d.type != 'predicted')
+
+function processData(timeline) {
+
+  const timeData = timeline.map((d,i) => {
+    let rand = 0.75 + (Math.random()/10)*3
+    return {
+      date: d.key,
+      node_id: Consts.ROOT_ID,
+      key: Consts.parseDate(d.key), //convert string date to datetime format
+      value: rand > 1 ? 1 : rand, // TEMPORARILY ASSIGN RANDOM SCORE
+      type: d.key === Consts.currentDateString ? 'present' : (Consts.parseDate(d.key)> Consts.currentDate ? 'predicted' : 'past')
+    }
+  })
+  return timeData
+
+}
+
+const Timeline = ({dimensions}) => {
 
     // state for single vertical line representing marker to indicate hover position 
     //const [current, setCurrent] = useState({date: Consts.currentDate, score: Math.round(data.find(d=>d.type=='present').value * 100)/10})
@@ -41,7 +61,8 @@ const Timeline = ({data, dimensions}) => {
  
     const marker = (current) => {
 
-      const { date, score } = current
+      const { date } = current
+      const score = round(data.find(d=>d.key.getTime() === date.getTime()).value)
       const currentX = xTimeMonthlyScale(date) 
         
       return(
@@ -107,7 +128,7 @@ const Timeline = ({data, dimensions}) => {
               strokeWidth='2'
               strokeOpacity='0'
               pointerEvents='all'
-              onMouseEnter={ () => dispatch({ type: 'SET_DATE', date: d.key, score: round(d.value) }) }
+              onMouseEnter={ () => dispatch({ type: 'SET_DATE', date: d.key }) }
             />
           ))}
           <Axis

@@ -90,7 +90,7 @@ Distribution.propTypes = {
 
 Distribution.defaultProps = {
   textAnchor: 'middle',
-  fontSize: '12px',
+  fontSize: '12px'
 }
 
 export default Distribution
