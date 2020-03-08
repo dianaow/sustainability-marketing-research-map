@@ -1,10 +1,16 @@
-import React from "react"
-import { region } from "./consts"
+import React, { useContext } from "react"
+
+import { PanelContext } from "./contexts/PanelContext"
+
 import { round }  from "./utils"
+import * as Consts from "./consts"
 
-const NetworkLegend = ({scales, bool}) => {
+const NetworkLegend = () => {
 
-  const { nodeRadiusScale, colorScale, colorScale1 } = scales
+  const { nodeRadiusScale, colorScale, colorScale1 } = Consts.scales
+  const { panelState } = useContext(PanelContext)
+  const bool = panelState.country
+
   return(
     <div className="Chart_legend_section">
       <p>LEGEND</p>  
@@ -24,7 +30,7 @@ const drawCategoryLegend = (colorScale) => {
       <svg width='100%' height='100px'>
         <g className='legend__category' transform="translate(0,20)">
           <text className='legend-header'>COUNTRY</text>
-          {region.map((d,i) => (
+          {Consts.region.map((d,i) => (
             <g className='legend__colorEle'>
               <circle 
                 cx='15'

@@ -1,9 +1,12 @@
 import React, { useState, useContext } from "react"
 import * as d3 from "d3"
+
 import Axis from "./Axis"
-import * as Consts from "./consts"
 import { MyContext } from "../NetworkPage"
+import { ChartContext } from "./Chart"
+
 import { round } from "./utils"
+import * as Consts from "./consts"
 import timeline from '../data/test_timeline.json';
 
 let data = processData(timeline)
@@ -25,11 +28,12 @@ function processData(timeline) {
 
 }
 
-const Timeline = ({dimensions}) => {
+const Timeline = () => {
 
     // state for single vertical line representing marker to indicate hover position 
     //const [current, setCurrent] = useState({date: Consts.currentDate, score: Math.round(data.find(d=>d.type=='present').value * 100)/10})
     const { current, dispatch } = useContext(MyContext)
+    const { dimensions } = useContext(ChartContext)
 
     const scaleTime1 = d3.scaleTime().domain([Consts.parseDate1("2015"), Consts.parseDate1("2021")])
     const years = scaleTime1.ticks(d3.timeYear.every(1))
@@ -64,7 +68,8 @@ const Timeline = ({dimensions}) => {
       const { date } = current
       const score = round(data.find(d=>d.key.getTime() === date.getTime()).value)
       const currentX = xTimeMonthlyScale(date) 
-        
+      d3.selectAll('.root-label-score').html(score) // update score in center of root node
+
       return(
         <g className='marker' transform={`translate(0, ${sliderHeight})`}>
           <rect 

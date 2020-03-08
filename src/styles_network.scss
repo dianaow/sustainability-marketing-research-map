@@ -95,6 +95,7 @@ div.tooltip {
   top: 20px;
   right: 80px;
   background: rgba(1, 28, 84, 0.6);
+  z-index:99;
 }
 
 /* zoomable control buttons */
@@ -102,10 +103,11 @@ div.tooltip {
   position: absolute;
   top: 23px;
   right: 40px;
+  z-index:99;
 }
 .button {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   border: 1px solid white;
   color: white; 
   background-color: transparent;  
@@ -114,6 +116,12 @@ div.tooltip {
   vertical-align: middle;
   line-height: 20px;  
   cursor: pointer;
+  box-shadow: 0px 2px 0 darken(#011C54, 5%), 2px 4px 6px darken(#011C54, 2%);
+  transition: all 150ms linear;
+}
+.button:hover {
+  background-color: white;
+  color: #011C54;
 }
 
 /* ------------------------------------------ */
@@ -126,8 +134,10 @@ div.tooltip {
   position: absolute;
   width:100%;
   color: white;
-  top: 20px;
+  top: 0px;
+  height: 80px;
   background: rgba(1, 28, 84, 0.6);
+  z-index: 1;
 }
 
 .chart-statistics {

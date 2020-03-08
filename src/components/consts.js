@@ -25,7 +25,7 @@ export const bufferInRad = 10 * (Math.PI / 180)
 export const angleSlice = (Math.PI * 2) / categories.length
 
 // set node, link, text color and dimensions
-export const rootRadius = 35
+export const rootRadius = 30
 export const nodeRadius = 40
 export const nodeStrokeWidth = 2
 export const nodeStroke = 'white'
@@ -34,7 +34,7 @@ export const nodeOpacity = 1
 export const nodeTextFill = 'white'
 export const nodeTextOpacity = 0.5
 export const childnodeTextOpacity = 0
-export const nodeTextSize = 8
+export const nodeTextSize = 6
 
 export const linkStrokeWidth = 0.6
 export const linkStroke = 'white'
@@ -56,3 +56,19 @@ export const currentDateString = '2020-02-01'
 export const currentDate = parseDate(currentDateString)
 
 export const ROOT_ID = 80114141
+
+// node radius size is scaled based on total number of connections to node (only applied to root or parent nodes)
+const nodeRadiusScale = d3.scaleSqrt()
+  .domain([1, 50])
+  .range([3, nodeRadius])
+
+const scoreScale = d3.scaleLinear()
+  .domain([0, 0.5, 1])
+  .range(['#71C3B4', "white", '#E00217'])
+
+export const scales = {
+  colorAccessor: d => colorScale(d.countries), // default is to color code nodes by region
+  colorScale: colorScale, 
+  colorScale1: scoreScale,
+  nodeRadiusScale: nodeRadiusScale
+}

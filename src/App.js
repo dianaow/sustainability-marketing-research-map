@@ -4,7 +4,7 @@ import MainPage from "./MainPage"
 import NetworkPage from "./NetworkPage"
 
 import 'semantic-ui-css/semantic.min.css'
-import "./styles.css"
+import "./styles.scss"
 
 const App = () => {
 

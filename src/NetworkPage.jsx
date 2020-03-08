@@ -1,14 +1,14 @@
-import React, { useState, useEffect, useReducer } from "react"
+import React, { useState, useEffect, useReducer, createContext } from "react"
 import Card from "./components/Card"
-import Network from "./components/Graph"
+import Network from "./components/NetworkSection"
 import * as Consts from "./components/consts"
 import * as d3 from "d3"
 import graph from './data/test_graph.json';
 import { Dimmer, Loader, Image, Segment } from 'semantic-ui-react'
 
-import "./styles_network.css"
+import "./styles_network.scss"
 
-export const MyContext = React.createContext(null)
+export const MyContext = createContext()
 
 const ROOT_ID = Consts.ROOT_ID
 const entityData = {

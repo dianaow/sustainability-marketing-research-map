@@ -1,14 +1,19 @@
+@import url('https://fonts.googleapis.com/css?family=Merriweather|Karla');
+
 * {
   box-sizing: border-box;
 }
 
 body {
-  font-family: 'Karla', sans-serif;
+  font-family: 'Karla', sans-serif !important;
   position: relative;
   background-color: #011C54;  
   color: white;
   margin: 0px;
   opacity: 0.85;
+}
+h1, h2, h3, h4, p {
+  font-family: 'Karla', sans-serif !important;
 }
 p {
   font-size: 0.75em;
@@ -55,27 +60,33 @@ text {
 }
 .btn {
   color: white;
-  background: transparent; 
-  border: 1px solid white; 
-  border-radius: 0px; 
-  padding: 6px 12px;
+  padding: 8px 12px;
   text-align: center;
   display: inline-block;
   font-size: 0.7em;
-  margin: 4px 2px;
-  -webkit-transition-duration: 0.4s; /* Safari */
-  transition-duration: 0.4s;
+  margin: 8px 4px 8px 0px;
   cursor: pointer;
   text-decoration: none;
   text-transform: uppercase;
+  letter-spacing: 1px;
+
+  background: lighten(#011C54, 3%);  
+  border: 1px solid darken(#011C54, 4%);
+  box-shadow: 0px 2px 0 darken(#011C54, 5%), 2px 4px 6px darken(#011C54, 2%);
+  transition: all 150ms linear;
 }
-/*.btn:hover {
+.btn:hover {
   background-color: white;
   color: #011C54;
-}*/
+}
+
 .btn.active {
-  background-color: white;
-  color: #011C54; 
+  background: darken(#011C54, 3%);
+  border: 1px solid rgba(#000, .05);
+  box-shadow: 1px 1px 2px rgba(#fff, .2);
+  color: white;
+  text-decoration: none;
+  transition: all 250ms linear;
 }
 
 .Legend {

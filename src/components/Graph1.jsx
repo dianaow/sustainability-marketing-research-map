@@ -1,19 +1,37 @@
-import React, { useEffect, useContext } from "react"
+import React, { useRef, useEffect, useContext, useState } from "react"
 import * as d3 from "d3"
-
-import { MyContext } from "../NetworkPage"
-import { ZoomContext } from "./contexts/ZoomContext"
-import { TooltipContext } from "./contexts/TooltipContext"
-import { ChartContext } from "./Chart"
-
+import Chart from "./Chart"
 import * as Consts from "./consts"
 import { useChartDimensions, onlyUnique, getRandomArbitrary, round }  from "./utils"
+import Timeline from "./Timeline"
+import Legend from "./NetworkLegend"
+import { MyContext } from "../NetworkPage"
+import Tooltip from "./NetworkTooltip";
 
 let selected = false
 let nodeTextOpacity = Consts.nodeTextOpacity
 let linkTextOpacity = Consts.linkTextOpacity
 const ROOT_ID = Consts.ROOT_ID
-const scales = Consts.scales
+
+// node radius size is scaled based on total number of connections to node (only applied to root or parent nodes)
+const nodeRadiusScale = d3.scaleSqrt()
+  .domain([1, 50])
+  .range([3, Consts.nodeRadius])
+
+const regionScale = d3.scaleOrdinal()
+  .domain(Consts.region)
+  .range(['aqua', 'fuchsia', 'gold', 'white', 'white'])
+
+const scoreScale = d3.scaleLinear()
+  .domain([0, 0.5, 1])
+  .range(['#71C3B4', "white", '#E00217'])
+
+const scales = {
+  colorAccessor: d => regionScale(d.countries), // default is to color code nodes by region
+  colorScale: regionScale, 
+  colorScale1: scoreScale,
+  nodeRadiusScale: nodeRadiusScale
+}
 
 const simulation = d3.forceSimulation()
   .force("link", d3.forceLink()
@@ -24,23 +42,27 @@ const simulation = d3.forceSimulation()
   .force("collide", d3.forceCollide(function(d){ return d.radius * 2 }))
   .alphaTarget(0.8)
 
-const Graph = () => {
-    
-  const { current, dispatch } = useContext(MyContext)
-  const { zoom, zoomState } = useContext(ZoomContext)
-  const { tooltipState, setTooltip } = useContext(TooltipContext)
-  const { dimensions } = useContext(ChartContext)
+const Network = () => {
 
-  const misc = {zoom: zoom, setTooltip: setTooltip, dimensions: {width: dimensions.width/2, height: dimensions.height/2-60}}
+  const { current, dispatch } = useContext(MyContext)
+  const [ref, dms] = useChartDimensions()
+
+  const [tooltip, setTooltip] = useState({ show: false, x: 0, y: 0, content: {}, position: 'right' })
+  const [zoomState, setZoomState] = useState({ x:0,y:0,k:1 })
+  const [panelState, setPanelState] = useState({ 'country': true, 'score': false, 'person': true, 'organization': true, 'clicked': null})
+
+  const zoom = d3.zoom().scaleExtent([0.5, 2]).on("zoom", ()=>setZoomState(d3.event.transform))
+  const Z = {zoom: zoom, setTooltip: setTooltip, dimensions: {width: dms.width/2, height: dms.height/2-60}}
 
   ///////////////////////// Initial Graph Render //////////////////////////
   useEffect(() => {
     if(current.date === Consts.currentDate){
-      if(dimensions.width>0 & dimensions.height>0){
-        let graph = updateGraph(current, scales, misc) 
+      if(dms.width>0 & dms.height>0){
+        let graph = updateGraph(current, scales, Z) 
       }
     }
-  }, [dimensions.width, dimensions.height])
+
+  }, [dms.width, dms.height])
 
   //////////////////////////////// Update Graph ///////////////////////////
   useEffect(() => {
@@ -52,7 +74,7 @@ const Graph = () => {
     const formattedDate = Consts.formatDate(current.date)
     const toUpdate = tempDates.indexOf(formattedDate) != -1
     if(toUpdate==true ){
-      let graph = updateGraph(current, scales, misc) 
+      let graph = updateGraph(current, scales, Z) 
       dispatch({ type: 'SET_STATS', nodes: graph.nodes, links: graph.links })
     }
   }, [current.date])
@@ -86,22 +108,125 @@ const Graph = () => {
 
   }, [zoomState])
 
+  //////////////// Control panel logic and set initial setting /////////////
+  useEffect(() => {
+
+    let val = panelState.clicked
+    
+    let graphNodesGroup = d3.select('.Network').select('.nodes')
+    let graphLinksGroup = d3.select('.Network').select('.links')
+
+    // find all nodes in selected category except for the root node which can never be changed
+    let nodesToRemove = current.nodes.filter(d=>d.node_type==val & d.type!='root')
+
+    let linksToRemove = []
+    nodesToRemove.map(d=>{
+      // find links connected to any node to be changed
+      linksToRemove.push(...current.links.filter(o => o.source.id === d.id || o.target.id === d.id))
+      graphNodesGroup.select('#node-' + d.id)
+        .attr('fill-opacity', panelState[val] ? Consts.nodeOpacity : 0.2) // change opacity
+        .attr('stroke-opacity', panelState[val] ? Consts.nodeOpacity : 0.2)
+    })
+
+    linksToRemove.map(d=>{
+      graphNodesGroup.select('#path-' + d.source.id.toString() + "-" + d.target.id.toString())
+        .attr('stroke-opacity', panelState[val] ? Consts.linkOpacity : 0.1) // change opacity
+    })
+
+  }, [panelState.person, panelState.organization])
+
+  const checkActiveBtn = (name) => {
+    let activeFilter = Object.keys(panelState).filter(id=>panelState[id])
+    return (activeFilter.indexOf(name) != -1) ? "btn active" : "btn";
+  }
+
+  const showControlPanel = () => {
+    return(
+      <React.Fragment>
+        <div className='Chart_color_section'>
+          <p>Color nodes by:</p>
+          <input name="color_scale" 
+                 type="button" 
+                 className={checkActiveBtn('country')}
+                 onClick={() => {
+                  setPanelState({'country': true, 'score': false, 'person': panelState.person, 'organization': panelState.organization, 'clicked': 'country'})
+                  scales.colorAccessor = d => regionScale(d.countries)
+                  let newEle = updateAttributes(current.nodes, current.links, scales)
+                  draw(newEle.nodes, newEle.links, newEle.accessors, Z)
+                 }}
+                 value="Country"/>
+          <input name="color_scale" 
+                 type="button"
+                 className={checkActiveBtn('score')} 
+                 onClick={() => {
+                  setPanelState({'country': false, 'score': true, 'person': panelState.person, 'organization': panelState.organization, 'clicked': 'score'})
+                  scales.colorAccessor = d => scoreScale(d.score)
+                  let newEle = updateAttributes(current.nodes, current.links, scales)
+                  draw(newEle.nodes, newEle.links, newEle.accessors, Z)
+                 }}
+                 value="Score"/>
+          <p>Only show:</p>
+          <input name="entity_filter" 
+                 type="button" 
+                 className={checkActiveBtn('person')}
+                 onClick={() => setPanelState({ 'country': panelState.country, 'score': panelState.score, 'person': !panelState.person, 'organization': panelState.organization, 'clicked': 'person'})}
+                 value="Person"/>
+          <input name="entity_filter" 
+                 type="button" 
+                 className={checkActiveBtn('organization')}
+                 onClick={() => setPanelState({ 'country': panelState.country, 'score': panelState.score, 'person': panelState.person, 'organization': !panelState.organization, 'clicked': 'organization'})}
+                 value="Organization"/>
+        </div>
+
+        <div className='Chart_controls_section'>
+          <div className="button zoom_in" onClick={ ()=> {
+            setZoomState({ x:zoomState.x, y:zoomState.y, k:zoomState.k*1.2 })
+            zoom.scaleBy(svg.transition().duration(750), 1.2);
+           } }>+</div>
+          <div className="button zoom_out" onClick={ ()=> {
+            setZoomState({ x:zoomState.x, y:zoomState.y, k:zoomState.k*0.8 })
+            zoom.scaleBy(svg.transition().duration(750), 0.8);
+          } }>-</div>
+        </div>
+      </React.Fragment>
+    )
+  }
 
   return(
-    <g className='network' transform={`translate(${zoomState.x}, ${zoomState.y}) scale(${zoomState.k})`}>
-      <g className='links'></g>
-      <g className='nodes'></g>
-    </g>
+    <div className="Network" ref={ref}>
+      <Chart dimensions={dms}>
+        <defs>
+          <marker id="arrowheadTransparent" viewBox="-0 -5 10 10" refX="0" refY="0" orient="auto" markerWidth="7" markerHeight="10">
+            <path d="M 0,-5 L 10 ,0 L 0,5" fill="white" fillOpacity="0" stroke="none"></path>
+          </marker>
+        </defs>
+        <defs>
+          <marker id="arrowhead" viewBox="-0 -5 10 10" refX="0" refY="0" orient="auto" markerWidth="7" markerHeight="10">
+            <path d="M 0,-5 L 10 ,0 L 0,5" fill="white" fillOpacity="0.3" stroke="none"></path>
+          </marker>
+        </defs>
+        <defs>
+          <marker id="arrowheadOpaque" viewBox="-0 -5 10 10" refX="0" refY="0" orient="auto" markerWidth="7" markerHeight="10">
+            <path d="M 0,-5 L 10 ,0 L 0,5" fill="white" fillOpacity="1" stroke="none"></path>
+          </marker>
+        </defs>      
+        <g className='network' transform={`translate(${zoomState.x}, ${zoomState.y}) scale(${zoomState.k})`}>
+          <g className='links'></g>
+          <g className='nodes'></g>
+        </g>
+        <Timeline dimensions={dms} />
+        <Tooltip width={200} height={300} tooltip={tooltip} />
+      </Chart>
+      {showControlPanel()}
+      <Legend scales={scales} bool={panelState.country} />
+    </div>
   )
-
 }
-
-export default Graph
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////// Graph Network: Create node and link elements ////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-function draw(nodes, links, accessors, misc) {
+function draw(nodes, links, accessors, z) {
 
   function nodeKey(n) {
     return n.id;
@@ -110,7 +235,7 @@ function draw(nodes, links, accessors, misc) {
     return d.source.id + '-' + d.target.id;
   }
 
-  let { zoom, setTooltip, dimensions } = misc
+  let { zoom, setTooltip, dimensions } = z
   let { root, parent, rootparent, organization, berects } = accessors
   let graphNodesGroup = d3.select('.Network').select('.nodes')
   let graphLinksGroup = d3.select('.Network').select('.links')
@@ -333,6 +458,24 @@ function draw(nodes, links, accessors, misc) {
     }
   }
 
+function getTranslation(transform) {
+  // Create a dummy g for calculation purposes only. This will never
+  // be appended to the DOM and will be discarded once this function 
+  // returns.
+  var g = document.createElementNS('http://www.w3.org/2000/svg', "g");
+  
+  // Set the transform attribute to the provided string value.
+  g.setAttributeNS(null, "transform", transform);
+  
+  // consolidate the SVGTransformList containing all transformations
+  // to a single SVGTransform of type SVG_TRANSFORM_MATRIX and get
+  // its SVGMatrix. 
+  var matrix = g.transform.baseVal.consolidate().matrix;
+  
+  // As per definition values e and f are the ones for the translation.
+  return [matrix.e, matrix.f];
+}
+
   function hoverOut(d) {
     if(selected === false){
       unhighlightConnections(d)
@@ -357,6 +500,13 @@ function draw(nodes, links, accessors, misc) {
       var thisX = dimensions.width - d.x*1.8
       var thisY = dimensions.height - d.y*1.8
 
+      // rootEdge
+      //   .transition().duration(350)
+      //   .attr("d", el => path({
+      //     source: {x: d.x, y: d.y, r: el.source.radius/2},
+      //     target: {x: el.target.x, y: el.target.y, r: el.target.radius}
+      //   }))
+
       rootNode
         .transition().duration(350)
         .attr('transform', el=>`translate(${el.x}, ${el.y})scale(0.5)`)
@@ -377,6 +527,13 @@ function draw(nodes, links, accessors, misc) {
         graphLinksData.selectAll('.edge-label').attr('opacity', Consts.linkTextOpacity)
         selected=false
       }, 750)
+      
+      // rootEdge
+      //   .transition().duration(350)
+      //   .attr("d", el => path({
+      //     source: {x: el.source.x, y: el.source.y, r: el.source.radius},
+      //     target: {x: el.target.x, y: el.target.y, r: el.target.radius}
+      //   }))
 
       rootNode
         .transition().duration(350)
@@ -389,7 +546,14 @@ function draw(nodes, links, accessors, misc) {
 
     }
 
+    // graphNodesData.selectAll('.node').filter(o => isConnected(d, o))
+    //   .call(d3.drag()
+    //     .on("start", dragstarted)
+    //     .on("drag", dragged)
+    //     .on("end", dragended))
+
   }
+
 
   function highlightConnections(d, hoverAttr) {
 
@@ -428,8 +592,55 @@ function draw(nodes, links, accessors, misc) {
 
   }
 
+  function dragstarted(d) {
+    console.log(d3.event.x, d3.event.y)
+    if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+    d.fx = d3.event.x;
+    d.fy = d3.event.y;
+  }
+
+  function dragged(d) {
+    d.fx = d3.event.x;
+    d.fy = d3.event.y;
+  }
+
+  function dragended(d) {
+    if (!d3.event.active) simulation.alphaTarget(0);
+    d.fx = d3.event.x;
+    d.fy = d3.event.y;
+  }
 
 }//draw: update nodes and edges of graph
+
+function path(d, exclude_radius=false) {
+
+  if(exclude_radius){
+
+    var dx = d.target.x - d.source.x;
+    var dy = d.target.y - d.source.y;
+    var gamma = Math.atan2(dy,dx); // Math.atan2 returns the angle in the correct quadrant as opposed to Math.atan
+    var sourceNewX = d.source.x + (Math.cos(gamma) * d.source.r);
+    var sourceNewY = d.source.y + (Math.sin(gamma) * d.source.r);
+    var targetNewX = d.target.x - (Math.cos(gamma) * d.target.r);
+    var targetNewY = d.target.y - (Math.sin(gamma) * d.target.r);
+
+  } else {
+
+    var sourceNewX = d.source.x;
+    var sourceNewY = d.source.y;
+    var targetNewX = d.target.x;
+    var targetNewY = d.target.y;
+
+  }
+
+  // Coordinates of mid point on line to add new vertex.
+  let midX = (targetNewX - sourceNewX) / 2 + sourceNewX   
+  let midY = (targetNewY - sourceNewY) / 2 + sourceNewY
+  return "M" + 
+      sourceNewX + "," + sourceNewY + "L" + 
+      midX + ',' + midY + 'L' +
+      targetNewX + "," + targetNewY
+  }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////// Graph Network: Update node and link styles ////////////////////////////
@@ -519,11 +730,11 @@ function updateAttributes(nodes, links, scales){
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////// Graph Network: Update graph layout ////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-function updateGraph(data, scales, misc) {
+function updateGraph(data, scales, z) {
 
   let { nodes, links, date } = data 
   const selectedTime = Consts.formatYear(date)
-  const { dimensions } = misc
+  const { dimensions } = z
 
   const root_targets = links.filter(d=>d.start_id == ROOT_ID)
   const parentIDs = root_targets.map(d=>d.end_id).filter(onlyUnique)
@@ -633,7 +844,7 @@ function updateGraph(data, scales, misc) {
     })
   }
 
-  draw(nodes, links, newEle.accessors, misc)
+  draw(nodes, links, newEle.accessors, z)
 
   return {nodes: nodes, links: links}
 
@@ -660,50 +871,4 @@ function comparerNodes(otherArray){
   }
 }
 
-function path(d, exclude_radius=false) {
-
-  if(exclude_radius){
-
-    var dx = d.target.x - d.source.x;
-    var dy = d.target.y - d.source.y;
-    var gamma = Math.atan2(dy,dx); // Math.atan2 returns the angle in the correct quadrant as opposed to Math.atan
-    var sourceNewX = d.source.x + (Math.cos(gamma) * d.source.r);
-    var sourceNewY = d.source.y + (Math.sin(gamma) * d.source.r);
-    var targetNewX = d.target.x - (Math.cos(gamma) * d.target.r);
-    var targetNewY = d.target.y - (Math.sin(gamma) * d.target.r);
-
-  } else {
-
-    var sourceNewX = d.source.x;
-    var sourceNewY = d.source.y;
-    var targetNewX = d.target.x;
-    var targetNewY = d.target.y;
-
-  }
-
-  // Coordinates of mid point on line to add new vertex.
-  let midX = (targetNewX - sourceNewX) / 2 + sourceNewX   
-  let midY = (targetNewY - sourceNewY) / 2 + sourceNewY
-  return "M" + 
-      sourceNewX + "," + sourceNewY + "L" + 
-      midX + ',' + midY + 'L' +
-      targetNewX + "," + targetNewY
-  }
-
-function getTranslation(transform) {
-  // Create a dummy g for calculation purposes only. This will never
-  // be appended to the DOM and will be discarded once this function 
-  // returns.
-  var g = document.createElementNS('http://www.w3.org/2000/svg', "g");
-  
-  // Set the transform attribute to the provided string value.
-  g.setAttributeNS(null, "transform", transform);
-  
-  // consolidate the SVGTransformList containing all transformations
-  // to a single SVGTransform of type SVG_TRANSFORM_MATRIX and get
-  // its SVGMatrix. 
-  var matrix = g.transform.baseVal.consolidate().matrix;
-  
-  // As per definition values e and f are the ones for the translation.
-  return [matrix.e, matrix.f];
-}
+export default Network
