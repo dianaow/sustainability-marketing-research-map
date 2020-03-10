@@ -1,14 +1,14 @@
 import React, { useEffect, useContext } from "react"
 import * as d3 from "d3"
 
-import { MyContext } from "../NetworkPage"
-import { PanelContext } from "./contexts/PanelContext"
+import { NetworkContext } from "../../NetworkPage"
+import { PanelContext } from "../contexts/PanelContext"
 
-import * as Consts from "./consts"
+import * as Consts from "../consts"
 
 const FilterPanel = () => {
 
-  const { current } = useContext(MyContext)
+  const { current } = useContext(NetworkContext)
   const { panelState, setPanelState } = useContext(PanelContext)
 
   //////////////// Control panel logic and set initial setting /////////////

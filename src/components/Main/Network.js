@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { arc } from './utils'
+import { arc } from '../utils'
 import Tooltip, { TooltipContext } from "./Tooltip";
 
 const Network = ({ ...props }) => {

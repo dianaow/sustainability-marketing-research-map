@@ -1,15 +1,30 @@
 import React, { useEffect, useContext } from "react"
 import * as d3 from "d3"
 
-import { MyContext } from "../NetworkPage"
-import { ZoomContext } from "./contexts/ZoomContext"
-import { TooltipContext } from "./contexts/TooltipContext"
-import { ChartContext } from "./Chart"
+import { NetworkContext } from "../../NetworkPage"
+import { ZoomContext } from "../contexts/ZoomContext"
+import { initialTooltipState, TooltipContext } from "../contexts/TooltipContext"
+import { ChartContext } from "../Shared/Chart"
 
-import * as Consts from "./consts"
-import { useChartDimensions, onlyUnique, getRandomArbitrary, round }  from "./utils"
+import { useChartDimensions, onlyUnique, getRandomArbitrary, round }  from "../utils"
+import * as Consts from "../consts"
+import bank from '../../data/bank.png'
+
+const detailedDataNodes = [
+  {id: "234-309-876", name: "XXX-XXX-XXX", type: 'children', node_type: 'bank_account'},
+  {id: "489-093-817", name: "XXX-XXX-XXX", type: 'children', node_type: 'bank_account'},
+]
+
+const detailedDataLinks= [
+  {"start_id": 82007088, "end_id": "234-309-876", type: 'children', link: "has bank account"},
+  {"start_id": 82007088, "end_id": "489-093-817", type: 'children', link: "has bank account"},
+  {"start_id": 80049490, "end_id": "234-309-876", type: 'children', link: "has bank account"}
+]
+
+const detailedData = { 'nodes': detailedDataNodes, 'links': detailedDataLinks }
 
 let selected = false
+let scene = 0
 let nodeTextOpacity = Consts.nodeTextOpacity
 let linkTextOpacity = Consts.linkTextOpacity
 const ROOT_ID = Consts.ROOT_ID
@@ -20,13 +35,13 @@ const simulation = d3.forceSimulation()
     .distance(function(d) { return d.distance })
     .strength(function(d) { return d.strength })
   )
-  .force("charge", d3.forceManyBody().strength(-90))
+  .force("charge", d3.forceManyBody().strength(-80))
   .force("collide", d3.forceCollide(function(d){ return d.radius * 2 }))
   .alphaTarget(0.8)
 
 const Graph = () => {
     
-  const { current, dispatch } = useContext(MyContext)
+  const { current, dispatch } = useContext(NetworkContext)
   const { zoom, zoomState } = useContext(ZoomContext)
   const { tooltipState, setTooltip } = useContext(TooltipContext)
   const { dimensions } = useContext(ChartContext)
@@ -62,6 +77,8 @@ const Graph = () => {
   svg.call(zoom).on("dblclick.zoom", null);
 
   useEffect(() => {
+
+    setTooltip(initialTooltipState)
 
     if(selected === false){
 
@@ -111,14 +128,12 @@ function draw(nodes, links, accessors, misc) {
   }
 
   let { zoom, setTooltip, dimensions } = misc
-  let { root, parent, rootparent, organization, berects } = accessors
+  let { root, parent, rootparent, organization, berects, extras } = accessors
   let graphNodesGroup = d3.select('.Network').select('.nodes')
   let graphLinksGroup = d3.select('.Network').select('.links')
 
   // DRAW NODES
   let graphNodesData = graphNodesGroup.selectAll("g").data(nodes, d => nodeKey(d))
-
-  let graphNodesEnter = graphNodesData.enter().append("g")
 
   graphNodesData.exit().select("circle")
     .transition().duration(Consts.transitionDuration)
@@ -131,8 +146,14 @@ function draw(nodes, links, accessors, misc) {
     .attr("height", 0)
     .remove()
 
-  graphNodesData.exit().select("text")
+  graphNodesData.exit().select("text").remove()
+
+  graphNodesData.exit()
+    .transition().duration(Consts.transitionDuration)
     .remove()
+
+  let graphNodesEnter = graphNodesData.enter().append("g")
+    .attr('id', d => 'node-group-' + nodeKey(d))
 
   graphNodesEnter
     .attr("transform", function(d) { 
@@ -146,7 +167,7 @@ function draw(nodes, links, accessors, misc) {
   let graphNodeCircles = graphNodesEnter.filter(d=>!berects(d))
     .append("circle")
       .attr('class', 'node node-circle')
-      .attr('id', function(d) {return 'node-' + d.id}) 
+      .attr('id', function(d) { return 'node-' + d.id}) 
       .attr('stroke-width', function(d) {return d.strokeWidth})
       .attr('stroke', function(d) {return d.strokeColor})
       .attr('stroke-opacity', function(d) { return d.opacity})
@@ -163,6 +184,14 @@ function draw(nodes, links, accessors, misc) {
       .attr('fill-opacity', function(d) { return d.opacity})
       .attr('fill', function(d) {return d.color})
 
+   graphNodesEnter.filter(d=>extras(d))
+    .append("svg:image")
+        .attr("xlink:href",  function(d) { return d.img;})
+        .attr("x", function(d) { return -6;})
+        .attr("y", function(d) { return -6;})
+        .attr("height", 12)
+        .attr("width", 12);
+  
   let parentLabels = graphNodesEnter.filter(d=>parent(d))
     .append("text")
       .attr('class', 'parent-node-label')
@@ -210,7 +239,7 @@ function draw(nodes, links, accessors, misc) {
     .text(d => round(d.score))
 
   graphNodesData = graphNodesEnter.merge(graphNodesData)
-
+  
   graphNodesData.transition().duration(Consts.transitionDuration)
     .attr("transform", function(d) { 
       if(berects(d)){
@@ -254,24 +283,33 @@ function draw(nodes, links, accessors, misc) {
   // DRAW LINKS
   let graphLinksData = graphLinksGroup.selectAll("g").data(links, d=>linkKey(d))
 
-  let graphLinksEnter = graphLinksData.enter().append("g")
-
-  let graphLinksExit = graphLinksData.exit().select("path")
+  graphLinksData.exit().select("path")
     .transition().duration(Consts.transitionDuration)
-    .attr("stroke-opacity", 0)
+    .attr("d", d => generatePath({
+      source: {x: d.source.x, y: d.source.y, r: 0},
+      target: {x: d.source.x, y: d.source.y, r: 0}
+    }, d.source.type=='root' ? false : true))
+    .attr("opacity", 0)
     .remove()
 
-  let graphLinksPath = graphLinksEnter.append('path')
-    .attr('class', 'link')
-    .attr('id', function(d) { return 'path-' + linkKey(d)})
-    .attr('marker-mid', 'url(#arrowhead)')
-    .attr('stroke-width', function(d) {return d.strokeWidth})
-    .attr('stroke', function(d) {return d.strokeColor})
-    .attr("opacity", d => d.opacity)
-    .attr("d", d => path({
-      source: {x: d.source.x0, y: d.source.y0, r: d.source.radius},
-      target: {x: d.target.x0, y: d.target.y0, r: d.target.radius}
-    }, d.source.type=='root' ? false : true))
+  graphLinksData.exit()
+    .transition().duration(Consts.transitionDuration)
+    .remove()
+
+  let graphLinksEnter = graphLinksData.enter().append("g").attr('id', d => 'path-group-' + linkKey(d))
+
+  let graphLinksPath = graphLinksEnter
+    .append('path')
+      .attr('class', 'link')
+      .attr('id', function(d) { return 'path-' + linkKey(d)})
+      .attr('marker-mid', 'url(#arrowhead)')
+      .attr('stroke-width', function(d) {return d.strokeWidth})
+      .attr('stroke', function(d) {return d.strokeColor})
+      .attr("opacity", d => d.opacity)
+      .attr("d", d => generatePath({
+        source: {x: d.source.x0, y: d.source.y0, r: d.source.radius},
+        target: {x: d.target.x0, y: d.target.y0, r: d.target.radius}
+      }, d.source.type=='root' ? false : true))
 
   let pathLabels = graphLinksEnter
     .append("text")
@@ -281,7 +319,6 @@ function draw(nodes, links, accessors, misc) {
       .attr('fill', Consts.linkTextFill)
       .attr('opacity', Consts.linkTextOpacity)
       .attr('dy', -2)
-      .attr('pointer-events', 'none')
     .append('textPath')
       .attr('xlink:href', d => '#path-' + linkKey(d))
       .attr("startOffset", "50%")
@@ -290,11 +327,13 @@ function draw(nodes, links, accessors, misc) {
   graphLinksData = graphLinksEnter.merge(graphLinksData)
 
   graphLinksData.selectAll('.link').transition().duration(Consts.transitionDuration)
-    .attr("opacity", d => d.opacity)
-    .attr("d", d => path({
-      source: {x: d.source.x, y: d.source.y, r: d.source.radius},
-      target: {x: d.target.x, y: d.target.y, r: d.target.radius}
-    }, d.source.type=='root' ? false : true))
+    //.attr("opacity", d => d.opacity)
+    .attr("d", function(d) { 
+      return generatePath({
+          source: {x: d.source.x, y: d.source.y, r: d.source.radius},
+          target: {x: d.target.x, y: d.target.y, r: d.target.radius}
+        }, d.source.type=='root' ? false : true) 
+    }) 
 
   // graphLinksData.selectAll('text')
   //   .attr('dy', function(d,i){
@@ -318,78 +357,156 @@ function draw(nodes, links, accessors, misc) {
 
   // INTERACTIVITY
   function hoverOver(d) {
-    let translation = getTranslation(d3.selectAll('.networkWrapper').selectAll('.root-label').attr('transform'))
-    let X = translation[0]
+    console.log(d)
+    let svg = d3.selectAll('.networkWrapper')
+    let rootPos = getTranslation(svg.selectAll('.root-label').attr('transform'))
+    let nodePos = getTranslation(svg.select('#node-group-' + d.id).attr('transform'))
+    let zoomedSvgPos = getTranslation(svg.select('.network').attr('transform'))
+    let nodePosAfterZoomX = (nodePos[0] * zoomedSvgPos[2]) + (zoomedSvgPos[0])
+    let nodePosAfterZoomY = (nodePos[1] * zoomedSvgPos[3]) + (zoomedSvgPos[1])
+    let rootPosAfterZoomX = (rootPos[0] * zoomedSvgPos[2]) + (zoomedSvgPos[0])
+
     if(selected === false){
       let hoverAttr = {hover_textOpacity: 0, hover_strokeOpacity: 0.2, hover_arrow: 'url(#arrowhead)'}
       highlightConnections(d, hoverAttr)
-      setTooltip({
-        show: true,
-        x: d.x,
-        y: d.y,
-        content: d,
-        position: (d.x>X) ? 'right' : 'left',
-      })
     }
+
+    setTooltip({
+      show: true,
+      x: nodePosAfterZoomX,
+      y: nodePosAfterZoomY,
+      position: (nodePosAfterZoomX>rootPosAfterZoomX) ? 'right' : 'left',
+      dimensions: selected ? {width: 380, height: 220} : {width: 250, height: 150},
+      type: selected, // decide which tooltip content to show
+      content: d, // pass down data attributes of selected node to tooltip
+    })
+
   }
 
   function hoverOut(d) {
     if(selected === false){
       unhighlightConnections(d)
-      // setTooltip({ 
-      //   show: false, 
-      //   content: {} 
-      // })
     }
+    setTooltip(initialTooltipState)
   }
 
   function click(d) {
-   
+    
+    setTooltip(initialTooltipState)
+
     var svg =  d3.selectAll('.networkWrapper')
     var rootNode = svg.selectAll('.root-label')
     var rootEdge = svg.selectAll('#path-' + ROOT_ID + '-' + d.id)
+    var maxScene = 4
+    scene++
+    if(scene>maxScene){
+      scene = 1 // reset counter to 0 after 4 scenes have been rendered
+    }
 
-    if(selected==false){
+    switch (scene) {
+      case 1: // zoom into singular graph
 
-      let hoverAttr = {hover_textOpacity: 0, hover_strokeOpacity: 0, hover_arrow: 'url(#arrowheadTransparent)'}
-      highlightConnections(d, hoverAttr)
+        let hoverAttr = {hover_textOpacity: 0, hover_strokeOpacity: 0, hover_arrow: 'url(#arrowheadTransparent)'}
+        highlightConnections(d, hoverAttr)
 
-      var thisX = dimensions.width - d.x*1.8
-      var thisY = dimensions.height - d.y*1.8
+        var thisX = dimensions.width - d.x*1.8
+        var thisY = dimensions.height - d.y*1.8
 
-      rootNode
-        .transition().duration(350)
-        .attr('transform', el=>`translate(${el.x}, ${el.y})scale(0.5)`)
+        rootNode
+          .transition().duration(350)
+          .attr('transform', el=>`translate(${el.x}, ${el.y})scale(0.5)`)
 
-      svg.transition().duration(350).delay(500).call(
-        zoom.transform,
-        d3.zoomIdentity.translate(thisX, thisY).scale(1.8)
-      );
+        svg.transition().duration(350).delay(500).call(
+          zoom.transform,
+          d3.zoomIdentity.translate(thisX, thisY).scale(1.8)
+        );
 
-      graphLinksData.selectAll('.edge-label').attr('opacity', o => (o.source === d || o.target === d ? 0.5 : Consts.linkTextOpacity))
+        graphLinksData.selectAll('.edge-label').attr('opacity', o => (o.source === d || o.target === d ? 0.5 : Consts.linkTextOpacity))
+        selected=true
+        break;
 
-      selected=true
+      case 2: // dive into detailed connections
 
-    } else {
+        detailedData.nodes.map(d=>nodes.push(d))
+        detailedData.links.map(d=>links.push(d))
+        updateGraph({nodes, links}, scales, misc) 
+        break;
 
-      setTimeout(function(){
-        unhighlightConnections(d)
-        graphLinksData.selectAll('.edge-label').attr('opacity', Consts.linkTextOpacity)
-        selected=false
-      }, 750)
+      case 3: // remove the extra nodes and edges connected to the clicked node 
 
-      rootNode
-        .transition().duration(350)
-        .attr('transform', el=>`translate(${el.x}, ${el.y})scale(1)`)
+        let removeIDs = detailedData.nodes.map(d=>d.id)
+        links = links.filter(d=>removeIDs.indexOf(d.end_id) == -1)
+        nodes = nodes.filter(d=>removeIDs.indexOf(d.id) == -1)
+        //updateGraph({nodes, links}, scales, misc) // redraw graph and running simulation
+        updateGraphManually() // without running simulation again
+        break;
 
-      svg.transition().duration(350).delay(150).call(
-        zoom.transform,
-        d3.zoomIdentity
-      )
+      case maxScene: // zoom out
+
+        setTimeout(function(){
+          unhighlightConnections(d)
+          graphLinksData.selectAll('.edge-label').attr('opacity', Consts.linkTextOpacity)
+          selected=false
+        }, 1000)
+
+        rootNode
+          .transition().duration(350).delay(250)
+          .attr('transform', el=>`translate(${el.x}, ${el.y})scale(1)`)
+
+        svg.transition().duration(350).delay(500).call(zoom.transform, d3.zoomIdentity)
+        break;
+
+    }
+
+    function updateGraphManually() {
+
+      detailedData.nodes.map(d=>{
+        let nodeToRemove = d3.selectAll('#node-group-' + d.id)
+        
+        nodeToRemove
+          .transition().duration(Consts.transitionDuration)
+          .remove()
+
+        nodeToRemove.select("circle")
+          .transition().duration(Consts.transitionDuration)
+          .attr("opacity", 0)
+          .remove()
+
+        nodeToRemove.select("rect")
+          .transition().duration(Consts.transitionDuration)
+          .attr("width", 0)
+          .attr("height", 0)
+          .remove()
+
+        nodeToRemove.select("image")
+          .transition().duration(Consts.transitionDuration)
+          .attr("opacity", 0)
+          .remove()
+
+        nodeToRemove.select("text").remove()
+      })
+
+      detailedData.links.map(d=>{
+        let pathToRemove = d3.selectAll('#path-group-' + d.source.id + '-' + d.target.id)
+        
+        pathToRemove
+          .transition().duration(Consts.transitionDuration)
+          .remove()
+
+        pathToRemove.select("path")
+          .transition().duration(Consts.transitionDuration)
+          .attr("d", d => generatePath({
+            source: {x: d.source.x, y: d.source.y, r: 0},
+            target: {x: d.source.x, y: d.source.y, r: 0}
+          }, d.source.type=='root' ? false : true))
+          .attr("opacity", 0)
+          .remove()
+      })
 
     }
 
   }
+
 
   function highlightConnections(d, hoverAttr) {
 
@@ -400,7 +517,7 @@ function draw(nodes, links, accessors, misc) {
         this.setAttribute('fill-opacity', thisOpacity)
         return thisOpacity
       })
-      .attr('pointer-events', 'none')
+      .style('pointer-events', o => (isConnected(d, o) ? 'auto' : 'none'))
 
     graphNodesData.selectAll('.root-label text').attr('opacity', o => (isConnected(d, o) ? 1 : 0.4))
     graphNodesData.selectAll('.parent-node-label').attr('opacity', o => (isConnected(d, o) ? 1 : hover_textOpacity))
@@ -417,7 +534,7 @@ function draw(nodes, links, accessors, misc) {
     graphNodesData.selectAll('.node')
       .attr('stroke-opacity', Consts.nodeOpacity)
       .attr('fill-opacity', Consts.nodeOpacity)
-      .attr('pointer-events', 'all')
+      .style('pointer-events', 'auto')
 
     graphNodesData.selectAll('.root-label text').attr('opacity', 1)
     graphNodesData.selectAll('.parent-node-label').attr('opacity', Consts.nodeTextOpacity)
@@ -427,7 +544,6 @@ function draw(nodes, links, accessors, misc) {
     graphLinksData.selectAll('.edge-label').attr('opacity', linkTextOpacity)
 
   }
-
 
 }//draw: update nodes and edges of graph
 
@@ -440,20 +556,16 @@ function updateAttributes(nodes, links, scales){
   const root_targets = links.filter(d=>d.start_id == ROOT_ID)
   const parentIDs = root_targets.map(d=>d.end_id).filter(onlyUnique)
   const orgIDs = nodes.filter(d=>d.node_type == 'organization').map(d=>d.id).filter(onlyUnique)
+  const extraIDs = nodes.filter(d=>d.node_type == 'bank_account').map(d=>d.id).filter(onlyUnique)
 
   // set up accessors
   const root = d => [ROOT_ID].indexOf(d.id) != -1
   const parent = d => parentIDs.indexOf(d.id) != -1
   const rootparent = d => parentIDs.concat([ROOT_ID]).indexOf(d.id) != -1
   const organization = d => orgIDs.indexOf(d.id) != -1
+  const extras = d => extraIDs.indexOf(d.id) != -1
   const berects = organization // choose node types to be rendered as rectangles
-  const accessors = {
-    root: root,
-    parent: parent,
-    rootparent: rootparent,
-    organization: organization,
-    berects: berects
-  }
+  const accessors = { root, parent, rootparent, organization, berects, extras }
 
   var linksTarget_nested = d3.nest()
     .key(function(d) { return d.target.id })
@@ -502,9 +614,10 @@ function updateAttributes(nodes, links, scales){
 
   nodes.forEach((d,i) => {
     let conn = linkAllNodes.find(l=>l.key==d.id)
-    d.radius = root(d) ? Consts.rootRadius : conn ? nodeRadiusScale(conn.value) : 1
-    d.color = parent(d) ? Consts.nodeFill : colorAccessor(d)
-    d.strokeColor = root(d) ? Consts.nodeStroke : colorAccessor(d)
+    d.radius = extras(d) ? 6 : (root(d) ? Consts.rootRadius : conn ? nodeRadiusScale(conn.value) : 1)
+    d.color = extras(d) ? 'transparent' : (parent(d) ? Consts.nodeFill : colorAccessor(d))
+    d.strokeColor = extras(d) ? 'transparent' : (root(d) ? Consts.nodeStroke : colorAccessor(d))
+    d.img = bank
   })
 
   links.forEach((d,i) => {
@@ -660,7 +773,7 @@ function comparerNodes(otherArray){
   }
 }
 
-function path(d, exclude_radius=false) {
+function generatePath(d, exclude_radius=false) {
 
   if(exclude_radius){
 
@@ -705,5 +818,30 @@ function getTranslation(transform) {
   var matrix = g.transform.baseVal.consolidate().matrix;
   
   // As per definition values e and f are the ones for the translation.
-  return [matrix.e, matrix.f];
+  return [matrix.e, matrix.f, matrix.a, matrix.d];
+}
+
+function pathTween(d1, precision) {
+  return function() {
+    var path0 = this,
+        path1 = path0.cloneNode(),
+        n0 = path0.getTotalLength(),
+        n1 = (path1.setAttribute("d", d1), path1).getTotalLength();
+
+    // Uniform sampling of distance based on specified precision.
+    var distances = [0], i = 0, dt = precision / Math.max(n0, n1);
+    while ((i += dt) < 1) distances.push(i);
+    distances.push(1);
+
+    // Compute point-interpolators at each distance.
+    var points = distances.map(function(t) {
+      var p0 = path0.getPointAtLength(t * n0),
+          p1 = path1.getPointAtLength(t * n1);
+      return d3.interpolate([p0.x, p0.y], [p1.x, p1.y]);
+    });
+
+    return function(t) {
+      return t < 1 ? "M" + points.map(function(p) { return p(t); }).join("L") : d1;
+    };
+  };
 }

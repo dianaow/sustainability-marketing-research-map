@@ -1,7 +1,7 @@
 import React, { useContext } from "react"
 import * as d3 from "d3"
 
-import { ZoomContext } from "./contexts/ZoomContext"
+import { ZoomContext } from "../contexts/ZoomContext"
 
 const ZoomPanel = () => {
 

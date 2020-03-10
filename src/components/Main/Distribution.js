@@ -1,7 +1,7 @@
 import React from "react"
 import * as d3 from 'd3'
-import { colorScale, fociRadius, categories } from "./consts"
-import Axis from "./Axis"
+import { colorScale, fociRadius, categories } from "../consts"
+import Axis from "../Shared/Axis"
 
 const v_dist = 280
 const h_dist = 80

@@ -1,19 +1,19 @@
 import React, { useRef, useEffect, useContext, useState } from "react"
 import * as d3 from "d3"
 
-import Chart from "./Chart"
+import Chart from "../Shared/Chart"
 import Graph from "./Graph"
 import Timeline from "./Timeline"
-import Tooltip from "./NetworkTooltip";
-import Legend from "./NetworkLegend"
+import Tooltip from "./Tooltip";
+import Legend from "./Legend"
 import FilterPanel from "./FilterPanel"
 import ZoomPanel from "./ZoomPanel"
 
-import { TooltipProvider } from "./contexts/TooltipContext"
-import { PanelProvider } from "./contexts/PanelContext"
-import { ZoomProvider } from "./contexts/ZoomContext"
+import { TooltipProvider } from "../contexts/TooltipContext"
+import { PanelProvider } from "../contexts/PanelContext"
+import { ZoomProvider } from "../contexts/ZoomContext"
 
-import { useChartDimensions }  from "./utils"
+import { useChartDimensions }  from "../utils"
 
 const Network = () => {
 
@@ -24,6 +24,9 @@ const Network = () => {
       <TooltipProvider>
         <PanelProvider>
           <ZoomProvider>
+            <Legend />
+            <FilterPanel />
+            <ZoomPanel />
             <Chart dimensions={dms}>
               <defs>
                 <marker id="arrowheadTransparent" viewBox="-0 -5 10 10" refX="0" refY="0" orient="auto" markerWidth="7" markerHeight="10">
@@ -44,9 +47,6 @@ const Network = () => {
               <Timeline />
               <Tooltip />
             </Chart>
-            <Legend />
-            <FilterPanel />
-            <ZoomPanel />
           </ZoomProvider>
         </PanelProvider>
       </TooltipProvider>

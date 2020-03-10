@@ -1,13 +1,13 @@
 import React from "react"
 import * as d3 from "d3"
 
-import Chart from "./Chart"
+import Chart from "../Shared/Chart"
 import Board from "./Board"
 import Axis from "./RadarAxis"
 import Nodes from "./Nodes"
 
-import { callAccessor, useChartDimensions }  from "./utils"
-import { categories, colorScale, fillScale, bufferInRad, angleSlice, LEVELS, UPPER, LOWER } from "./consts"
+import { callAccessor, useChartDimensions }  from "../utils"
+import { categories, colorScale, fillScale, bufferInRad, angleSlice, LEVELS, UPPER, LOWER } from "../consts"
 
 const STEPS = UPPER / LEVELS
 const range = d3.range(0, STEPS*LEVELS, STEPS).concat(STEPS*LEVELS)

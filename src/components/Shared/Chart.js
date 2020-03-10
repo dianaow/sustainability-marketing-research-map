@@ -1,5 +1,5 @@
 import React, { createContext, useContext } from "react"
-import { dimensionsPropsType } from "./utils"
+import { dimensionsPropsType } from "../utils"
 
 export const ChartContext = createContext()
 

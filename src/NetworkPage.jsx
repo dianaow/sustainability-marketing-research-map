@@ -1,14 +1,18 @@
 import React, { useState, useEffect, useReducer, createContext } from "react"
-import Card from "./components/Card"
-import Network from "./components/NetworkSection"
-import * as Consts from "./components/consts"
-import * as d3 from "d3"
-import graph from './data/test_graph.json';
 import { Dimmer, Loader, Image, Segment } from 'semantic-ui-react'
+import * as d3 from "d3"
+
+import graph from './data/test_graph.json';
+import Card from "./components/Network/Card"
+import Network from "./components/Network/NetworkSection"
+
+import reducer from "./components/reducers/NetworkReducer"
+
+import * as Consts from "./components/consts"
 
 import "./styles_network.scss"
 
-export const MyContext = createContext()
+export const NetworkContext = createContext()
 
 const ROOT_ID = Consts.ROOT_ID
 const entityData = {
@@ -50,25 +54,6 @@ const NetworkPage = () => {
     links: data.links,
   }
 
-  function reducer(state, action) {
-    switch (action.type) {
-      case 'SET_DATE':
-        return {
-          date: action.date,
-          nodes: state.nodes,
-          links: state.links
-        }
-      case 'SET_STATS':
-        return {
-          date: state.date,
-          nodes: action.nodes,
-          links: action.links
-        }
-      default:
-        return initialState
-    }
-  }
-
   const [current, dispatch] = useReducer(reducer, initialState)
 
   useEffect(() => {
@@ -107,9 +92,9 @@ const NetworkPage = () => {
 
         { loading.loading && showLoader() }
 
-        <MyContext.Provider value={{ current, dispatch }}>
+        <NetworkContext.Provider value={{ current, dispatch }}>
           { loading.loading === false && <Network /> }
-        </MyContext.Provider>
+        </NetworkContext.Provider>
 
       </div>
 

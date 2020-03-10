@@ -1,13 +1,13 @@
 import React, { useState, useContext } from "react"
 import * as d3 from "d3"
 
-import Axis from "./Axis"
-import { MyContext } from "../NetworkPage"
-import { ChartContext } from "./Chart"
+import timeline from '../../data/test_timeline.json';
+import Axis from "../Shared/Axis"
+import { NetworkContext } from "../../NetworkPage"
+import { ChartContext } from "../Shared/Chart"
 
-import { round } from "./utils"
-import * as Consts from "./consts"
-import timeline from '../data/test_timeline.json';
+import { round } from "../utils"
+import * as Consts from "../consts"
 
 let data = processData(timeline)
 data = data.filter(d=>d.type != 'predicted')
@@ -32,7 +32,7 @@ const Timeline = () => {
 
     // state for single vertical line representing marker to indicate hover position 
     //const [current, setCurrent] = useState({date: Consts.currentDate, score: Math.round(data.find(d=>d.type=='present').value * 100)/10})
-    const { current, dispatch } = useContext(MyContext)
+    const { current, dispatch } = useContext(NetworkContext)
     const { dimensions } = useContext(ChartContext)
 
     const scaleTime1 = d3.scaleTime().domain([Consts.parseDate1("2015"), Consts.parseDate1("2021")])

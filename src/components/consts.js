@@ -42,7 +42,7 @@ export const linkOpacity = 0.5
 export const linkTextFill = 'white'
 export const linkTextOpacity = 0
 export const linkTextSize = 8
-export const transitionDuration = 2000
+export const transitionDuration = 1000
 
 export const linkedByIndex = {}
 

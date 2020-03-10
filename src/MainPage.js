@@ -5,11 +5,11 @@ import * as d3 from "d3"
 
 import scores from './data/soccer_player_scores.json';
 import paths from './data/output1.json';
-import Slider from "./components/Slider"
-import RadarChart from "./components/RadarScatter"
-import Tooltip, { TooltipContext } from "./components/Tooltip";
-import Table from "./components/Table"
-import DistributionChart from "./components/Distribution"
+import Slider from "./components/Main/Slider"
+import RadarChart from "./components/Main/RadarScatter"
+import Tooltip, { TooltipContext } from "./components/Main/Tooltip";
+import Table from "./components/Main/Table"
+import DistributionChart from "./components/Main/Distribution"
 
 import { region, categories, SCORE_THRESHOLD } from "./components/consts"
 

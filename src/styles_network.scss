@@ -37,15 +37,20 @@
   height: 100%;
   justify-content: center;
   position: relative;
+
+  .link {
+    pointer-events: none;
+    fill: none;
+  }
+  .node {
+    pointer-events: auto;
+    cursor: pointer;
+  }
+  .text {
+    pointer-events: none;
+  }
 }
-.link {
-  pointer-events: all;
-  fill: none;
-}
-.node {
-  pointer-events: all;
-  cursor: pointer;
-}
+
 div.tooltip {
   position: absolute;
   max-width: 100px;
@@ -68,8 +73,10 @@ div.tooltip {
   left: 40px;
   width: 180px;
   height: auto; 
-  background: rgba(1, 28, 84, 0.6); 
-  z-index: 99; 
+  z-index: 2; 
+}
+.legend-color {
+  position: relative;
 }
 .Chart_legend_section .legend-header {
   fill: white;
@@ -94,8 +101,7 @@ div.tooltip {
   position: absolute;
   top: 20px;
   right: 80px;
-  background: rgba(1, 28, 84, 0.6);
-  z-index:99;
+  z-index:2;
 }
 
 /* zoomable control buttons */
@@ -103,7 +109,8 @@ div.tooltip {
   position: absolute;
   top: 23px;
   right: 40px;
-  z-index:99;
+  z-index: 2;
+  box-shadow: 2px 4px 10px 2px hsla(0, 0%, 100%, 0.23);
 }
 .button {
   width: 24px;

@@ -1,7 +1,7 @@
 import React from "react"
 import PropTypes from "prop-types"
-import { accessorPropsType, callAccessor } from "./utils";
-import { UPPER } from "./consts"
+import { accessorPropsType, callAccessor } from "../utils";
+import { UPPER } from "../consts"
 
 const Board = ({ data, keyAccessor, rAccessor, ...props }) => {
 

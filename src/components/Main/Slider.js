@@ -2,7 +2,7 @@ import React, { Component } from "react"
 
 import "./slider.css"
 
-import { SCORE_THRESHOLD } from "./consts"
+import { SCORE_THRESHOLD } from "../consts"
 
 class Slider extends Component {
 

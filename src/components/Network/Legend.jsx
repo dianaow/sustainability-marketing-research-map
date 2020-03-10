@@ -1,9 +1,9 @@
 import React, { useContext } from "react"
 
-import { PanelContext } from "./contexts/PanelContext"
+import { PanelContext } from "../contexts/PanelContext"
 
-import { round }  from "./utils"
-import * as Consts from "./consts"
+import { round }  from "../utils"
+import * as Consts from "../consts"
 
 const NetworkLegend = () => {
 
@@ -124,7 +124,7 @@ const drawShapeLegend = () => {
           x='30' 
           y='15' 
           fill='white'>
-          '1st degree'
+          1st degree
         </text>
         <rect
           x='100' 
@@ -138,20 +138,20 @@ const drawShapeLegend = () => {
           x={100+size+15} 
           y='15' 
           fill='white'>
-          '1st degree'
+          1st degree
         </text>
         <circle 
           cx={15-size} 
           cy='30' 
           r={size}
-          fill='none'
-          stroke='white'/>
+          fill='white'
+          stroke='none'/>
         <text
           className='legend-content-text'
           x='30' 
           y='30' 
           fill='white'>
-          '2nd degree'
+          2nd degree
         </text>
         <rect
           x='100' 
@@ -165,7 +165,7 @@ const drawShapeLegend = () => {
           x={100+size+15} 
           y='30' 
           fill='white'>
-          '2nd degree'
+          2nd degree
         </text>
       </g>
     </svg>  

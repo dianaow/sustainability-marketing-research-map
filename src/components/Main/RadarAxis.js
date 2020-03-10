@@ -1,7 +1,7 @@
 import React from "react"
 import PropTypes from "prop-types"
 import * as d3 from 'd3'
-import { angleSlice } from "./consts"
+import { angleSlice } from "../consts"
 
 export const max = Math.max;
 export const sin = Math.sin;

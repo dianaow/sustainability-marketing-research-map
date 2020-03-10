@@ -1,6 +1,8 @@
 import React from "react"
-import { calculateAspectRatioFit } from "./utils"
-import photo from '../data/najib_razak.jpg';
+
+import photo from '../../data/najib_razak.jpg';
+import { calculateAspectRatioFit } from "../utils"
+
 import "./card.css"
 
 const displayImage = (data) => {

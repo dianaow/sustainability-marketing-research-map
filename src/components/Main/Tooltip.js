@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 import PropTypes from "prop-types"
-import { colorScale } from "./consts"
+import { colorScale } from "../consts"
 
 const TooltipContext = React.createContext({
   show: false,

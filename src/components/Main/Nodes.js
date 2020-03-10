@@ -2,8 +2,8 @@ import React, { useEffect, useRef, useContext } from "react"
 import PropTypes from "prop-types"
 import * as d3 from "d3"
 
-import { accessorPropsType, callAccessor } from "./utils";
-import { NODE_SIZE } from "./consts"
+import { accessorPropsType, callAccessor } from "../utils";
+import { NODE_SIZE } from "../consts"
 import Tooltip, { TooltipContext } from "./Tooltip";
 import Network from "./Network";
 
