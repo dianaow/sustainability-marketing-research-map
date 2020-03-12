@@ -24,10 +24,10 @@ const Network = ({ ...props }) => {
           />
           <image
             className="Network__image"
-            x={d.target[0]-12}
-            y={d.target[1]-12}
-            width={12*2}
-            height={12*2}
+            x={d.target[0]-8}
+            y={d.target[1]-8}
+            width={8*2}
+            height={8*2}
             xlinkHref={d.photo}
           /> 
         </React.Fragment>    

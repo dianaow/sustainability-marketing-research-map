@@ -52,7 +52,7 @@ const Axis = ({ data, scale, keyAccessor, ...props }) => {
       <path
         className="Axis__invisible_arc"
         id={"Axis__arc_label"}
-        d={invisibleArc(1, window.innerWidth*0.22-15)}
+        d={invisibleArc(1, window.innerWidth*0.21-15)}
         strokeOpacity={0}
         fill='none'
       />
@@ -93,7 +93,7 @@ const Axis = ({ data, scale, keyAccessor, ...props }) => {
           <path
             className="Axis__invisible_arc"
             id={"Axis__arc_" + i}
-            d={invisibleArc(axis, window.innerWidth*0.22)}
+            d={invisibleArc(axis, window.innerWidth*0.21)}
             strokeOpacity={0}
             fill='none'
           />

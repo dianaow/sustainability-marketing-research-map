@@ -7,7 +7,7 @@ import { NODE_SIZE } from "../consts"
 import Tooltip, { TooltipContext } from "./Tooltip";
 import Network from "./Network";
 
-const Nodes = ({data, dataAll, binnedData, accessors, direction}) => {
+const Nodes = ({data, dataAll, binnedData, accessors, direction, filter, search}) => {
 
   const tooltip = useContext(TooltipContext)
 
@@ -111,7 +111,8 @@ const Nodes = ({data, dataAll, binnedData, accessors, direction}) => {
     let circles = d3.select("." + eleWrapper).selectAll("." + eleSelector).data(data, d=>d.entity);
 
     circles.exit().remove()
-
+    console.log(search.isSelected, direction)
+    
     let circlesEnter = circles.enter().append('circle')
       .attr('class', eleSelector)
       .attr('cx', (d, i) => callAccessor(x0, d, i))
@@ -131,12 +132,13 @@ const Nodes = ({data, dataAll, binnedData, accessors, direction}) => {
       .attr('cy', (d, i) => callAccessor(y1, d, i))
       .attr('r', (d, i) => callAccessor(size, d, i))
       .attr('opacity', (d, i) => callAccessor(opacity[0], d, i))
-      .style('cursor', direction === "2" ? 'pointer': 'none')
-      .attr('pointer-events', direction === "2" ? 'visible': 'none')
+      .style('cursor', search.isSelected === false & direction === "2" ? 'pointer': 'none')
+      .attr('pointer-events', search.isSelected === false & direction === "2" ? 'visible': 'none')
 
     circles
-      .on("mouseover", d => direction === "2" ? mouseOver(d) : ()=>{} )
-      .on("mouseout", d => direction === "2" ? mouseOut(d) : ()=>{} )
+      .on("mouseover", function(d) { 
+        return search.isSelected === false & direction === "2" ? mouseOver(d) : ()=>{} })
+      .on("mouseout", d => search.isSelected === false & direction === "2" ? mouseOut(d) : ()=>{} )
 
   }
 
@@ -163,8 +165,8 @@ const Nodes = ({data, dataAll, binnedData, accessors, direction}) => {
       .attr('fill', (d,i) => eleWrapper === 'NodesMask' ? 'transparent' : callAccessor(fill, d, i))
       .attr('stroke', (d,i) => eleWrapper === 'NodesMask' ? 'transparent' : callAccessor(stroke, d, i))
       .attr('strokeWidth', strokeWidth)
-      .style('cursor', direction === "2" ? 'pointer': 'none')
-      .attr('pointer-events', direction === "2" ? 'visible': 'none')
+      .style('cursor', search.isSelected === false & direction === "2"? 'pointer': 'none')
+      .attr('pointer-events', search.isSelected === false & direction === "2" ? 'visible': 'none')
       
     rects = rects.merge(rectsEnter)
 
@@ -174,12 +176,12 @@ const Nodes = ({data, dataAll, binnedData, accessors, direction}) => {
       .attr('width', (d, i) => WIDTH(width, d, i))
       .attr('height', (d, i) => HEIGHT(height, d, i))
       .attr('opacity', (d, i) => callAccessor(opacity[0], d, i))
-      .style('cursor', direction === "2" ? 'pointer': 'none')
-      .attr('pointer-events', direction === "2" ? 'visible': 'none')
+      .style('cursor', search.isSelected === false & direction === "2" ? 'pointer': 'none')
+      .attr('pointer-events', search.isSelected === false & direction === "2" ? 'visible': 'none')
 
     rects
-      .on("mouseover", d => direction === "2" ? mouseOver(d) : ()=>{} )
-      .on("mouseout", d => direction === "2" ? mouseOut(d) : ()=>{} )
+      .on("mouseover", d => search.isSelected === false & direction === "2" ? mouseOver(d) : ()=>{} )
+      .on("mouseout", d => search.isSelected === false & direction === "2" ? mouseOut(d) : ()=>{} )
 
   }
 
@@ -207,12 +209,25 @@ const Nodes = ({data, dataAll, binnedData, accessors, direction}) => {
     updateBin(prevDirection)
   }, [])
 
+  const filterBool = filter.lowerLimit > 14 | filter.upperLimit < 20
+
+
   useEffect(() => {
-    if(direction !== "0"){
+    if(search.isLoading===false){
+      if(direction !== '0' & filterBool === 0){
+        updateBin(prevDirection)
+        updateSingle(prevDirection)
+      }
+      if(filterBool === 1){
+        updateBin(prevDirection)
+        updateSingle(prevDirection)    
+      }
+    }
+    if(search.isSelected===true){
       updateBin(prevDirection)
       updateSingle(prevDirection)
     }
-  }, [data, dataAll, binnedData])
+  }, [data, dataAll, binnedData, filterBool])
 
   useEffect(() => {
     if(tooltip.show){
@@ -266,7 +281,7 @@ function updateCirclesBin(data, accessors, eleWrapper, eleSelector) {
 
   let { x, y, size, opacity, fill, stroke, strokeWidth } = accessors
 
-  let circles = d3.select("." + eleWrapper).selectAll("." + eleSelector).data(data, d=>d.category+d.overall+d.axis);
+  let circles = d3.select("." + eleWrapper).selectAll("." + eleSelector).data(data, d=>d.category + '-' + d.overall + '-' + d.axis);
 
   circles.exit().remove()
 
@@ -283,9 +298,9 @@ function updateCirclesBin(data, accessors, eleWrapper, eleSelector) {
     .attr('pointer-events', "none")
 
   circles = circles.merge(circlesEnter)
+console.log(circles)
 
   circles.transition().duration(1200)
-    .attr('cx', (d, i) => callAccessor(x, d, i))
     .attr('cy', (d, i) => callAccessor(y, d, i))
     .attr('r', function(d, i) { 
       return callAccessor(size[1], d, i) })
@@ -304,7 +319,7 @@ function updateRectsBin(data, accessors, eleWrapper, eleSelector) {
   const WIDTH1 = (width, d, i) => typeof width[1] === "function" ? width[1](d,i) : width[1]*2
   const HEIGHT1 = (height, d, i) => typeof height[1] === "function" ? height[1](d,i) : height[1]*2
 
-  let rects = d3.select("." + eleWrapper).selectAll("." + eleSelector).data(data, d=>d.entity);
+  let rects = d3.select("." + eleWrapper).selectAll("." + eleSelector).data(data,  d=>d.category + '-' + d.overall + '-' + d.axis);
 
   rects.exit().remove()
 
@@ -336,10 +351,10 @@ function findConnections(data, id) {
   var dataConn = d3.nest()
     .key(function(d) { return d.club })
     .entries(data)
-
+  console.log(dataConn)
   var links = []
   var player = data.find(a=>a.entity === id)
-  var club = dataConn.find(d=>d.key === player.club).values
+  var club = dataConn.find(d=>d.key === player.club.toString()).values
 
   club.map(d=>{
     links.push({

@@ -1,6 +1,6 @@
 import React from "react"
 
-import photo from '../../data/najib_razak.jpg';
+import photo from '../../images/najib_razak.jpg';
 import { calculateAspectRatioFit } from "../utils"
 
 import "./card.css"
@@ -121,9 +121,6 @@ const Card = ({data}) => {
             <div className="value">Title</div>
           </div>
           <div className="cell cell-15">
-            <div className="value">Country</div>
-          </div>
-          <div className="cell cell-15">
             <div className="value">Start Date</div>
           </div>
           <div className="cell cell-15">
@@ -135,9 +132,6 @@ const Card = ({data}) => {
             <div className="row">
               <div className="cell cell-50">
                 <div className="value">{d.title}</div>
-              </div>
-              <div className="cell cell-15">
-                <div className="value">{d.country}</div>
               </div>
               <div className="cell cell-15">
                 <div className="value">{d.start_time}</div>
@@ -152,20 +146,32 @@ const Card = ({data}) => {
 
       <div className='Card__section card-events'>
         <div className='header'><p>Events</p></div>
-        <div className="table-row-header">
-          <div className="cell cell-50">
-            <div className="value">Description</div>
-          </div>
-          <div className="cell cell-15">
-            <div className="value">Score</div>
-          </div>
-          <div className="cell cell-15">
-            <div className="value">Start Date</div>
-          </div>
-          <div className="cell cell-15">
-            <div className="value">End Date</div>
-          </div>
+      <div className="table-row-header">
+        <div className="cell cell-50">
+          <div className="value">Type</div>
         </div>
+        <div className="cell cell-50">
+          <div className="value">Description</div>
+        </div>
+        <div className="cell cell-20">
+          <div className="value">Date</div>
+        </div>
+      </div>
+      <div className='table-row-contents'>
+        {data.events.map((d,i)=>(
+          <div className="row">
+            <div className="cell cell-50">
+              <div className="value">{d.type}</div>
+            </div>
+            <div className="cell cell-50">
+              <div className="value">{d.description}</div>
+            </div>
+            <div className="cell cell-20">
+              <div className="value">{d.date}</div>
+            </div>
+          </div>  
+        ))}
+      </div>
       </div>   
     </div>
   )

@@ -3,13 +3,17 @@ import { Search } from "semantic-ui-react";
 import { Link } from "react-router-dom";
 import * as d3 from "d3"
 
-import scores from './data/soccer_player_scores.json';
+import icon from "./images/icons/manager.png"
+import scores from './data/dummy_fraud_scores.json';
 import paths from './data/output1.json';
+
+import Header from "./components/Shared/Header"
 import Slider from "./components/Main/Slider"
 import RadarChart from "./components/Main/RadarScatter"
 import Tooltip, { TooltipContext } from "./components/Main/Tooltip";
 import Table from "./components/Main/Table"
 import DistributionChart from "./components/Main/Distribution"
+import Legend from './components/Main/Legend'
 
 import { region, categories, SCORE_THRESHOLD } from "./components/consts"
 
@@ -60,7 +64,7 @@ const MainPage = () => {
       links: [],
       details: data.players.filter(d=>d.name.indexOf(result.name) !== -1) 
     })
-    setSearch({ value: result.name, isSelected: true })
+    setSearch({ isLoading: false, isSelected: true, value: result.name })
   }
 
   const handleSearchChange = (e, { value }) => {
@@ -72,6 +76,7 @@ const MainPage = () => {
       }
       setSearch({
         isLoading: false,
+        isSelected: false, 
         results: data.playersMax.filter(d=>d.name.indexOf(value) !== -1)
       })
     }, 300)
@@ -83,13 +88,13 @@ const MainPage = () => {
       <Link to='/network'>
         <input name="nav" 
           type="button" 
-          className='btn nav_1'
-          value="Network"/>
+          className='btn-large nav_1'
+          value="See Network"/>
         </Link>
         <input name="nav" 
           type="button" 
-          className="btn nav_2"
-          value="Events"/>
+          className="btn-large nav_2"
+          value="See Events"/>
       </div>
     )
   }
@@ -99,16 +104,19 @@ const MainPage = () => {
   const { isSelected, isLoading, value, results } = search
 
   return(
+    <React.Fragment>
+    <Header/>
     <div className="App__wrapper">
       <div className ='SideBarLeft'>
         <div className="Title">
-          <h1>FIFA 19</h1>
-          <p>Players are scored according to 6 categories representing their abilities. An overall score is formulated for each player based on these category scores amongst other parameters.</p>
+          <h1>RISK 360</h1>
         </div>
         <div className="Search">
           <Search
             icon="search"
-            placeholder="Search..."
+            placeholder="SEARCH FOR AN ENTITY"
+            size='large'
+            fluid
             loading={isLoading}
             onResultSelect={handleResultSelect}
             onSearchChange={handleSearchChange}
@@ -121,6 +129,7 @@ const MainPage = () => {
         <TooltipContext.Provider value={{ ...tooltip, setTooltip }}>
           <Table />
         </TooltipContext.Provider>
+        <Legend />
       </div>
 
       <div className ='Main'>
@@ -130,6 +139,8 @@ const MainPage = () => {
           <RadarChart 
             data={data} 
             config={config}
+            filter={filter}
+            search={search}
           />
         </TooltipContext.Provider>
       </div>
@@ -139,6 +150,7 @@ const MainPage = () => {
         <DistributionChart data={data.paths} singleData={tooltip}/>
       </div>
     </div>
+    </React.Fragment>
   )
 
 }
@@ -160,10 +172,11 @@ function processData(data, lowerLimit, upperLimit) {
           overall: +player['Overall'],
           category: player['Region'],
           country: player['Nationality'],
-          photo: player['Photo'],
+          photo: icon,
+          //photo: player['Photo'],
           //photo: "./data/images/" + player['ID'] + '.jpg',
-          club: player['Club'],
-          name: player['Name']
+          club: 'Organization ' + player['Club'],
+          name: player['ID'] === 20801 ? 'John Doe' : 'Entity ' + player['ID']
         })
       }
     })

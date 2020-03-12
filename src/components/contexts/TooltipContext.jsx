@@ -1,6 +1,6 @@
 import React, { createContext, useState } from "react"
 
-export const initialTooltipState = { show: false, x: 0, y: 0, content: {}, position: 'right', dimensions: {width: 300, height: 200} }
+export const initialTooltipState = { show: false, x: 0, y: 0, content: {}, position: 'right' }
 
 export const TooltipContext = createContext()
 

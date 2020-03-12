@@ -5,6 +5,7 @@ import timeline from '../../data/test_timeline.json';
 import Axis from "../Shared/Axis"
 import { NetworkContext } from "../../NetworkPage"
 import { ChartContext } from "../Shared/Chart"
+import { SceneContext } from "../contexts/SceneContext"
 
 import { round } from "../utils"
 import * as Consts from "../consts"
@@ -34,6 +35,7 @@ const Timeline = () => {
     //const [current, setCurrent] = useState({date: Consts.currentDate, score: Math.round(data.find(d=>d.type=='present').value * 100)/10})
     const { current, dispatch } = useContext(NetworkContext)
     const { dimensions } = useContext(ChartContext)
+    const { sceneState } = useContext(SceneContext)
 
     const scaleTime1 = d3.scaleTime().domain([Consts.parseDate1("2015"), Consts.parseDate1("2021")])
     const years = scaleTime1.ticks(d3.timeYear.every(1))
@@ -44,7 +46,7 @@ const Timeline = () => {
     const { width, height } = dimensions
     const targetValue = width - 80
     const sliderPosX = 40
-    const sliderPosY = height - 45
+    const sliderPosY = height - 50
     const sliderHeight = 60
 
     const xTimeScale = d3.scaleTime()
@@ -104,7 +106,7 @@ const Timeline = () => {
     }
 
     return(
-      <g className='slider' transform={`translate(${sliderPosX}, ${sliderPosY})`}>
+      <g className='slider' transform={`translate(${sliderPosX}, ${sliderPosY})`} style={{ visibility: sceneState.scene === 0 ? 'visible' : 'hidden' }}>
         <g className='line-group' transform={`translate(0, ${-sliderHeight})`}>
           <rect 
             width={targetValue}

@@ -1,6 +1,7 @@
 .Entity__Left {
   width: 25%;
   height: 100%;
+  margin-top: 35px;
 }
 .Entity__Right {
   position: relative;
@@ -8,6 +9,7 @@
   height: 100%;
   display: flex;
   flex-direction: column;
+  margin-top: 35px;
 }
 
 /* ------------------------------------------ */
@@ -80,7 +82,7 @@ div.tooltip {
 }
 .Chart_legend_section .legend-header {
   fill: white;
-  font-size: 0.65em;
+  font-size: 11px;
   font-weight: bold;
 }
 .Chart_legend_section .legend-content-text {
@@ -107,7 +109,7 @@ div.tooltip {
 /* zoomable control buttons */
 .Chart_controls_section {
   position: absolute;
-  top: 23px;
+  top: 25px;
   right: 40px;
   z-index: 2;
   box-shadow: 2px 4px 10px 2px hsla(0, 0%, 100%, 0.23);

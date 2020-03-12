@@ -1,7 +1,7 @@
 import * as d3 from 'd3'
 
-export const categories = ['Total Attacking', 'Total Skill', 'Total Movement', 'Total Power', 'Total Mentality', 'Total Defending']
-export const region = ['Europe & Central Asia', 'Latin America & Caribbean', 'Middle East & North Africa', 'North America', 'Sub-Saharan Africa', 'East Asia & Pacific']
+export const categories = ['Rules Score','POI Matching Score', 'Anomaly Score', 'PM Score', 'UT Score', 'Social Network Score']
+export const region = ['Actor', 'PEP', 'Insider', 'GOS', 'Terrorist']
 export const SCORE_THRESHOLD = 0.7
 export const NODE_SIZE = 3
 export const LEVELS = 5
@@ -9,11 +9,11 @@ export const LOWER = 0
 export const UPPER = 1
 
 export const colorScale = d3.scaleOrdinal()
-  .range(['aqua', 'fuchsia', 'gold', 'white', 'white', 'white'])
+  .range(['aqua', 'fuchsia', 'gold', 'white', 'white'])
   .domain(region)
 
 export const fillScale = d3.scaleOrdinal()
-  .range(['aqua', 'fuchsia', 'gold', 'white', 'transparent', 'transparent'])
+  .range(['aqua', 'fuchsia', 'gold', 'white', 'white'])
   .domain(region)
 
 export const fociRadius = d3.scaleSqrt()
@@ -41,7 +41,7 @@ export const linkStroke = 'white'
 export const linkOpacity = 0.5
 export const linkTextFill = 'white'
 export const linkTextOpacity = 0
-export const linkTextSize = 8
+export const linkTextSize = 5
 export const transitionDuration = 1000
 
 export const linkedByIndex = {}
@@ -56,11 +56,12 @@ export const currentDateString = '2020-02-01'
 export const currentDate = parseDate(currentDateString)
 
 export const ROOT_ID = 80114141
+export const NAME = 'John Doe'
 
 // node radius size is scaled based on total number of connections to node (only applied to root or parent nodes)
 const nodeRadiusScale = d3.scaleSqrt()
   .domain([1, 50])
-  .range([3, nodeRadius])
+  .range([4, nodeRadius])
 
 const scoreScale = d3.scaleLinear()
   .domain([0, 0.5, 1])
@@ -68,7 +69,7 @@ const scoreScale = d3.scaleLinear()
 
 export const scales = {
   colorAccessor: d => colorScale(d.countries), // default is to color code nodes by region
-  colorScale: colorScale, 
-  colorScale1: scoreScale,
-  nodeRadiusScale: nodeRadiusScale
+  colorScale, 
+  scoreScale,
+  nodeRadiusScale
 }

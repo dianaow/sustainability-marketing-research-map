@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useReducer, createContext } from "react"
-import { Dimmer, Loader, Image, Segment } from 'semantic-ui-react'
+import { Dimmer, Loader, Image, Segment, Icon } from 'semantic-ui-react'
 import * as d3 from "d3"
 
 import graph from './data/test_graph.json';
+import Header from "./components/Shared/Header"
 import Card from "./components/Network/Card"
 import Network from "./components/Network/NetworkSection"
 
@@ -14,20 +15,28 @@ import "./styles_network.scss"
 
 export const NetworkContext = createContext()
 
-const ROOT_ID = Consts.ROOT_ID
+const events = [
+  {'type': 'Has Bank Account', 'description': 'HSBC: 134-435-486', 'date': '03/04/19'},
+  {'type': 'Bank Transaction', 'description': 'Has Received: $10000', 'date': '26/03/19'},
+  {'type': 'Bank Transaction', 'description': 'Has Sent: $50000', 'date': '26/03/19'},
+  {'type': 'Bank Transaction', 'description': 'Has Sent: $50000', 'date': '31/03/19'},
+  {'type': 'Has Registered Address', 'description': 'Paris, France', 'date': '07/01/14'}
+]
+
 const entityData = {
-  entity: ROOT_ID,
-  name: 'Najib Razak',
-  full_name: 'Mohd Najb Abdul Razak',
-  dob: '23 July 1953',
-  nationality: 'Malaysian',
+  entity: Consts.ROOT_ID,
+  name: Consts.NAME,
+  full_name: 'John Doe Silva',
+  dob: '1o January 1953',
+  nationality: 'Portugal',
   image: '../data/najib_razak.jpg',
   key_lists: [{'title': 'PEP Tier 1', 'type': 'watch', 'start_time': '01/01/00', 'end_time': 'NA'}],
   key_positions: [
-    {'title': 'Prime Minister', 'country': 'Malaysia', 'start_time': '03/04/09', 'end_time': '10/05/18'},
-    {'title': 'President of the United Malays National Organisation', 'country': 'Malaysia', 'start_time': '26/03/09', 'end_time': '12/05/18'},
-    {'title': 'Deputy Prime Minister', 'country': 'Malaysia', 'start_time': '07/01/04', 'end_time': '01/04/09'}
-  ]
+    {'title': 'CEO, North Star Overseas Enterprises Inc', 'country': 'Portugal', 'start_time': '03/04/09', 'end_time': '10/05/18'},
+    {'title': 'President, Stichting Fuchs Family Charity', 'country': 'Spain', 'start_time': '26/03/09', 'end_time': '12/05/18'},
+    {'title': 'Director, Hunt Oil Company', 'country': 'Spain', 'start_time': '07/01/04', 'end_time': '01/04/09'}
+  ],
+  events
 }
 
 const showLoader = () => (
@@ -43,15 +52,26 @@ const showLoader = () => (
   </div>
 )
 
+function processData(data) {
+
+  data.forEach((d,i) => { 
+    d.name = 'Entity ' + d['id']
+  })
+  return data
+
+}
+
 const NetworkPage = () => {
 
-  const [data, setData] = useState({ nodes: graph.nodes, links: graph.links })
+  const [data, setData] = useState({ nodes: processData(graph.nodes), links: graph.links })
   const [loading, setLoading] = useState({ loading: true })
   
   const initialState = {
+    id: Consts.ROOT_ID,
+    name: Consts.NAME,
     date: Consts.currentDate, 
     nodes: data.nodes, 
-    links: data.links,
+    links: data.links
   }
 
   const [current, dispatch] = useReducer(reducer, initialState)
@@ -63,8 +83,9 @@ const NetworkPage = () => {
   }, [data])
 
   return(
+    <React.Fragment>
+    <Header />
     <div className='App__wrapper'>
-
       <div className="Entity__Left">
           <Card data={entityData} />
       </div>
@@ -97,9 +118,8 @@ const NetworkPage = () => {
         </NetworkContext.Provider>
 
       </div>
-
     </div>
-
+    </React.Fragment>
   )
 }
 

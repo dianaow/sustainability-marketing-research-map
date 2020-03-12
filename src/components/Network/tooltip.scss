@@ -8,6 +8,15 @@
   position: relative;
 }
 
+.close {
+  cursor: pointer;
+  font-weight: 900;
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 4px 4px 0px 0px;
+}
+
 .tooltipContent {
     color: var(--color);
     opacity: 0.85;
@@ -15,7 +24,7 @@
     cursor: default;
     white-space: nowrap;
     background-color: var(--bg);
-    box-shadow: 2px 4px 10px 2px hsla(0, 0%, 100%, 0.23);
+    /*box-shadow: 2px 4px 10px 2px hsla(0, 0%, 100%, 0.23);*/
     width: calc(100% - 28px);
     height: calc(100% - 18px);
     position: absolute;
@@ -49,7 +58,6 @@
 
     .value {
       font-size: 10px;
-      max-width: 80px;
     }
 }
 

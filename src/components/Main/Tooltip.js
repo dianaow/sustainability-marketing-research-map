@@ -40,22 +40,22 @@ const Tooltip = ({...props }) => {
         y={-60}  
         fill={colorScale(info.category)}   
       >
-        { "Overall Score:" }
+        Overall Score:
       </text> 
       <text {...props}
         className="Tooltip__score"
-        y={-40}  
-        fill={colorScale(info.category)}  
-        fontSize={20}  
+        y={-30}  
+        fill='white'  
+        fontSize={32}  
       >
         { Math.round(info.score * 100) / 100 }
       </text> 
       <image
         className="Tooltip__image"
-        x={-30}
-        y={-30}  
-        width={30*2}
-        height={30*2}
+        x={-24}
+        y={-16}  
+        width={24*2}
+        height={24*2}
         fill={colorScale(info.category)}  
         xlinkHref={info.photo}
       /> 

@@ -1,27 +1,21 @@
-import React, { useContext } from "react"
+import React, { useContext, useState, useEffect } from "react"
 import cx from 'classnames';
 
-import { TooltipContext } from "../contexts/TooltipContext"
+import { NetworkContext } from "../../NetworkPage"
+import { initialTooltipState, TooltipContext } from "../contexts/TooltipContext"
+import { SceneContext } from "../contexts/SceneContext"
 
 import { round }  from "../utils"
 
 import "./card.css"
 import './tooltip.scss';
 
-const eventData = [
-  {'entity':82007088, 'type': 'Has Bank Account', 'description': 'XXX-XXX-XXX', 'date': '03/04/09'},
-  {'entity':82007088, 'type': 'Bank Account Transaction', 'description': 'Has Received: $10000', 'date': '26/03/09'},
-  {'entity':82007088, 'type': 'Has Registered Address', 'description': 'Paris, France', 'date': '07/01/04'},
-  {'entity':2019, 'type': 'Has Bank Account', 'description': 'XXX-XXX-XXX', 'date': '03/04/09'},
-  {'entity':2019, 'type': 'Bank Account Transaction', 'description': 'Has Sent: $10000', 'date': '07/01/04'},
-  {'entity':2019, 'type': 'Has Registered Address', 'description': 'Paris, France', 'date': '07/01/04'}
-]
+const TooltipEvent = (data, selected_entity, page_entity) => {
 
-const TooltipEvent = (data) => {
-
-  return(
+  return( 
     <div className='Tooltip'>
-      <div className="name" style={{border:0, textAlign:'center'}}>{data[0].entity}</div>
+      <div style={{border:0, textAlign:'center', fontWeight: 900, padding: '4px'}}>{`Events of ${selected_entity}`}</div>
+      <div style={{border:0, textAlign:'center', padding: '0px'}}>{`associated with ${page_entity}`}</div>
       <div className="table-row-header">
         <div className="cell cell-50">
           <div className="value">TYPE</div>
@@ -83,21 +77,52 @@ const TooltipEntity = (d) => {
 
 const Tooltip = () => {
 
-  const { tooltipState } = useContext(TooltipContext)
-  const { x, y, show, position, dimensions, content, type } = tooltipState
-  const { width, height } = dimensions
+  const { current } = useContext(NetworkContext)
+  const { sceneState } = useContext(SceneContext)
+  const { tooltipState, setTooltip } = useContext(TooltipContext)
+  const { x, y, position, show, content } = tooltipState
+  const radius = content.radius ? content.radius : 0
 
-  const events = eventData.filter(d=>d.entity == 82007088)
+  // Standard dummy events for each tooltip. These are recent events happening for each entity which are connected/associated to root node
+  // In actual, this component will receive data of all events related to root node, then breakdown events by each entity connected to root node
+  const events = [
+    {'type': 'Bank Account Transaction', 'description': 'Has Received: $10000', 'date': '31/03/19'},
+    {'type': 'Bank Account Transaction', 'description': 'Has Sent: $50000', 'date': '26/03/19'},
+    {'type': 'Bank Account Transaction', 'description': 'Has Sent: $50000', 'date': '21/03/19'},
+    {'type': 'Has Registered Address', 'description': 'Paris, France', 'date': '07/01/14'}
+  ]
+
+  let xNew, yNew, width, height
+  if(sceneState.scene === 0){
+    width = 250
+    height = 150
+    if(position==='left'){
+      xNew = x-width-10-radius
+    } else {
+      xNew = x+10+radius 
+    }
+    yNew = y-height/2  
+  } else {
+    width = 500
+    height = 240
+    xNew = x-width
+    yNew = y-height/2-20
+  }
+
+  function onClick(){
+    console.log('clicked')
+    setTooltip(initialTooltipState)
+  }
 
   return (
     <g
-      transform={position=='left' ? `translate(${x-width-10}, ${y-height/2})` : `translate(${x+10}, ${y-height/2})`}
+      transform={`translate(${xNew}, ${yNew})`}
       style={{ visibility: show ? 'visible' : 'hidden' }}
     >
       <foreignObject width={width} height={height} className='tooltipFO'>
         <div className={cx('tooltipContent', position)}>
-            <span className="arrow"></span>
-            { type ? TooltipEvent(events) : TooltipEntity(content) }
+            { (sceneState.scene !== 0) ? <span className="close" onClick={()=>onClick()}>X</span> : <span className="arrow"></span> }
+            { (sceneState.scene !== 0 ) ? TooltipEvent(events, content.name, current.name) : TooltipEntity(content) }
         </div>
       </foreignObject>
     </g>

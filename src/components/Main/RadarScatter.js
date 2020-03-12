@@ -15,8 +15,8 @@ const range = d3.range(0, STEPS*LEVELS, STEPS).concat(STEPS*LEVELS)
 const arc = (axis) => {
 
   var arc = d3.arc()
-      .innerRadius(window.innerWidth*0.22)
-      .outerRadius(window.innerWidth*0.22)
+      .innerRadius(window.innerWidth*0.21)
+      .outerRadius(window.innerWidth*0.21)
       .startAngle(angleSlice*axis + bufferInRad)
       .endAngle(angleSlice*(axis+1))
 
@@ -133,10 +133,10 @@ const getNewCoords = (data, version, direction, rScale, config) => {
 
 }
 
-const Radar = ({ data, config, ...props }) => {
+const Radar = ({ data, config, filter, search, ...props }) => {
 
-  const dimensions = {'width': window.innerWidth*0.9, 'height': window.innerHeight*0.9}
-  const radius = Math.min(dimensions.width/2, dimensions.height/2) - 30
+  const dimensions = {'width': window.innerWidth*0.84, 'height': window.innerHeight*0.84}
+  const radius = Math.min(dimensions.width/2, dimensions.height/2) - 18
   //const [ref, dms] = useChartDimensions({'width': window.innerWidth*0.9, 'height': window.innerHeight*0.9})
   //const radius = Math.min(dms.boundedWidth/2, dms.boundedHeight/2) - 30
   const DEFAULT_PIE = 0
@@ -182,7 +182,7 @@ const Radar = ({ data, config, ...props }) => {
   const fillAccessor = d => fillScale(d.category)
   const strokeAccessor = d => colorScale(d.category)
 
-  const drawNodes = (data, dataAll, bins, direction) => {
+  const drawNodes = (data, dataAll, bins, direction, filter, search) => {
 
     let accessors = { 
       key: nodeKeyAccessor,
@@ -205,6 +205,8 @@ const Radar = ({ data, config, ...props }) => {
         binnedData={bins}
         accessors={accessors}
         direction={direction}
+        filter={filter}
+        search={search}
       />
 
     return nodes
@@ -214,18 +216,18 @@ const Radar = ({ data, config, ...props }) => {
   var NodesVersion
   if(config.toBin){
     if(config.initRender){
-      NodesVersion = drawNodes(data10.data, data.players, data10.bins, "0")
+      NodesVersion = drawNodes(data10.data, data.players, data10.bins, "0", filter, search)
     } else {
-      NodesVersion = drawNodes(data11.data, data.players, data11.bins, "1")
+      NodesVersion = drawNodes(data11.data, data.players, data11.bins, "1", filter, search)
     }
   } else {
-    NodesVersion = drawNodes(data12.data, data.players, data12.bins, "2")
+    NodesVersion = drawNodes(data12.data, data.players, data12.bins, "2", filter, search)
   }
 
   return (
-    <div className="Radar" style={{'width': window.innerWidth*0.9, 'height': window.innerHeight*0.9}}>
+    <div className="Radar" style={{'width': window.innerWidth*0.84, 'height': window.innerHeight*0.84}}>
       <Chart dimensions={dimensions}>
-       <g transform={`translate(${dimensions.width/2}, ${dimensions.height/2})`}>
+       <g transform={`translate(${dimensions.width/2}, ${dimensions.height/2+10})`}>
           <Board
             data={range}
             keyAccessor={(d, i) => 'board-' + i}
