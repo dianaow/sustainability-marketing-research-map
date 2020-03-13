@@ -1,12 +1,12 @@
 import React from "react"
 import PropTypes from "prop-types"
 import * as d3 from 'd3'
-import { region, fociRadius, fillScale, colorScale } from "../consts"
+import { persona, fociRadius, fillScale, colorScale } from "../consts"
 
 const size = 6
 const keys = [0.75, 0.85, 1]
-const asia = region.filter(d=>d == 'GOS')
-const others = region.filter(d=>d != 'GOS')
+const asia = persona.filter(d=>d == 'GOS')
+const others = persona.filter(d=>d != 'GOS')
 const asia_labels = ['Groups, Orgnizations, Syndicates']
 const others_labels = ['Actor', 'Politically Exposed Person', 'Insider (Company Employees)', 'Terrorist']
 
@@ -15,7 +15,7 @@ const Legend = ({ ...props }) => {
     <div className="Legend">
        <div className="Legend__color">
         <h4>Persona Type</h4>
-        <svg height={region.length*24}>
+        <svg height={persona.length*24}>
           {others.map((d, i) => (
             <React.Fragment>
               <circle

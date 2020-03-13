@@ -135,8 +135,8 @@ const getNewCoords = (data, version, direction, rScale, config) => {
 
 const Radar = ({ data, config, filter, search, ...props }) => {
 
-  const dimensions = {'width': window.innerWidth*0.84, 'height': window.innerHeight*0.84}
-  const radius = Math.min(dimensions.width/2, dimensions.height/2) - 18
+  const dimensions = {'width': window.innerWidth*0.8, 'height': window.innerHeight*0.8}
+  const radius = Math.min(dimensions.width/2, dimensions.height/2) - 15
   //const [ref, dms] = useChartDimensions({'width': window.innerWidth*0.9, 'height': window.innerHeight*0.9})
   //const radius = Math.min(dms.boundedWidth/2, dms.boundedHeight/2) - 30
   const DEFAULT_PIE = 0
@@ -214,7 +214,7 @@ const Radar = ({ data, config, filter, search, ...props }) => {
   }
 
   var NodesVersion
-  if(config.toBin){
+  if(config.panelState.binned){
     if(config.initRender){
       NodesVersion = drawNodes(data10.data, data.players, data10.bins, "0", filter, search)
     } else {
@@ -225,9 +225,9 @@ const Radar = ({ data, config, filter, search, ...props }) => {
   }
 
   return (
-    <div className="Radar" style={{'width': window.innerWidth*0.84, 'height': window.innerHeight*0.84}}>
+    <div className="Radar" style={{'width': window.innerWidth*0.8, 'height': window.innerHeight*0.8}}>
       <Chart dimensions={dimensions}>
-       <g transform={`translate(${dimensions.width/2}, ${dimensions.height/2+10})`}>
+       <g transform={`translate(${dimensions.width/2}, ${dimensions.height/2 + 10})`}>
           <Board
             data={range}
             keyAccessor={(d, i) => 'board-' + i}

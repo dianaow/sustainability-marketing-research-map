@@ -111,8 +111,7 @@ const Nodes = ({data, dataAll, binnedData, accessors, direction, filter, search}
     let circles = d3.select("." + eleWrapper).selectAll("." + eleSelector).data(data, d=>d.entity);
 
     circles.exit().remove()
-    console.log(search.isSelected, direction)
-    
+
     let circlesEnter = circles.enter().append('circle')
       .attr('class', eleSelector)
       .attr('cx', (d, i) => callAccessor(x0, d, i))
@@ -190,7 +189,7 @@ const Nodes = ({data, dataAll, binnedData, accessors, direction, filter, search}
       show:true,
       info: {entity: e.entity, name: e.name, club: e.club, category: e.category, score: e.overall, photo: e.photo},
       links: findConnections(data, e.entity),
-      details: dataAll.filter(d=>d.name === e.name) 
+      details: dataAll.filter(d=>d.entity === e.entity) 
     })
   }
  
@@ -210,8 +209,6 @@ const Nodes = ({data, dataAll, binnedData, accessors, direction, filter, search}
   }, [])
 
   const filterBool = filter.lowerLimit > 14 | filter.upperLimit < 20
-
-
   useEffect(() => {
     if(search.isLoading===false){
       if(direction !== '0' & filterBool === 0){
@@ -298,9 +295,9 @@ function updateCirclesBin(data, accessors, eleWrapper, eleSelector) {
     .attr('pointer-events', "none")
 
   circles = circles.merge(circlesEnter)
-console.log(circles)
 
   circles.transition().duration(1200)
+    .attr('cx', (d, i) => callAccessor(x, d, i))
     .attr('cy', (d, i) => callAccessor(y, d, i))
     .attr('r', function(d, i) { 
       return callAccessor(size[1], d, i) })

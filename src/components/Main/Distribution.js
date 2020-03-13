@@ -12,7 +12,7 @@ const xScale = d3.scaleLinear()
 const dimensions = {'boundedWidth': v_dist, 'boundedHeight': h_dist}
 
 const Distribution = ({ data, singleData, ...props }) => {
-
+  console.log(singleData.details)
   const generateRect = (d) => {
     return (
       <rect

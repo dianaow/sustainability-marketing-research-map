@@ -45,7 +45,7 @@
   border: 1px solid white;
 }
 .card-events {
-  height: 40%;
+  height: 31%;
   border: 1px solid white;  
   margin-bottom: 35px;     
 }
@@ -96,13 +96,13 @@
 }
 .cell-50 {
   min-width: 40%;
-  max-width: 45%;
 }
-.cell-80 {
-  min-width: 80%;
-  min-width: 200px;
+.cell-60 {
+  min-width: 60%;
 }
+
 .value {
+  max-width: 190px;
   font-size: 11px;
   overflow: hidden;
   white-space: nowrap;

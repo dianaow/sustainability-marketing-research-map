@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useReducer, createContext } from "react"
 import { Dimmer, Loader, Image, Segment, Icon } from 'semantic-ui-react'
-import * as d3 from "d3"
 
 import graph from './data/test_graph.json';
 import Header from "./components/Shared/Header"
@@ -10,24 +9,20 @@ import Network from "./components/Network/NetworkSection"
 import reducer from "./components/reducers/NetworkReducer"
 
 import * as Consts from "./components/consts"
+import { getRandomArbitrary }  from "./components/utils"
+import { formatFullDate }  from "./components/consts"
 
 import "./styles_network.scss"
 
-export const NetworkContext = createContext()
+const faker = require('faker');
 
-const events = [
-  {'type': 'Has Bank Account', 'description': 'HSBC: 134-435-486', 'date': '03/04/19'},
-  {'type': 'Bank Transaction', 'description': 'Has Received: $10000', 'date': '26/03/19'},
-  {'type': 'Bank Transaction', 'description': 'Has Sent: $50000', 'date': '26/03/19'},
-  {'type': 'Bank Transaction', 'description': 'Has Sent: $50000', 'date': '31/03/19'},
-  {'type': 'Has Registered Address', 'description': 'Paris, France', 'date': '07/01/14'}
-]
+export const NetworkContext = createContext()
 
 const entityData = {
   entity: Consts.ROOT_ID,
   name: Consts.NAME,
   full_name: 'John Doe Silva',
-  dob: '1o January 1953',
+  dob: '10 January 1953',
   nationality: 'Portugal',
   image: '../data/najib_razak.jpg',
   key_lists: [{'title': 'PEP Tier 1', 'type': 'watch', 'start_time': '01/01/00', 'end_time': 'NA'}],
@@ -36,7 +31,71 @@ const entityData = {
     {'title': 'President, Stichting Fuchs Family Charity', 'country': 'Spain', 'start_time': '26/03/09', 'end_time': '12/05/18'},
     {'title': 'Director, Hunt Oil Company', 'country': 'Spain', 'start_time': '07/01/04', 'end_time': '01/04/09'}
   ],
-  events
+  events: createEvents(12)
+}
+
+function processNodes(data) {
+
+  data.forEach((d,i) => { 
+    d.name = faker.name.firstName() + " " + faker.name.lastName()
+    d.countries = Consts.countries[getRandomArbitrary(0,5)]
+    d.events = createEvents(getRandomArbitrary(0,3))
+    d.persona = d.id === Consts.ROOT_ID ? 'Actor' : Consts.persona[getRandomArbitrary(0,5)]
+  })
+  return data
+
+}
+
+function processLinks(nodes, links) {
+
+  links.forEach((d,i) => {
+    let startEntityType = nodes.find(el=>el.id == d.start_id).node_type 
+    let endEntityType = nodes.find(el=>el.id == d.end_id).node_type
+    if(startEntityType == 'organization' & endEntityType == 'organization'){
+      d.link = 'subsidiary of'
+    } else if (startEntityType == 'organization' & endEntityType == 'person'){
+      d.link = 'investor of'
+    } else if (startEntityType == 'person' & endEntityType == 'organization'){
+      d.link = Consts.org_relationships[getRandomArbitrary(0,2)]
+    } else if (startEntityType == 'person' & endEntityType == 'person'){
+      d.link = Consts.people_relationships[getRandomArbitrary(0,4)]
+    } else {
+      d.link = 'connected to'
+    }
+  })
+  return links
+
+}
+
+// Fake events for each entity. These are recent events happening for each entity which are connected/associated to root node
+// In actual, tooltip component will receive data of all events related to root node, then breakdown events by each entity connected to root node
+function createEvents(num) {
+  let events = []
+  let transactionType = ['Has Received: ', 'Has Sent: ']
+  let eventType = ['Has Bank Account', 'Has Registered Address']
+  let address = faker.address.streetAddress("###") + ", " + faker.address.city() + ', ' + faker.address.country()
+  let bank_account = faker.finance.accountName() + ": " + faker.finance.account()
+  for (let i = 0; i <= num; i++) {
+    events.push({
+      type: 'Bank Transaction',
+      description: transactionType[getRandomArbitrary(0,1)] + faker.finance.amount(1000,10000,1,"$"),
+      date: faker.date.between('2016-01-01', '2019-12-31')
+    })
+  }
+  let type = eventType[getRandomArbitrary(0,1)]
+  events.push({
+    type: type,
+    description: type === 'Has Bank Account' ? bank_account : address,
+    date: faker.date.between('2016-01-01', '2019-12-31')
+  })
+  // sort events by datetime in descending order
+  events = events.sort(function(a,b){ return b.date - a.date })
+  // convert date to string
+  events.forEach(d=>{
+    d.date = formatFullDate(d.date)
+  })
+
+  return events
 }
 
 const showLoader = () => (
@@ -52,18 +111,9 @@ const showLoader = () => (
   </div>
 )
 
-function processData(data) {
-
-  data.forEach((d,i) => { 
-    d.name = 'Entity ' + d['id']
-  })
-  return data
-
-}
-
 const NetworkPage = () => {
 
-  const [data, setData] = useState({ nodes: processData(graph.nodes), links: graph.links })
+  const [data, setData] = useState({ nodes: processNodes(graph.nodes), links: processLinks(graph.nodes, graph.links) })
   const [loading, setLoading] = useState({ loading: true })
   
   const initialState = {
@@ -77,9 +127,9 @@ const NetworkPage = () => {
   const [current, dispatch] = useReducer(reducer, initialState)
 
   useEffect(() => {
-    setTimeout(function(){
+    //setTimeout(function(){
       setLoading({ loading: false })
-    }, 500)
+    //}, 500)
   }, [data])
 
   return(

@@ -35,7 +35,7 @@ const Graph = () => {
   const { tooltipState, setTooltip } = useContext(TooltipContext)
   const { sceneState, clicker } = useContext(SceneContext)
   const { dimensions } = useContext(ChartContext)
-  console.log(current)
+
   Scene = sceneState.scene
   ROOT_ID = current.id
   //console.log(Scene)
@@ -706,7 +706,7 @@ function updateGraph(data, scales, misc) {
   if(selectedTime==2019){
     d3.range(0, 10).map(d=>{
       let ID = parseInt(selectedTime + d)
-      nodes.push({id: ID, type: 'children', node_type: 'person', score: Math.random(), countries: Consts.region[getRandomArbitrary(0,5)]})
+      nodes.push({id: ID, type: 'children', node_type: 'person', score: Math.random(), persona: Consts.persona[getRandomArbitrary(0,5)]})
       links.push({"start_id": 82007088, "end_id": ID, type: 'children', link: "treasurer of"}) 
     })
   }

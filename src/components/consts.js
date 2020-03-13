@@ -1,7 +1,10 @@
 import * as d3 from 'd3'
 
+export const people_relationships = ['employee of', 'co-workers', 'family', 'attorney', 'investment manager']
+export const org_relationships = ['board member of', 'director of', 'shareholder of']
+export const countries = ['France', 'Spain', 'Portugal', 'Brazil', 'Switzerland']
 export const categories = ['Rules Score','POI Matching Score', 'Anomaly Score', 'PM Score', 'UT Score', 'Social Network Score']
-export const region = ['Actor', 'PEP', 'Insider', 'GOS', 'Terrorist']
+export const persona = ['Actor', 'PEP', 'Insider', 'GOS', 'Terrorist']
 export const SCORE_THRESHOLD = 0.7
 export const NODE_SIZE = 3
 export const LEVELS = 5
@@ -10,11 +13,11 @@ export const UPPER = 1
 
 export const colorScale = d3.scaleOrdinal()
   .range(['aqua', 'fuchsia', 'gold', 'white', 'white'])
-  .domain(region)
+  .domain(persona)
 
 export const fillScale = d3.scaleOrdinal()
   .range(['aqua', 'fuchsia', 'gold', 'white', 'white'])
-  .domain(region)
+  .domain(persona)
 
 export const fociRadius = d3.scaleSqrt()
     .range([3, 10])
@@ -48,10 +51,10 @@ export const linkedByIndex = {}
 
 export const formatYear = d3.timeFormat("%Y")
 export const formatDate = d3.timeFormat("%b %Y")
+export const formatFullDate = d3.timeFormat("%d/%m/%y")
 export const parseDate = d3.timeParse("%Y-%m-%d")
 export const parseDate1 = d3.timeParse("%Y")
 export const parseDate2 = d3.timeParse("%b %Y")
-export const parseDate3 = d3.timeParse("%d-%b-%Y")
 export const currentDateString = '2020-02-01'
 export const currentDate = parseDate(currentDateString)
 
@@ -68,7 +71,7 @@ const scoreScale = d3.scaleLinear()
   .range(['#71C3B4', "white", '#E00217'])
 
 export const scales = {
-  colorAccessor: d => colorScale(d.countries), // default is to color code nodes by region
+  colorAccessor: d => colorScale(d.persona), // default is to color code nodes by persona
   colorScale, 
   scoreScale,
   nodeRadiusScale

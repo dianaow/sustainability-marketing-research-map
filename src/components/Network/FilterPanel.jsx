@@ -86,7 +86,7 @@ const FilterPanel = () => {
               let colorAccessor =  d => colorScale(d.countries)
               updateGraphManually(colorAccessor)
              }}
-             value="Country"/>
+             value="Persona"/>
       <input name="color_scale" 
              type="button"
              className={checkActiveBtn('score')} 

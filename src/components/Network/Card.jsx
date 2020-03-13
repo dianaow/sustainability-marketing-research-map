@@ -117,7 +117,7 @@ const Card = ({data}) => {
       <div className='Card__section card-key-positions'>
         <div className='header'><p>KEY POSITIONS</p></div>
         <div className="table-row-header">
-          <div className="cell cell-50">
+          <div className="cell cell-60">
             <div className="value">Title</div>
           </div>
           <div className="cell cell-15">
@@ -130,7 +130,7 @@ const Card = ({data}) => {
         <div className='table-row-contents'>
           {data.key_positions.map((d,i)=>(
             <div className="row">
-              <div className="cell cell-50">
+              <div className="cell cell-60">
                 <div className="value">{d.title}</div>
               </div>
               <div className="cell cell-15">

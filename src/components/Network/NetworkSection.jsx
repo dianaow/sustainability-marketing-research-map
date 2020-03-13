@@ -1,5 +1,4 @@
 import React, { useRef, useEffect, useContext, useState } from "react"
-import * as d3 from "d3"
 
 import Chart from "../Shared/Chart"
 import Graph from "./Graph"

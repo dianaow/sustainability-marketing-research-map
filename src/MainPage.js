@@ -15,7 +15,9 @@ import Table from "./components/Main/Table"
 import DistributionChart from "./components/Main/Distribution"
 import Legend from './components/Main/Legend'
 
-import { region, categories, SCORE_THRESHOLD } from "./components/consts"
+import { persona, categories, SCORE_THRESHOLD } from "./components/consts"
+
+const faker = require('faker');
 
 const MainPage = () => {
 
@@ -28,12 +30,11 @@ const MainPage = () => {
     }
   }
 
-  var toBin = true
   const initialTooltipState = { show: false, info: {entity: 0, name: "", club: "", category: "", score: "", photo: ""}, links: [], details: {} }
   const initialSearchState = { isSelected: false, isLoading: false, results: [], value: '' }
   const [filter, setFilter] = useState({ lowerLimit: SCORE_THRESHOLD*20, upperLimit: 1*20 })
   const [tooltip, setTooltip] = useState(initialTooltipState)
-  const [binned, setBinned] = useState(toBin)
+  const [panelState, setPanelState] = useState({ entity: false, binned: true })
   const [initRender, setInitRender] = useState(true)
   const [data, setData] = useState(getData(scores, filter))
   const [search, setSearch] = useState(initialSearchState)
@@ -45,19 +46,12 @@ const MainPage = () => {
     })
   }
 
-  function toggleBin(binned) {
-    toBin = !binned
-    setBinned(toBin)
-    setInitRender(false)
-  }
-
   useEffect(() => {
     setData(getData(scores, filter))
   }, [filter])
 
   const handleResultSelect = (e, { result }) => {
-    toBin = false
-    setBinned(toBin) 
+    setPanelState({ entity: true, binned: false })
     setTooltip({
       show: true,
       info: {entity: result.entity, name: result.name, club: result.club, category: result.category, score: result.overall, photo: result.photo},
@@ -99,8 +93,12 @@ const MainPage = () => {
     )
   }
 
-  const buttonLabel = binned===true ? "Show entity view" : 'Show binned view'
-  const config = {lowerLimit: filter.lowerLimit/20, upperLimit: filter.upperLimit/20, toBin: binned, initRender : initRender}
+  const checkActiveBtn = (name) => {
+    let activeFilter = Object.keys(panelState).filter(id=>panelState[id])
+    return (activeFilter.indexOf(name) != -1) ? "btn active" : "btn";
+  }
+
+  const config = {lowerLimit: filter.lowerLimit/20, upperLimit: filter.upperLimit/20, panelState, initRender}
   const { isSelected, isLoading, value, results } = search
 
   return(
@@ -109,7 +107,7 @@ const MainPage = () => {
     <div className="App__wrapper">
       <div className ='SideBarLeft'>
         <div className="Title">
-          <h1>RISK 360</h1>
+          <h1>RISK 360°</h1>
         </div>
         <div className="Search">
           <Search
@@ -127,14 +125,33 @@ const MainPage = () => {
           </div>
         </div>
         <TooltipContext.Provider value={{ ...tooltip, setTooltip }}>
-          <Table />
+          <Table binned={panelState.binned} />
         </TooltipContext.Provider>
         <Legend />
       </div>
 
       <div className ='Main'>
         <Slider changeThresholds={changeThresholds} />
-        <h4 className='viewButton' onClick={()=>toggleBin(binned)}>{buttonLabel}</h4>
+
+        <div className='ToggleButtons'>
+          <input name="color_scale" 
+             type="button" 
+             className={checkActiveBtn('entity')}
+             onClick={() => {
+              setPanelState({ entity: true, binned: false })
+              setInitRender(false)
+             }}
+             value="Entity View"/>
+          <input name="color_scale" 
+             type="button"
+             className={checkActiveBtn('binned')} 
+             onClick={() => {
+              setPanelState({ entity: false, binned: true })
+              setInitRender(false)
+             }}
+             value="Binned View"/>
+        </div>
+
         <TooltipContext.Provider value={{ ...tooltip, setTooltip }}>
           <RadarChart 
             data={data} 
@@ -146,7 +163,7 @@ const MainPage = () => {
       </div>
 
       <div className ='SideBarRight'>
-        <p>Probability density of all  18207 players at different <b>CATEGORY SCORES</b>, smoothed by a kernel density estimator</p>
+        <p>Probability density of all  18207 entities at different <b>CATEGORY SCORES</b>, smoothed by a kernel density estimator</p>
         <DistributionChart data={data.paths} singleData={tooltip}/>
       </div>
     </div>
@@ -176,14 +193,15 @@ function processData(data, lowerLimit, upperLimit) {
           //photo: player['Photo'],
           //photo: "./data/images/" + player['ID'] + '.jpg',
           club: 'Organization ' + player['Club'],
-          name: player['ID'] === 20801 ? 'John Doe' : 'Entity ' + player['ID']
+          name: player['ID'] === 20801 ? 'John Doe' : faker.name.firstName() + " " + faker.name.lastName()
+          //name: player['ID'] === 20801 ? 'John Doe' : 'Entity ' + player['ID']
         })
       }
     })
   })
 
   players.sort(function(a, b){  
-    return region.indexOf(a.category) - region.indexOf(b.category);
+    return persona.indexOf(a.category) - persona.indexOf(b.category);
   });
 
   return players
