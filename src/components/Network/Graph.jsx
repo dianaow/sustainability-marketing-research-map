@@ -707,7 +707,7 @@ function updateGraph(data, scales, misc) {
     d3.range(0, 10).map(d=>{
       let ID = parseInt(selectedTime + d)
       nodes.push({id: ID, type: 'children', node_type: 'person', score: Math.random(), persona: Consts.persona[getRandomArbitrary(0,5)]})
-      links.push({"start_id": 82007088, "end_id": ID, type: 'children', link: "treasurer of"}) 
+      links.push({"start_id": 82007088, "end_id": ID, type: 'children', link: "co-worker"}) 
     })
   }
 

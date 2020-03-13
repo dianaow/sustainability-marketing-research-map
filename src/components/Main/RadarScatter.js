@@ -6,7 +6,7 @@ import Board from "./Board"
 import Axis from "./RadarAxis"
 import Nodes from "./Nodes"
 
-import { callAccessor, useChartDimensions }  from "../utils"
+import { callAccessor, useChartDimensions, round }  from "../utils"
 import { categories, colorScale, fillScale, bufferInRad, angleSlice, LEVELS, UPPER, LOWER } from "../consts"
 
 const STEPS = UPPER / LEVELS
@@ -152,7 +152,7 @@ const Radar = ({ data, config, filter, search, ...props }) => {
     .domain([1, 60])
 
   // Calculate the placement of each axis arc label
-  var axisData = [{overall: config.lowerLimit, axis: 1},{overall: config.upperLimit, axis: 1}]
+  var axisData = [{overall: round(config.lowerLimit), axis: 1},{overall: round(config.upperLimit), axis: 1}]
   var labels = []
   axisData.forEach((a,i)=>{
     let coors = getCoordsAlongArc(a, rScale(DEFAULT_PIE)+10, config)

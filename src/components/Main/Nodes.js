@@ -126,7 +126,7 @@ const Nodes = ({data, dataAll, binnedData, accessors, direction, filter, search}
 
     circles = circles.merge(circlesEnter)
 
-    circles.transition().duration(1000)
+    circles.transition().duration(500)
       .attr('cx', (d, i) => callAccessor(x1, d, i))
       .attr('cy', (d, i) => callAccessor(y1, d, i))
       .attr('r', (d, i) => callAccessor(size, d, i))
@@ -169,7 +169,7 @@ const Nodes = ({data, dataAll, binnedData, accessors, direction, filter, search}
       
     rects = rects.merge(rectsEnter)
 
-    rects.transition().duration(1000)
+    rects.transition().duration(500)
       .attr('x', (d, i) => callAccessor(x1, d, i) - WIDTH(width, d, i)/2)
       .attr('y', (d, i) => callAccessor(y1, d, i) - HEIGHT(height, d, i)/2)
       .attr('width', (d, i) => WIDTH(width, d, i))
@@ -210,27 +210,21 @@ const Nodes = ({data, dataAll, binnedData, accessors, direction, filter, search}
 
   const filterBool = filter.lowerLimit > 14 | filter.upperLimit < 20
   useEffect(() => {
-    if(search.isLoading===false){
-      if(direction !== '0' & filterBool === 0){
+    if(search.isLoading===false & search.isOpen===false){ // prevents chart from re-rendering each time search value changes
+      if(direction !== '0' & filterBool === 0){ // if in initial state, do not re-render
         updateBin(prevDirection)
         updateSingle(prevDirection)
       }
-      if(filterBool === 1){
+      if(filterBool === 1){ // when data is filtered, re-render
         updateBin(prevDirection)
         updateSingle(prevDirection)    
       }
-    }
-    if(search.isSelected===true){
-      updateBin(prevDirection)
-      updateSingle(prevDirection)
+      if(search.isSelected===true){ // when an entity is searched for, re-render
+        updateBin(prevDirection)
+        updateSingle(prevDirection)
+      }
     }
   }, [data, dataAll, binnedData, filterBool])
-
-  useEffect(() => {
-    if(tooltip.show){
-      //updateSingle(prevDirection)
-    }
-  }, [tooltip])
 
   return(
     <g className="Radar__Elements">
@@ -296,7 +290,7 @@ function updateCirclesBin(data, accessors, eleWrapper, eleSelector) {
 
   circles = circles.merge(circlesEnter)
 
-  circles.transition().duration(1200)
+  circles.transition().duration(600)
     .attr('cx', (d, i) => callAccessor(x, d, i))
     .attr('cy', (d, i) => callAccessor(y, d, i))
     .attr('r', function(d, i) { 
@@ -333,7 +327,7 @@ function updateRectsBin(data, accessors, eleWrapper, eleSelector) {
 
   rects = rects.merge(rectsEnter)
 
-  rects.transition().duration(1200)
+  rects.transition().duration(600)
     .attr('x', (d, i) => x(d, i) - WIDTH1(width, d, i))
     .attr('y', (d, i) => y(d, i) - HEIGHT1(height, d, i))
     .attr('width', function(d, i) { return WIDTH1(width, d, i) * 2})
@@ -348,7 +342,7 @@ function findConnections(data, id) {
   var dataConn = d3.nest()
     .key(function(d) { return d.club })
     .entries(data)
-  console.log(dataConn)
+
   var links = []
   var player = data.find(a=>a.entity === id)
   var club = dataConn.find(d=>d.key === player.club.toString()).values

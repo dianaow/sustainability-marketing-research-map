@@ -128,7 +128,9 @@ i.icon {
 .ui.search>.results .result:hover {
    color: #011C54 !important; 
 }
-
+.ToggleButtons {
+  height: 40px;
+}
 .NavButtons {
   margin: 20px 0px 10px 0px; 
 }
@@ -143,9 +145,8 @@ i.icon {
   text-decoration: none;
   text-transform: uppercase;
   letter-spacing: 1px;
-
-  background: lighten(#011C54, 3%);  
-  border: 1px solid darken(#011C54, 4%);
+  background-color: transparent;   
+  border: 1px solid white;
   box-shadow: 0px 2px 0 darken(#011C54, 5%), 2px 4px 6px darken(#011C54, 2%);
   transition: all 150ms linear;
 }

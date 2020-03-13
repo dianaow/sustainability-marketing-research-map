@@ -10,7 +10,6 @@ import reducer from "./components/reducers/NetworkReducer"
 
 import * as Consts from "./components/consts"
 import { getRandomArbitrary }  from "./components/utils"
-import { formatFullDate }  from "./components/consts"
 
 import "./styles_network.scss"
 
@@ -37,7 +36,7 @@ const entityData = {
 function processNodes(data) {
 
   data.forEach((d,i) => { 
-    d.name = faker.name.firstName() + " " + faker.name.lastName()
+    d.name = d.node_type === 'person' ? faker.name.firstName() + " " + faker.name.lastName() : faker.company.companyName(0)
     d.countries = Consts.countries[getRandomArbitrary(0,5)]
     d.events = createEvents(getRandomArbitrary(0,3))
     d.persona = d.id === Consts.ROOT_ID ? 'Actor' : Consts.persona[getRandomArbitrary(0,5)]
@@ -92,7 +91,7 @@ function createEvents(num) {
   events = events.sort(function(a,b){ return b.date - a.date })
   // convert date to string
   events.forEach(d=>{
-    d.date = formatFullDate(d.date)
+    d.date = Consts.formatFullDate(d.date)
   })
 
   return events

@@ -6,9 +6,12 @@ import { initialTooltipState, TooltipContext } from "../contexts/TooltipContext"
 import { SceneContext } from "../contexts/SceneContext"
 
 import { round }  from "../utils"
+import { formatFullDate }  from "../consts"
 
 import "./card.css"
 import './tooltip.scss';
+
+const faker = require('faker');
 
 const TooltipEvent = (data, selected_entity, page_entity) => {
 
@@ -66,8 +69,8 @@ const TooltipEntity = (d) => {
           <div className="value">{d.countries}</div>
         </div>
         <div className="cell cell-50">
-          <div className="title">Relationship Type</div>
-          <div className="value">Shareholder Of</div>
+          <div className="title">Relationship Est. Date</div>
+          <div className="value">{formatFullDate(faker.date.between('2016-01-01', '2019-12-31'))}</div>
         </div>
       </div>
     </div>   

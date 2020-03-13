@@ -8,7 +8,7 @@ import scores from './data/dummy_fraud_scores.json';
 import paths from './data/output1.json';
 
 import Header from "./components/Shared/Header"
-import Slider from "./components/Main/Slider"
+import Slider from "./components/Shared/slider/Slider"
 import RadarChart from "./components/Main/RadarScatter"
 import Tooltip, { TooltipContext } from "./components/Main/Tooltip";
 import Table from "./components/Main/Table"
@@ -31,7 +31,7 @@ const MainPage = () => {
   }
 
   const initialTooltipState = { show: false, info: {entity: 0, name: "", club: "", category: "", score: "", photo: ""}, links: [], details: {} }
-  const initialSearchState = { isSelected: false, isLoading: false, results: [], value: '' }
+  const initialSearchState = { isSelected: false, isLoading: false, isOpen: false, results: [], value: '' }
   const [filter, setFilter] = useState({ lowerLimit: SCORE_THRESHOLD*20, upperLimit: 1*20 })
   const [tooltip, setTooltip] = useState(initialTooltipState)
   const [panelState, setPanelState] = useState({ entity: false, binned: true })
@@ -58,21 +58,23 @@ const MainPage = () => {
       links: [],
       details: data.players.filter(d=>d.name.indexOf(result.name) !== -1) 
     })
-    setSearch({ isLoading: false, isSelected: true, value: result.name })
+    setSearch({ isLoading: false, isSelected: true, isOpen: false, value: result.name })
   }
 
   const handleSearchChange = (e, { value }) => {
-    setSearch({ isLoading: true, isSelected: false, value })
+    setSearch({ isLoading: true, isSelected: false, isOpen: true, value })
     setTimeout(() => {
       if (value.length < 1) {
         setTooltip(initialTooltipState)
         setSearch(initialSearchState)
+      } else {
+        setSearch({
+          isLoading: false,
+          isSelected: false, 
+          isOpen: true,
+          results: data.playersMax.filter(d=>d.name.indexOf(value) !== -1)
+        })
       }
-      setSearch({
-        isLoading: false,
-        isSelected: false, 
-        results: data.playersMax.filter(d=>d.name.indexOf(value) !== -1)
-      })
     }, 300)
   }
 
@@ -96,6 +98,29 @@ const MainPage = () => {
   const checkActiveBtn = (name) => {
     let activeFilter = Object.keys(panelState).filter(id=>panelState[id])
     return (activeFilter.indexOf(name) != -1) ? "btn active" : "btn";
+  }
+
+  const showToggleButtons = () => {
+    return(
+      <div className='ToggleButtons'>
+        <input name="color_scale" 
+           type="button" 
+           className={checkActiveBtn('entity')}
+           onClick={() => {
+            setPanelState({ entity: true, binned: false })
+            setInitRender(false)
+           }}
+           value="Entity View"/>
+        <input name="color_scale" 
+           type="button"
+           className={checkActiveBtn('binned')} 
+           onClick={() => {
+            setPanelState({ entity: false, binned: true })
+            setInitRender(false)
+           }}
+           value="Binned View"/>
+      </div>
+    )
   }
 
   const config = {lowerLimit: filter.lowerLimit/20, upperLimit: filter.upperLimit/20, panelState, initRender}
@@ -131,27 +156,9 @@ const MainPage = () => {
       </div>
 
       <div className ='Main'>
+        <p style={{marginTop: '30px'}}>OVERALL SCORE</p>
         <Slider changeThresholds={changeThresholds} />
-
-        <div className='ToggleButtons'>
-          <input name="color_scale" 
-             type="button" 
-             className={checkActiveBtn('entity')}
-             onClick={() => {
-              setPanelState({ entity: true, binned: false })
-              setInitRender(false)
-             }}
-             value="Entity View"/>
-          <input name="color_scale" 
-             type="button"
-             className={checkActiveBtn('binned')} 
-             onClick={() => {
-              setPanelState({ entity: false, binned: true })
-              setInitRender(false)
-             }}
-             value="Binned View"/>
-        </div>
-
+        { isSelected === false ?  showToggleButtons() : <div className='ToggleButtons'></div> }
         <TooltipContext.Provider value={{ ...tooltip, setTooltip }}>
           <RadarChart 
             data={data} 
