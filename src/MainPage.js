@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import * as d3 from "d3"
 
 import icon from "./images/icons/manager.png"
-import scores from './data/dummy_fraud_scores.json';
+import scores from './data/soccer_player_scores1.json';
 import paths from './data/output1.json';
 
 import Header from "./components/Shared/Header"
@@ -17,6 +17,7 @@ import Legend from './components/Main/Legend'
 
 import { persona, categories, SCORE_THRESHOLD } from "./components/consts"
 
+const images = require.context('./images/Pictures', true);
 const faker = require('faker');
 
 const MainPage = () => {
@@ -78,31 +79,14 @@ const MainPage = () => {
     }, 300)
   }
 
-  const showNavButtons = () => {
-    return(
-      <div className='NavButtons'>
-      <Link to='/network'>
-        <input name="nav" 
-          type="button" 
-          className='btn-large nav_1'
-          value="See Network"/>
-        </Link>
-        <input name="nav" 
-          type="button" 
-          className="btn-large nav_2"
-          value="See Events"/>
-      </div>
-    )
-  }
-
   const checkActiveBtn = (name) => {
     let activeFilter = Object.keys(panelState).filter(id=>panelState[id])
     return (activeFilter.indexOf(name) != -1) ? "btn active" : "btn";
   }
 
-  const showToggleButtons = () => {
+  const showToggleButtons = (active) => {
     return(
-      <div className='ToggleButtons'>
+      <div className='ToggleButtons' style={{ opacity: active ? '1' : '0.5' }}>
         <input name="color_scale" 
            type="button" 
            className={checkActiveBtn('entity')}
@@ -110,7 +94,8 @@ const MainPage = () => {
             setPanelState({ entity: true, binned: false })
             setInitRender(false)
            }}
-           value="Entity View"/>
+           value="Entity View"
+           disabled={active ? false : true} />
         <input name="color_scale" 
            type="button"
            className={checkActiveBtn('binned')} 
@@ -118,7 +103,8 @@ const MainPage = () => {
             setPanelState({ entity: false, binned: true })
             setInitRender(false)
            }}
-           value="Binned View"/>
+           value="Binned View"
+           disabled={active ? false : true} />
       </div>
     )
   }
@@ -132,12 +118,14 @@ const MainPage = () => {
     <div className="App__wrapper">
       <div className ='SideBarLeft'>
         <div className="Title">
-          <h1>RISK 360°</h1>
+          <h1>FIFA 19</h1>
+          <p>Detailed attributes for every player registered in football simulation video game 'FIFA 19' is made available on the website https://sofifa.com</p>
+          <p>Players are scored according to 6 categories representing their abilities. An overall score is formulated for each player based on these category scores amongst other parameters.</p>
         </div>
         <div className="Search">
           <Search
             icon="search"
-            placeholder="SEARCH FOR AN ENTITY"
+            placeholder="SEARCH FOR A PLAYER"
             size='large'
             fluid
             loading={isLoading}
@@ -145,9 +133,6 @@ const MainPage = () => {
             onSearchChange={handleSearchChange}
             results={results}
             value={value} />
-          <div className="NavButtons">
-            { isSelected && showNavButtons()}
-          </div>
         </div>
         <TooltipContext.Provider value={{ ...tooltip, setTooltip }}>
           <Table binned={panelState.binned} />
@@ -156,9 +141,8 @@ const MainPage = () => {
       </div>
 
       <div className ='Main'>
-        <p style={{marginTop: '30px'}}>OVERALL SCORE</p>
-        <Slider changeThresholds={changeThresholds} />
-        { isSelected === false ?  showToggleButtons() : <div className='ToggleButtons'></div> }
+        { (tooltip.show === false) ?  <Slider changeThresholds={changeThresholds} active={true} /> : <Slider changeThresholds={changeThresholds} active={false} /> }
+        { (tooltip.show === false) ?  showToggleButtons(true) : showToggleButtons(false) }
         <TooltipContext.Provider value={{ ...tooltip, setTooltip }}>
           <RadarChart 
             data={data} 
@@ -196,12 +180,9 @@ function processData(data, lowerLimit, upperLimit) {
           overall: +player['Overall'],
           category: player['Region'],
           country: player['Nationality'],
-          photo: icon,
-          //photo: player['Photo'],
-          //photo: "./data/images/" + player['ID'] + '.jpg',
-          club: 'Organization ' + player['Club'],
-          name: player['ID'] === 20801 ? 'John Doe' : faker.name.firstName() + " " + faker.name.lastName()
-          //name: player['ID'] === 20801 ? 'John Doe' : 'Entity ' + player['ID']
+          photo: player['url'],
+          club: player['Club'],
+          name: player['Name']
         })
       }
     })
@@ -224,6 +205,13 @@ function findmaxData(data) {
       let max = d3.max(v, function(d) { return d.value; })
       let rows = v.filter(d=>d.value===max)
       let player = rows[0]
+      let url
+      try {
+        url = images(player['photo']) 
+      }
+      catch (err) {
+        url = icon
+      }
       return {
         entity: player['entity'],
         axis: player['axis'],  // find the sub-score category that has the largest value
@@ -231,7 +219,7 @@ function findmaxData(data) {
         overall: player['overall'],
         category: player['category'],
         country: player['country'],
-        photo: player['photo'],
+        photo: url,
         club: player['club'],
         name: player['name'],
         title: player['name']          

@@ -34,7 +34,8 @@ class Example extends Component {
     } = this
 
     return (
-      <div style={{ height: '35px', width: '80%', marginTop: '8px' }}>
+      <div style={{ height: '60px', width: '80%', marginTop: '20px', opacity: this.props.active ? '1' : '0.5' }}>
+       <p style={{margin: '10px 0px', textAlign: 'center'}}>OVERALL SCORE</p>
         <Slider
           step={0.05}
           domain={domain}
@@ -42,6 +43,7 @@ class Example extends Component {
           rootStyle={sliderStyle}
           onUpdate={this.onUpdate}
           values={values}
+          disabled={this.props.active ? false: true}
         >
           <Rail>
             {({ getRailProps }) => <SliderRail getRailProps={getRailProps} />}

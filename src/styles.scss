@@ -80,10 +80,9 @@ i.icon {
 .SideBarLeft {
   width: 25vw;
   height: 100%;
-  padding: 40px 0px 10px 20px;
+  padding: 50px 0px 10px 20px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
 }
 
 .Title {
@@ -130,6 +129,7 @@ i.icon {
 }
 .ToggleButtons {
   height: 40px;
+  margin-bottom: 10px;
 }
 .NavButtons {
   margin: 20px 0px 10px 0px; 
@@ -196,7 +196,7 @@ i.icon {
 
 .Legend {
   width: 100%;
-  height: auto;
+  height: 160px;
 }
 
 .Main {
@@ -211,10 +211,9 @@ i.icon {
 .SideBarRight {
   width: 25vw;
   height: 100%;
-  padding: 40px 20px 10px 0px;
+  padding: 50px 20px 10px 0px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
 }
 
 .viewButton {

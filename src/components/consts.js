@@ -3,8 +3,11 @@ import * as d3 from 'd3'
 export const people_relationships = ['employee of', 'co-workers', 'family', 'attorney', 'investment manager']
 export const org_relationships = ['board member of', 'director of', 'shareholder of']
 export const countries = ['France', 'Spain', 'Portugal', 'Brazil', 'Switzerland']
-export const categories = ['Rules Score','POI Matching Score', 'Anomaly Score', 'PM Score', 'UT Score', 'Social Network Score']
-export const persona = ['Actor', 'PEP', 'Insider', 'GOS', 'Terrorist']
+//export const categories = ['Rules Score','POI Matching Score', 'Anomaly Score', 'PM Score', 'UT Score', 'Social Network Score']
+//export const persona = ['Actor', 'PEP', 'Insider', 'GOS', 'Terrorist']
+export const categories = ['Total Attacking', 'Total Skill', 'Total Movement', 'Total Power', 'Total Mentality', 'Total Defending']
+export const persona = ['Europe & Central Asia', 'Latin America & Caribbean', 'Middle East & North Africa', 'North America', 'Sub-Saharan Africa', 'East Asia & Pacific']
+
 export const SCORE_THRESHOLD = 0.7
 export const NODE_SIZE = 3
 export const LEVELS = 5
@@ -12,11 +15,11 @@ export const LOWER = 0
 export const UPPER = 1
 
 export const colorScale = d3.scaleOrdinal()
-  .range(['aqua', 'fuchsia', 'gold', 'white', 'white'])
+  .range(['aqua', 'fuchsia', 'gold', 'white', 'white', 'white'])
   .domain(persona)
 
 export const fillScale = d3.scaleOrdinal()
-  .range(['aqua', 'fuchsia', 'gold', 'white', 'white'])
+  .range(['aqua', 'fuchsia', 'gold', 'white', 'transparent', 'transparent'])
   .domain(persona)
 
 export const fociRadius = d3.scaleSqrt()

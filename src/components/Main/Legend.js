@@ -5,17 +5,15 @@ import { persona, fociRadius, fillScale, colorScale } from "../consts"
 
 const size = 6
 const keys = [0.75, 0.85, 1]
-const asia = persona.filter(d=>d == 'GOS')
-const others = persona.filter(d=>d != 'GOS')
-const asia_labels = ['Groups, Orgnizations, Syndicates']
-const others_labels = ['Actor', 'Politically Exposed Person', 'Insider (Company Employees)', 'Terrorist']
+const asia = persona.filter(d=>d == 'East Asia & Pacific')
+const others = persona.filter(d=>d != 'East Asia & Pacific')
 
 const Legend = ({ ...props }) => {
   return (
     <div className="Legend">
        <div className="Legend__color">
-        <h4>Persona Type</h4>
-        <svg height={persona.length*24}>
+        <h4>Nationality (by region)</h4>
+        <svg height={persona.length*30}>
           {others.map((d, i) => (
             <React.Fragment>
               <circle
@@ -34,7 +32,7 @@ const Legend = ({ ...props }) => {
                 x={30}
                 y={15 + i*20}   
               >
-                { others_labels[i] }
+                { d }
               </text> 
             </React.Fragment>    
           ))}
@@ -56,7 +54,7 @@ const Legend = ({ ...props }) => {
               x={30}
               y={15 + others.length*20}    
             >
-              { asia_labels[0] }
+              { asia[0] }
             </text> 
           </React.Fragment>    
         </svg>

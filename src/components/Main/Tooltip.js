@@ -52,10 +52,10 @@ const Tooltip = ({...props }) => {
       </text> 
       <image
         className="Tooltip__image"
-        x={-24}
-        y={-16}  
-        width={24*2}
-        height={24*2}
+        x={-28}
+        y={-20}  
+        width={28*2}
+        height={28*2}
         fill={colorScale(info.category)}  
         xlinkHref={info.photo}
       /> 

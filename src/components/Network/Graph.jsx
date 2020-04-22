@@ -624,7 +624,7 @@ function updateAttributes(nodes, links, scales){
     .rollup(function(leaves) { return d3.sum(leaves, d=>d.value) })
     .entries(linksNested)
 
-  // create custom link strength scale based on total number of connections to node (node could be either a source or target)
+  // create custom link streodngth scale based on total number of connections to node (node could be either a source or target)
   var strengthScale = d3.scaleLinear()
     .domain(d3.extent(linkAllNodes, d=>d.value))
     .range([1, 0.1])

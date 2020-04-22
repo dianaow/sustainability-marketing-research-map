@@ -8,7 +8,7 @@ const Header = () => (
       <Link to='/'>
         <div class='home'><Icon name='home' /></div>
       </Link>
-      <div class='logo'>RISK 360°</div>
+      <div class='logo'>FIFA 19</div>
       <div class='menu'><Icon name='user outline' /></div>
       <div class='menu'><Icon name='bars' /></div>
     </div>
