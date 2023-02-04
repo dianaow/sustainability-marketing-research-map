@@ -4,7 +4,7 @@ import { colorScale } from "../consts"
 
 const TooltipContext = React.createContext({
   show: false,
-  info: {name: "", club: "", category: "", score: "", photo: ""},
+  info: {},
   links: []
 })
 
@@ -17,48 +17,49 @@ const Tooltip = ({...props }) => {
       <circle
         className="Tooltip__circle"
         r={60}
-        fill={colorScale(info.category)}  
-        fillOpacity={0.1}
+        fill={colorScale(info.unit)}  
+        fillOpacity={0.2}
       />  
       <text {...props}
-        className="Tooltip__name"
-        y={50}  
-        fill={colorScale(info.category)}  
-        fontSize={16}    
+        className="Tooltip__unit"
+        y={-40}  
+        fill={colorScale(info.unit)}  
+        fontSize={18}    
       >
-        { info.name }
+        { "Unit Type:" + info.unit }
+      </text>
+      <text {...props}
+        className="Tooltip__entity"
+        y={-20}  
+        fill={colorScale(info.unit)}  
+        fontSize={18}    
+      >
+        { "Topic:" + info.topic }
       </text> 
       <text {...props}
-        className="Tooltip__club"
-        y={70}  
-        fill={colorScale(info.category)}  
+        className="Tooltip__category"
+        y={0}  
+        fill={colorScale(info.unit)}  
+        fontSize={18}  
       >
-        { info.club }
-      </text> 
-      <text {...props}
-        className="Tooltip__label"
-        y={-60}  
-        fill={colorScale(info.category)}   
-      >
-        Overall Score:
+        { "Category:" + info.category }
       </text> 
       <text {...props}
         className="Tooltip__score"
-        y={-30}  
+        y={20}  
         fill='white'  
-        fontSize={32}  
+        fontSize={16}  
       >
-        { Math.round(info.score * 100) / 100 }
+        { "Score:" + info.value }
       </text> 
-      <image
-        className="Tooltip__image"
-        x={-28}
-        y={-20}  
-        width={28*2}
-        height={28*2}
-        fill={colorScale(info.category)}  
-        xlinkHref={info.photo}
-      /> 
+      <text {...props}
+        className="Tooltip__count"
+        y={40}  
+        fill='white'  
+        fontSize={16}  
+      >
+        { "No. of papers:" + info.count }
+      </text> 
     </g>
   )
 }

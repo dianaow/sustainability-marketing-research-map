@@ -1,34 +1,20 @@
 import * as d3 from 'd3'
 
-export const people_relationships = ['employee of', 'co-workers', 'family', 'attorney', 'investment manager']
-export const org_relationships = ['board member of', 'director of', 'shareholder of']
-export const countries = ['France', 'Spain', 'Portugal', 'Brazil', 'Switzerland']
-//export const categories = ['Rules Score','POI Matching Score', 'Anomaly Score', 'PM Score', 'UT Score', 'Social Network Score']
-//export const persona = ['Actor', 'PEP', 'Insider', 'GOS', 'Terrorist']
-export const categories = ['Total Attacking', 'Total Skill', 'Total Movement', 'Total Power', 'Total Mentality', 'Total Defending']
-export const persona = ['Europe & Central Asia', 'Latin America & Caribbean', 'Middle East & North Africa', 'North America', 'Sub-Saharan Africa', 'East Asia & Pacific']
-
-export const SCORE_THRESHOLD = 0.7
-export const NODE_SIZE = 3
-export const LEVELS = 5
-export const LOWER = 0
-export const UPPER = 1
+export const unitType = ['Title', 'Abstract', 'Introduction', 'Discussion', 'Conclusion', 'Overall']
+export const topicCategories = ['Business', 'Consumer', 'Institution']
+//export const tagCategories = ['Self', 'Oth', 'SP', 'Soc', 'Env', 'Prof', 'Gro']
+export const tagCategories = ['Self/Profit/Growth', 'Society', 'Environment', 'Sustainability', 'Other'].reverse()
+export const scoreCategories = d3.range(0, 6)
+export const angleSlice = (Math.PI * 2) / topicCategories.length
+export const bufferInRad = 0.1 * angleSlice
 
 export const colorScale = d3.scaleOrdinal()
-  .range(['aqua', 'fuchsia', 'gold', 'white', 'white', 'white'])
-  .domain(persona)
+  .range(['aqua', 'fuchsia', 'gold', 'lime', 'white', 'white'])
+  .domain(unitType)
 
 export const fillScale = d3.scaleOrdinal()
-  .range(['aqua', 'fuchsia', 'gold', 'white', 'transparent', 'transparent'])
-  .domain(persona)
-
-export const fociRadius = d3.scaleSqrt()
-    .range([3, 10])
-    .domain([SCORE_THRESHOLD, UPPER])
-
-export const bufferInRad = 10 * (Math.PI / 180)
-
-export const angleSlice = (Math.PI * 2) / categories.length
+  .range(['aqua', 'fuchsia', 'gold', 'lime', 'white', 'transparent'])
+  .domain(unitType)
 
 // set node, link, text color and dimensions
 export const rootRadius = 30
@@ -50,32 +36,6 @@ export const linkTextOpacity = 0
 export const linkTextSize = 5
 export const transitionDuration = 1000
 
-export const linkedByIndex = {}
-
-export const formatYear = d3.timeFormat("%Y")
-export const formatDate = d3.timeFormat("%b %Y")
-export const formatFullDate = d3.timeFormat("%d/%m/%y")
-export const parseDate = d3.timeParse("%Y-%m-%d")
-export const parseDate1 = d3.timeParse("%Y")
-export const parseDate2 = d3.timeParse("%b %Y")
-export const currentDateString = '2020-02-01'
-export const currentDate = parseDate(currentDateString)
-
-export const ROOT_ID = 80114141
-export const NAME = 'John Doe'
-
-// node radius size is scaled based on total number of connections to node (only applied to root or parent nodes)
-const nodeRadiusScale = d3.scaleSqrt()
-  .domain([1, 50])
-  .range([4, nodeRadius])
-
-const scoreScale = d3.scaleLinear()
-  .domain([0, 0.5, 1])
-  .range(['#71C3B4', "white", '#E00217'])
-
-export const scales = {
-  colorAccessor: d => colorScale(d.persona), // default is to color code nodes by persona
-  colorScale, 
-  scoreScale,
-  nodeRadiusScale
-}
+export const nodeRadiusScale = d3.scaleSqrt()
+.domain([1, 100])
+.range([2, 22])

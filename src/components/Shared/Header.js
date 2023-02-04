@@ -6,11 +6,8 @@ const Header = () => (
   <div className="Header">
     <div className='headerWrapper'>
       <Link to='/'>
-        <div class='home'><Icon name='home' /></div>
+        <div className='home'><Icon name='home' /></div>
       </Link>
-      <div class='logo'>FIFA 19</div>
-      <div class='menu'><Icon name='user outline' /></div>
-      <div class='menu'><Icon name='bars' /></div>
     </div>
   </div>
 )

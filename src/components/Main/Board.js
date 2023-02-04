@@ -1,24 +1,26 @@
 import React from "react"
 import PropTypes from "prop-types"
 import { accessorPropsType, callAccessor } from "../utils";
-import { UPPER } from "../consts"
 
-const Board = ({ data, keyAccessor, rAccessor, ...props }) => {
-
+const Board = ({ data, keyAccessor, scale, ...props }) => {
   return (
     <React.Fragment>
+      <circle
+        className="Board__circle"
+        r={scale.range()[1]}
+      />
       {data.map((d, i) => (
         <g key={keyAccessor(d, i)}>
           <circle
             className="Board__circle"
-            r={callAccessor(rAccessor, d, i)}
+            r={callAccessor(scale, d, i) + scale.bandwidth()}
           />
           <text {...props}
             className="Board__label"
             x={10}
-            y={-callAccessor(rAccessor, d, i)}   
+            y={-callAccessor(scale, d, i) - scale.bandwidth() / 2}   
           >
-            { Math.round((UPPER - d) * 100) / 100 }
+            { d }
           </text> 
         </g>
       ))}
@@ -29,7 +31,7 @@ const Board = ({ data, keyAccessor, rAccessor, ...props }) => {
 Board.propTypes = {
   data: PropTypes.array,
   keyAccessor: accessorPropsType,
-  rAccessor: accessorPropsType
+  scale: accessorPropsType
 }
 
 Board.defaultProps = {

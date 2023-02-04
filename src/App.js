@@ -3,7 +3,7 @@ import { BrowserRouter, Route } from "react-router-dom";
 import MainPage from "./MainPage"
 
 import 'semantic-ui-css/semantic.min.css'
-import "./styles.scss"
+import "./styles.css"
 
 const App = () => {
 

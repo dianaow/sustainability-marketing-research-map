@@ -6,241 +6,152 @@ import Board from "./Board"
 import Axis from "./RadarAxis"
 import Nodes from "./Nodes"
 
-import { callAccessor, useChartDimensions, round }  from "../utils"
-import { categories, colorScale, fillScale, bufferInRad, angleSlice, LEVELS, UPPER, LOWER } from "../consts"
+import { callAccessor }  from "../utils"
+import { colorScale, fillScale, tagCategories, topicCategories, scoreCategories, nodeRadiusScale, angleSlice, bufferInRad } from "../consts"
 
-const STEPS = UPPER / LEVELS
-const range = d3.range(0, STEPS*LEVELS, STEPS).concat(STEPS*LEVELS)
+const getCoordsAlongArc = (data, rScale, label) => {
 
-const arc = (axis) => {
+  const angle = angleSlice * (topicCategories.indexOf(data.topic))
 
-  var arc = d3.arc()
-      .innerRadius(window.innerWidth*0.21)
-      .outerRadius(window.innerWidth*0.21)
-      .startAngle(angleSlice*axis + bufferInRad)
-      .endAngle(angleSlice*(axis+1))
+  const angleScale = d3.scaleLinear()
+    .range([angle + bufferInRad , angle+angleSlice - bufferInRad])
+    .domain([0, 5])
 
-  return arc()
-
-}
-
-const getCoordsAlongArc = (data, rScale, config) => {
-
-  var angle = angleSlice * data.axis
-  var angleScale = d3.scaleLinear()
-      .range([angle-angleSlice + bufferInRad, angle])
-      .domain([config.lowerLimit, config.upperLimit])
-
-  var line = d3.lineRadial()
-    .radius(function(d,i) { return callAccessor(rScale, d.value, i) })
-    .angle(function(d,i) { return angleScale(d.overall) })
+  const line = d3.lineRadial()
+    .radius(function(d,i) { return label ? callAccessor(rScale, d.category, i) + rScale.bandwidth() + 15 : callAccessor(rScale, d.category, i) + rScale.bandwidth() / 2})
+    .angle(function(d,i) { return angleScale(+d.value) })
 
   return line([data]).slice(1).slice(0, -1).split(',')
 
 }
 
-const getPolarScatterCoords = (data, rScale, config) => {
+const getPolarScatterCoords = (data, rScale) => {
 
-  const bandScale = d3.scaleThreshold()
-    .domain(range)
-    .range(range)
+  const nested = d3.nest()
+    .key(d => d.unit)
+    .key(d => d.topic)
+    .key(d => d.category)
+    .key(d => d.value)
+    .rollup(d => d.length)
+    .entries(data)
 
-  data.forEach((a,i)=>{
-    let val = bandScale(a.value)
-    var rScaleNew = d3.scaleLinear()
-      .range([rScale(UPPER-val+STEPS), rScale(UPPER-val)])
-      .domain([val-STEPS, val])
-
-    var coors = getCoordsAlongArc(a, rScaleNew, config)
-
-    a.x = +coors[0]
-    a.y = +coors[1]
-  })
-
-  return data
-
-}
-
-// Calculate the coordinates of each node
-const getNewCoords = (data, version, direction, rScale, config) => {
-
-  var bin
-  if(version === '1') {
-    bin = d3.histogram().value(d=>d.value)
-  } else if(version === '2') {
-    bin = d3.histogram().value(d=>d.value).domain([0.7, 1])
-  }
-  
-  const binsAll = []
-  const dataCoord = []
-  data.map(a=>{
-    a.values.map(b=>{
-      b.values.map(c=>{
-
-        let buckets = bin(c.values)
-
-        var valueOrig, valueNew
-        buckets.forEach((d,i)=>{
-          let avg = d3.mean(d, f=>f.value)
-          d.map(e=>{
-            if(direction === '0'){
-              valueOrig = avg
-              valueNew = avg
-            } else if(direction === '1'){
-              valueOrig = e.value
-              valueNew = avg
-            } else if(direction === '2'){
-              valueOrig = avg 
-              valueNew = e.value            
-            }
-            let coordsOrig = getPolarScatterCoords([{value: valueOrig, overall: e.overall, axis: e.axis}], rScale, config)
-            let coordsNew = getPolarScatterCoords([{value:  valueNew, overall: e.overall, axis: e.axis}], rScale, config)
-            dataCoord.push({
-              entity: e.entity,
-              x0: coordsOrig[0].x,
-              y0: coordsOrig[0].y,
-              x1: coordsNew[0].x,
-              y1: coordsNew[0].y,
-              category: e.category,
-              country: e.country,
-              photo: e.photo,
-              club: e.club, 
-              name: e.name,
-              overall: +b.key
-            })
+  let aggData = []
+  nested.forEach(a =>{
+    a.values.forEach(b => {
+      b.values.forEach(c => {
+        c.values.forEach(d => {
+          aggData.push({
+            entity: a.key + '-' + b.key + '-' + c.key + '-' + d.key,
+            unit: a.key,
+            topic: b.key,
+            category: c.key,
+            value: +d.key,
+            count: d.value 
           })
-          d.axis = a.key
-          d.overall = b.key
-          d.category = c.key
-          d.value = avg
-          d.count = d.length 
         })
-
-        buckets.forEach((d,i)=>{
-          if(d.count > 0){
-            binsAll.push(d)
-          }
-        })
-        
       })
     })
   })
 
-  // Calculate the coordinates of each bin
-  const binsCoord = getPolarScatterCoords(binsAll, rScale, config)
-
-  return { bins: binsCoord, data: dataCoord }
-
-}
-
-const Radar = ({ data, config, filter, search, ...props }) => {
-
-  const dimensions = {'width': window.innerWidth*0.8, 'height': window.innerHeight*0.8}
-  const radius = Math.min(dimensions.width/2, dimensions.height/2) - 15
-  //const [ref, dms] = useChartDimensions({'width': window.innerWidth*0.9, 'height': window.innerHeight*0.9})
-  //const radius = Math.min(dms.boundedWidth/2, dms.boundedHeight/2) - 30
-  const DEFAULT_PIE = 0
-
-  const rScale = d3.scalePow()
-    .exponent(0.5)
-    .range([radius, 0])
-    .domain([LOWER, UPPER])
-
-  // Standardize the scale amongst all versions and overall scores
-  const binRadiusScale = d3.scaleSqrt()
-    .range([3, 30])
-    .domain([1, 60])
-
-  // Calculate the placement of each axis arc label
-  var axisData = [{overall: round(config.lowerLimit), axis: 1},{overall: round(config.upperLimit), axis: 1}]
-  var labels = []
-  axisData.forEach((a,i)=>{
-    let coors = getCoordsAlongArc(a, rScale(DEFAULT_PIE)+10, config)
-    labels.push({text: a.overall, x: +coors[0], y: +coors[1]})
+  aggData.forEach(a => {
+    const coors = getCoordsAlongArc(a, rScale)
+    a.x = +coors[0]
+    a.y = +coors[1]
+    a.size = nodeRadiusScale(a.count)
   })
 
-  // Bin nodes
-  const dataMaxNested = d3.nest()
-    .key(d=>d.axis)
-    .key(d=>d.overall)
-    .key(d=>d.category)
-    .entries(data.playersMax)
+  const simulation = d3
+    .forceSimulation()
+    .nodes(aggData)
+    .force('charge', d3.forceManyBody().strength(-20))
+    .force('x', d3.forceX().x(d => d.x).strength(0.5))
+    .force('y', d3.forceY().y(d => d.y).strength(0.5))
+    .force(
+      'collision',
+      d3.forceCollide().radius((d) => d.size * 0.75)
+    )
+    .stop();
 
-  const data10 = getNewCoords(dataMaxNested, "1", "0", rScale, config)
-  const data11 = getNewCoords(dataMaxNested, "1", "1", rScale, config) 
-  const data12 = getNewCoords(dataMaxNested, "1", "2", rScale, config) 
+    for (
+      let i = 0,
+        n = Math.ceil(
+          Math.log(simulation.alphaMin()) /
+            Math.log(1 - simulation.alphaDecay())
+        );
+      i < n;
+      ++i
+    ) {
+      simulation.tick();
+    }
 
-  const rAccessor = d => rScale(d) 
-  const binSizeAccessor = d => binRadiusScale(d.count)
+  return aggData
+
+}
+const Radar = ({ data, ...props }) => {
+
+  const dimensions = {'width': window.innerWidth, 'height': window.innerHeight}
+  const radius = Math.min(dimensions.width/2, dimensions.height/2) - 50
+
+  const rScale = d3.scaleBand()
+    .range([radius, radius/tagCategories.length])
+    .domain(tagCategories)
+
+  // Calculate the placement of each axis arc label
+  const labels = []
+  topicCategories.forEach((topic)=>{
+    scoreCategories.forEach((score)=>{
+      const datum = {
+        topic : topic,
+        category: tagCategories[0],
+        value : score
+      } 
+      let coors = getCoordsAlongArc(datum, rScale, true)
+      labels.push({text: score, x: +coors[0], y: +coors[1]})
+    })
+  })
+
   const nodeKeyAccessor = d => "entity-" + d.entity
-  const binXAccessor = d => d.x
-  const binYAccessor = d => d.y
-  const x0Accessor = d => d.x0
-  const y0Accessor = d => d.y0
-  const x1Accessor = d => d.x1
-  const y1Accessor = d => d.y1
-  const fillAccessor = d => fillScale(d.category)
-  const strokeAccessor = d => colorScale(d.category)
+  const xAccessor = d => d.x
+  const yAccessor = d => d.y
+  const fillAccessor = d => fillScale(d.unit)
+  const strokeAccessor = d => colorScale(d.unit)
+  const radiusAccessor = d => nodeRadiusScale(d.size)
 
-  const drawNodes = (data, dataAll, bins, direction, filter, search) => {
+  const drawNodes = (data) => {
+    const radialData = getPolarScatterCoords(data, rScale)
 
-    let accessors = { 
+    const accessors = { 
       key: nodeKeyAccessor,
-      x: binXAccessor,
-      y: binYAccessor,
-      x0: x0Accessor,
-      y0: y0Accessor,
-      x1: x1Accessor,
-      y1: y1Accessor,
-      size: binSizeAccessor,
+      x: xAccessor,
+      y: yAccessor,
       fill: fillAccessor,
       stroke: strokeAccessor,
+      size: radiusAccessor,
       strokeWidth: 1
     }
 
     const nodes = 
       <Nodes
-        data={data} 
-        dataAll={dataAll} 
-        binnedData={bins}
+        data={radialData} 
         accessors={accessors}
-        direction={direction}
-        filter={filter}
-        search={search}
       />
 
     return nodes
-
-  }
-
-  var NodesVersion
-  if(config.panelState.binned){
-    if(config.initRender){
-      NodesVersion = drawNodes(data10.data, data.players, data10.bins, "0", filter, search)
-    } else {
-      NodesVersion = drawNodes(data11.data, data.players, data11.bins, "1", filter, search)
-    }
-  } else {
-    NodesVersion = drawNodes(data12.data, data.players, data12.bins, "2", filter, search)
   }
 
   return (
-    <div className="Radar" style={{'width': window.innerWidth*0.8, 'height': window.innerHeight*0.8}}>
+    <div className="Radar" style={{'width': window.innerWidth, 'height': window.innerHeight}}>
       <Chart dimensions={dimensions}>
-       <g transform={`translate(${dimensions.width/2}, ${dimensions.height/2 + 10})`}>
+       <g transform={`translate(${dimensions.width/2}, ${dimensions.height/2})`}>
           <Board
-            data={range}
+            data={tagCategories}
             keyAccessor={(d, i) => 'board-' + i}
-            rAccessor={rAccessor}
-          />
-          <Axis
-            data={categories} 
-            keyAccessor={(d, i) => 'axis-' + i}
             scale={rScale}
           />
-          <path {...props}
-            className="Radar__arc"
-            d={arc(DEFAULT_PIE)}
+          <Axis
+            data={topicCategories} 
+            keyAccessor={(d, i) => 'axis-' + i}
+            radius={radius + 15}
           />
           {labels.map((label, i) => (
             <text {...props}
@@ -252,7 +163,7 @@ const Radar = ({ data, config, filter, search, ...props }) => {
               { label.text }
             </text> 
           ))}
-          {NodesVersion}
+          {drawNodes(data)}
         </g>
       </Chart>
     </div>

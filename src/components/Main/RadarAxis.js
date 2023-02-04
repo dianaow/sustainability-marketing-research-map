@@ -13,8 +13,8 @@ const invisibleArc = (axis, radius) => {
   var arc = d3.arc()
       .innerRadius(radius)
       .outerRadius(radius+5)
-      .startAngle(angleSlice*(axis-1))
-      .endAngle(angleSlice*(axis))
+      .startAngle(angleSlice*(axis))
+      .endAngle(angleSlice*(axis+1))
 
   //Search pattern for everything between the start and the first capital L
   var firstArcSection = /(^.+?)L/;  
@@ -45,47 +45,26 @@ const invisibleArc = (axis, radius) => {
   return newArc
 }
 
-const Axis = ({ data, scale, keyAccessor, ...props }) => {
-
+const Axis = ({ data, radius, keyAccessor, ...props }) => {
   return (
     <g className="Axis">
-      <path
-        className="Axis__invisible_arc"
-        id={"Axis__arc_label"}
-        d={invisibleArc(1, window.innerWidth*0.21-15)}
-        strokeOpacity={0}
-        fill='none'
-      />
-      <text 
-        className="Axis__arcText"
-        fill={props.textColor}
-        fontSize={9}
-      >
-        <textPath
-          startOffset="50%"
-          textAnchor={props.textAnchor}
-          xlinkHref={"#Axis__arc_label"}
-        >
-         OVERALL SCORE
-        </textPath>
-      </text>
       <text 
         className="Axis__line_label"
         fill={props.textColor}
         fontSize={9}
         textAnchor={props.textAnchor}
-        transform="translate(0,-150)rotate(-90)"
+        transform="translate(-15,-150)rotate(-90)"
       >
-        CATEGORY SCORE
+        CATEGORY
       </text>
-      {d3.range(0, data.length).map((axis, i) => (
+      {data.map((axis, i) => (
         <g key={keyAccessor(axis, i)}>
           <line
             className="Axis__line"
             x1={0}
             y1={0}
-            x2={scale(0) * cos(angleSlice * i - HALF_PI)}
-            y2={scale(0) * sin(angleSlice * i - HALF_PI)}
+            x2={radius * cos(angleSlice * i - HALF_PI)}
+            y2={radius * sin(angleSlice * i - HALF_PI)}
             stroke={props.stroke}
             strokeWidth={props.strokeWidth}
             strokeOpacity={props.strokeOpacity}
@@ -93,7 +72,7 @@ const Axis = ({ data, scale, keyAccessor, ...props }) => {
           <path
             className="Axis__invisible_arc"
             id={"Axis__arc_" + i}
-            d={invisibleArc(axis, window.innerWidth*0.21)}
+            d={invisibleArc(i, radius)}
             strokeOpacity={0}
             fill='none'
           />
@@ -107,7 +86,7 @@ const Axis = ({ data, scale, keyAccessor, ...props }) => {
               textAnchor={props.textAnchor}
               xlinkHref={"#Axis__arc_" + i}
             >
-            { data[i] }
+            { axis }
             </textPath>
           </text>
         </g>    
@@ -118,11 +97,11 @@ const Axis = ({ data, scale, keyAccessor, ...props }) => {
 
 Axis.propTypes = {
   data: PropTypes.array,
-  scale: PropTypes.func
+  radius: PropTypes.number
 }
 
 Axis.defaultProps = {
-  scale: null,
+  radius: 100,
   stroke: 'white',
   strokeWidth: '2px',
   strokeOpacity: 0.2,
