@@ -53,7 +53,7 @@ const Axis = ({ data, radius, keyAccessor, ...props }) => {
         fill={props.textColor}
         fontSize={9}
         textAnchor={props.textAnchor}
-        transform="translate(-15,-150)rotate(-90)"
+        transform="translate(10,-150)rotate(-90)"
       >
         CATEGORY
       </text>

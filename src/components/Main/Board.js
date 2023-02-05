@@ -17,7 +17,8 @@ const Board = ({ data, keyAccessor, scale, ...props }) => {
           />
           <text {...props}
             className="Board__label"
-            x={10}
+            textAnchor="end"
+            x={-10}
             y={-callAccessor(scale, d, i) - scale.bandwidth() / 2}   
           >
             { d }

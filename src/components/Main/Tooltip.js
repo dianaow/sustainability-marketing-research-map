@@ -5,7 +5,7 @@ import { colorScale } from "../consts"
 const TooltipContext = React.createContext({
   show: false,
   info: {},
-  links: []
+  details: []
 })
 
 const Tooltip = ({...props }) => {
@@ -26,7 +26,7 @@ const Tooltip = ({...props }) => {
         fill={colorScale(info.unit)}  
         fontSize={18}    
       >
-        { "Unit Type:" + info.unit }
+        { "Unit Type: " + info.unit }
       </text>
       <text {...props}
         className="Tooltip__entity"
@@ -34,7 +34,7 @@ const Tooltip = ({...props }) => {
         fill={colorScale(info.unit)}  
         fontSize={18}    
       >
-        { "Topic:" + info.topic }
+        { "Topic: " + info.topic }
       </text> 
       <text {...props}
         className="Tooltip__category"
@@ -42,7 +42,7 @@ const Tooltip = ({...props }) => {
         fill={colorScale(info.unit)}  
         fontSize={18}  
       >
-        { "Category:" + info.category }
+        { "Category: " + info.category }
       </text> 
       <text {...props}
         className="Tooltip__score"
@@ -50,7 +50,7 @@ const Tooltip = ({...props }) => {
         fill='white'  
         fontSize={16}  
       >
-        { "Score:" + info.value }
+        { "Score: " + info.value }
       </text> 
       <text {...props}
         className="Tooltip__count"
@@ -58,7 +58,7 @@ const Tooltip = ({...props }) => {
         fill='white'  
         fontSize={16}  
       >
-        { "No. of papers:" + info.count }
+        { "No. of papers: " + info.count }
       </text> 
     </g>
   )

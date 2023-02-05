@@ -1,12 +1,23 @@
 import React from "react"
 import { Link } from "react-router-dom";
-import { Icon } from 'semantic-ui-react'
 
 const Header = () => (
   <div className="Header">
     <div className='headerWrapper'>
       <Link to='/'>
-        <div className='home'><Icon name='home' /></div>
+        <div>THE MAP</div>
+      </Link>
+      <Link to='/'>
+        <div>TRY IT YOURSELF</div>
+      </Link>
+      <Link to='/'>
+        <div>OUR PROCESS</div>
+      </Link>
+      <Link to='/'>
+        <div>FUTURE WORK</div>
+      </Link>
+      <Link to='/contact'>
+        <div>CONTACT</div>
       </Link>
     </div>
   </div>

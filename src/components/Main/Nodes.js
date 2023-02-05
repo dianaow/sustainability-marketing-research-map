@@ -1,96 +1,77 @@
-import React, { useEffect, useContext } from "react"
+import React, { useEffect, useContext, useState } from "react"
 import PropTypes from "prop-types"
 import * as d3 from "d3"
 
 import { accessorPropsType, callAccessor } from "../utils";
 import Tooltip, { TooltipContext } from "./Tooltip";
 
-const Nodes = ({data, accessors}) => {
+const Nodes = ({data, dataAll, accessors}) => {
 
   const tooltip = useContext(TooltipContext)
+  const [clicked, setClicked] = useState(false)
+  
+  const updateCircles = (data, accessors, clicked) => {
+    console.log(data)
+    let { x, y, key, size, opacity, fill, stroke, strokeWidth } = accessors
 
-  const updateSingle = () => {
-
-    var selectedData = data.filter(d=> d.entity === tooltip.info.entity) 
-    var nonselectedData = data.filter(d=> d.entity !== tooltip.info.entity) 
-    accessors.opacity = 1
-    drawAllNodes(selectedData, accessors, 'entity__selected')
-    
-    if(tooltip.show){
-      accessors.opacity = 0.1
-      drawAllNodes(nonselectedData, accessors, 'entity__nonselected')
-    } else { 
-      accessors.opacity = 1
-      drawAllNodes(nonselectedData, accessors, 'entity__nonselected')
-    }
-
-  }
-
-  const drawAllNodes = (data, accessors, eleSelector) => {
-
-    updateCircles(data, accessors, 'Nodes', 'Circle__'+eleSelector)
-
-  }
-
-  const updateCircles = (data, accessors, eleWrapper, eleSelector) => {
-
-    let { x, y, size, opacity, fill, stroke, strokeWidth } = accessors
-
-    let circles = d3.select("." + eleWrapper).selectAll("." + eleSelector).data(data, d=>d.entity);
+    let circles = d3.select(".Nodes").selectAll("circle").data(data, d=>d.entity);
 
     circles.exit().remove()
 
     let circlesEnter = circles.enter().append('circle')
-      .attr('class', eleSelector)
+      .attr('class', (d, i) => callAccessor(key, d, i))
       .attr('cx', (d, i) => callAccessor(x, d, i))
       .attr('cy', (d, i) => callAccessor(y, d, i))
       .attr('r', (d, i) => callAccessor(size, d, i))
-      .attr('opacity', (d, i) => callAccessor(opacity, d, i))
-      .attr('fill', (d,i) => eleWrapper === 'NodesMask' ? 'transparent' : callAccessor(fill, d, i))
-      .attr('stroke', (d,i) => eleWrapper === 'NodesMask' ? 'transparent' : callAccessor(stroke, d, i))
+      .attr('fill', (d,i) => callAccessor(fill, d, i))
+      .attr('stroke', (d,i) => callAccessor(stroke, d, i))
+      .attr('opacity', 1)
       .attr('strokeWidth', strokeWidth)
-
-    circles = circles.merge(circlesEnter)
-
-    circles.transition().duration(500)
-      .attr('opacity', (d, i) => callAccessor(opacity, d, i))
       .style('cursor', 'pointer')
       .attr('pointer-events', 'visible')
 
+    circles = circles.merge(circlesEnter)
+
     circles
-      .on("mouseover", d => mouseOver(d))
-      .on("mouseout", d => mouseOut(d))
+      .on("click", d => {
+        mouseOver(d, clicked)
+        setClicked(!clicked)
+      })
+      .on("mouseover", d => mouseOver(d, clicked))
+      .on("mouseout", d => mouseOut(d, clicked))
 
   }
 
-  const mouseOver = (e) => {
-    console.log(e)
+  const mouseOver = (e, clicked) => {
+    console.log(clicked)
+    if(clicked) return
+    d3.select(".Nodes").selectAll('circle').attr('opacity', 0.1)
+    d3.select(".Nodes").selectAll(".entity-" + e.entity).attr('opacity', 1)
     tooltip.setTooltip({
       show:true,
-      info: {unit: e.unit, topic: e.topic, category: e.category, value: e.value, count: e.count},
-      links: [],
-      details: data.filter(d=>d.entity === e.entity) 
+      info: {unit: e.unit, topic: e.topic, category: e.category, value: e.value, count: e.count, entity: e.entity},
+      details: dataAll.filter(d=>d.entity === e.entity) 
     })
   }
  
-  const mouseOut = (e) => {
+  const mouseOut = (e, clicked) => {
+    console.log(clicked)
+    if(clicked) return
+    d3.select(".Nodes").selectAll('circle').attr('opacity', 1)
     tooltip.setTooltip({
       show: false,
       info: {},
-      links: [],
-      details: {}
+      details: []
     })
   }
 
   useEffect(() => {
-    updateSingle()
-  }, [data])
+    if(data.length > 0) updateCircles(data, accessors, clicked)
+  }, [data, clicked])
 
   return(
     <g className="Radar__Elements">
       <g className="Nodes"></g>
-      <g className="NodesMask"></g>
-      <g className="Nodes__Binned"></g>
       <Tooltip/>
     </g>
   )

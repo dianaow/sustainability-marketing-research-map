@@ -15,7 +15,7 @@ const getCoordsAlongArc = (data, rScale, label) => {
 
   const angleScale = d3.scaleLinear()
     .range([angle + bufferInRad , angle+angleSlice - bufferInRad])
-    .domain([0, 5])
+    .domain([1, 5])
 
   const line = d3.lineRadial()
     .radius(function(d,i) { return label ? callAccessor(rScale, d.category, i) + rScale.bandwidth() + 15 : callAccessor(rScale, d.category, i) + rScale.bandwidth() / 2})
@@ -110,33 +110,22 @@ const Radar = ({ data, ...props }) => {
     })
   })
 
+  const radialData = getPolarScatterCoords(data, rScale)
+
   const nodeKeyAccessor = d => "entity-" + d.entity
   const xAccessor = d => d.x
   const yAccessor = d => d.y
   const fillAccessor = d => fillScale(d.unit)
   const strokeAccessor = d => colorScale(d.unit)
   const radiusAccessor = d => nodeRadiusScale(d.size)
-
-  const drawNodes = (data) => {
-    const radialData = getPolarScatterCoords(data, rScale)
-
-    const accessors = { 
-      key: nodeKeyAccessor,
-      x: xAccessor,
-      y: yAccessor,
-      fill: fillAccessor,
-      stroke: strokeAccessor,
-      size: radiusAccessor,
-      strokeWidth: 1
-    }
-
-    const nodes = 
-      <Nodes
-        data={radialData} 
-        accessors={accessors}
-      />
-
-    return nodes
+  const accessors = { 
+    key: nodeKeyAccessor,
+    x: xAccessor,
+    y: yAccessor,
+    fill: fillAccessor,
+    stroke: strokeAccessor,
+    size: radiusAccessor,
+    strokeWidth: 1
   }
 
   return (
@@ -151,7 +140,7 @@ const Radar = ({ data, ...props }) => {
           <Axis
             data={topicCategories} 
             keyAccessor={(d, i) => 'axis-' + i}
-            radius={radius + 15}
+            radius={radius + 20}
           />
           {labels.map((label, i) => (
             <text {...props}
@@ -163,7 +152,11 @@ const Radar = ({ data, ...props }) => {
               { label.text }
             </text> 
           ))}
-          {drawNodes(data)}
+          <Nodes
+            data={radialData} 
+            dataAll={data}
+            accessors={accessors}
+          />
         </g>
       </Chart>
     </div>

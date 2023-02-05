@@ -12,6 +12,7 @@ body {
   margin: 0px;
   padding: 0px;
   opacity: 0.85;
+  overflow: none;
 }
 h1, h2, h3, h4, p, text, a {
   font-family: 'Karla', sans-serif !important;
@@ -44,6 +45,14 @@ i.icon {
 .headerWrapper {
   position: relative;
   width: 100%;
+  display: flex;
+  justify-content: space-between;
+}
+
+.headerWrapper div {
+  border-bottom: 1px solid white;
+  text-align: center;
+  padding: 2px 6px;
 }
 
 .App__wrapper {
