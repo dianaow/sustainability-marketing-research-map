@@ -3,10 +3,10 @@ import * as d3 from 'd3'
 export const unitType = ['Title', 'Abstract', 'Introduction', 'Discussion', 'Conclusion', 'Overall']
 export const topicCategories = ['Business', 'Consumer', 'Institution']
 //export const tagCategories = ['Self', 'Oth', 'SP', 'Soc', 'Env', 'Prof', 'Gro']
-export const tagCategories = ['Self/Profit/Growth', 'Society', 'Environment', 'Sustainability', 'Other'].reverse()
-export const scoreCategories = d3.range(1, 6)
+export const tagCategories = ['Self-Profit-Growth', 'Society', 'Environment', 'Sustainability', 'Other'].reverse()
+export const scoreCategories = d3.range(0, 6)
 export const angleSlice = (Math.PI * 2) / topicCategories.length
-export const bufferInRad = 0.16 * angleSlice
+export const bufferInRad = 0.12 * angleSlice
 
 export const colorScale = d3.scaleOrdinal()
   .range(['aqua', 'fuchsia', 'gold', 'lime', 'white', 'white'])
@@ -38,4 +38,4 @@ export const transitionDuration = 1000
 
 export const nodeRadiusScale = d3.scaleSqrt()
 .domain([1, 100])
-.range([2, 22])
+.range(window.innerHeight < 800 ? [1.5, 16.5] : [2, 22])

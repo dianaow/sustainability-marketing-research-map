@@ -28,6 +28,10 @@ export function getPropertyName(obj, expression) {
   return expression(res)();
 }
 
+export const onlyUnique = (value, index, self) => { 
+  return self.indexOf(value) === index;
+}
+
 export function cleanTopic(topic) {
   if(topic === 'Bus' || topic === 'Busi') return 'Business'
   if(topic === 'Ins' || topic === 'Inst') return 'Institution'
@@ -36,9 +40,9 @@ export function cleanTopic(topic) {
 } 
 
 export function cleanCategory(topic) {
-  if(topic === 'Self') return 'Self/Profit/Growth'
-  if(topic === 'Prof') return 'Self/Profit/Growth'
-  if(topic === 'Gro' || topic === 'Grow' || topic === 'Gro2' || topic === 'Gro3') return 'Self/Profit/Growth'
+  if(topic === 'Self') return 'Self-Profit-Growth'
+  if(topic === 'Prof') return 'Self-Profit-Growth'
+  if(topic === 'Gro' || topic === 'Grow' || topic === 'Gro2' || topic === 'Gro3') return 'Self-Profit-Growth'
   if(topic === 'Soc') return 'Society'
   if(topic === 'Env') return 'Environment'
   if(topic === 'SP') return 'Sustainability'

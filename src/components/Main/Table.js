@@ -43,6 +43,7 @@ const tableActive = (tooltip) => {
 const tableEntityDefault = () => {
   return(
     <div className = 'Table__default'>
+      <h4>Each node represents all papers with the same score, topic ('Business', 'Consumer', 'Institution') and tag category ('Self /Profit /Growth', 'Society', 'Environment', 'Sustainability', 'Other').</h4>
       <h4>Hover over or click a node to select all related papers</h4>
     </div> 
   )

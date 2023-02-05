@@ -15,7 +15,7 @@ const getCoordsAlongArc = (data, rScale, label) => {
 
   const angleScale = d3.scaleLinear()
     .range([angle + bufferInRad , angle+angleSlice - bufferInRad])
-    .domain([1, 5])
+    .domain([0, 5])
 
   const line = d3.lineRadial()
     .radius(function(d,i) { return label ? callAccessor(rScale, d.category, i) + rScale.bandwidth() + 15 : callAccessor(rScale, d.category, i) + rScale.bandwidth() / 2})
@@ -64,8 +64,8 @@ const getPolarScatterCoords = (data, rScale) => {
     .forceSimulation()
     .nodes(aggData)
     .force('charge', d3.forceManyBody().strength(-20))
-    .force('x', d3.forceX().x(d => d.x).strength(0.5))
-    .force('y', d3.forceY().y(d => d.y).strength(0.5))
+    .force('x', d3.forceX().x(d => d.x).strength(window.innerHeight < 800 ? 0.7 : 0.5))
+    .force('y', d3.forceY().y(d => d.y).strength(window.innerHeight < 800 ? 0.7 : 0.5))
     .force(
       'collision',
       d3.forceCollide().radius((d) => d.size * 0.75)
@@ -87,7 +87,7 @@ const getPolarScatterCoords = (data, rScale) => {
   return aggData
 
 }
-const Radar = ({ data, ...props }) => {
+const Radar = ({ data, search, ...props }) => {
 
   const dimensions = {'width': window.innerWidth, 'height': window.innerHeight}
   const radius = Math.min(dimensions.width/2, dimensions.height/2) - 50
@@ -156,6 +156,7 @@ const Radar = ({ data, ...props }) => {
             data={radialData} 
             dataAll={data}
             accessors={accessors}
+            search={search}
           />
         </g>
       </Chart>

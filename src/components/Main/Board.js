@@ -21,10 +21,30 @@ const Board = ({ data, keyAccessor, scale, ...props }) => {
             x={-10}
             y={-callAccessor(scale, d, i) - scale.bandwidth() / 2}   
           >
-            { d }
+            { d === 'Self-Profit-Growth' ? 'Profit' : d}
           </text> 
         </g>
       ))}
+      <g transform="rotate(30)">
+      <text {...props}
+        className="Board__label"
+        textAnchor="start"
+        x={scale.bandwidth() * 1.25}
+        y={-scale.bandwidth() * 0.2}   
+      >
+        { "Self" }
+      </text> 
+      </g>
+      <g transform="rotate(-30)">
+      <text {...props}
+        className="Board__label"
+        textAnchor="end"
+        x={-scale.bandwidth() * 1.25}
+        y={scale.bandwidth() * 0.25}     
+      >
+        { "Growth" }
+      </text> 
+      </g>
     </React.Fragment>
   )
 }
