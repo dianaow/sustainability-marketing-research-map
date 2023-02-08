@@ -1,5 +1,5 @@
 import React from "react"
-import { unitType, fillScale, colorScale } from "../consts"
+import { fillScale, colorScale } from "../consts"
 
 const size = 6
 
@@ -8,8 +8,8 @@ const Legend = ({ ...props }) => {
     <div className="Legend">
        <div className="Legend__color">
         <h4>Unit Type</h4>
-        <svg height={unitType.length*30}>
-          {unitType.map((d, i) => (
+        <svg height={(fillScale.domain().length-1)*30}>
+          {fillScale.domain().map((d, i) => (
             <React.Fragment>
               <circle
                 key={d}

@@ -7,7 +7,7 @@ import Axis from "./RadarAxis"
 import Nodes from "./Nodes"
 
 import { callAccessor }  from "../utils"
-import { colorScale, fillScale, tagCategories, topicCategories, scoreCategories, nodeRadiusScale, angleSlice, bufferInRad } from "../consts"
+import { colorScale, fillScale, tagCategories, topicCategories, scoreCategories, nodeRadiusScale, nodeOpacityScale, angleSlice, bufferInRad } from "../consts"
 
 const getCoordsAlongArc = (data, rScale, label) => {
 
@@ -15,7 +15,7 @@ const getCoordsAlongArc = (data, rScale, label) => {
 
   const angleScale = d3.scaleLinear()
     .range([angle + bufferInRad , angle+angleSlice - bufferInRad])
-    .domain([0, 5])
+    .domain([1, 5])
 
   const line = d3.lineRadial()
     .radius(function(d,i) { return label ? callAccessor(rScale, d.category, i) + rScale.bandwidth() + 15 : callAccessor(rScale, d.category, i) + rScale.bandwidth() / 2})
@@ -27,48 +27,23 @@ const getCoordsAlongArc = (data, rScale, label) => {
 
 const getPolarScatterCoords = (data, rScale) => {
 
-  const nested = d3.nest()
-    .key(d => d.unit)
-    .key(d => d.topic)
-    .key(d => d.category)
-    .key(d => d.value)
-    .rollup(d => d.length)
-    .entries(data)
-
-  let aggData = []
-  nested.forEach(a =>{
-    a.values.forEach(b => {
-      b.values.forEach(c => {
-        c.values.forEach(d => {
-          aggData.push({
-            entity: a.key + '-' + b.key + '-' + c.key + '-' + d.key,
-            unit: a.key,
-            topic: b.key,
-            category: c.key,
-            value: +d.key,
-            count: d.value 
-          })
-        })
-      })
-    })
-  })
-
-  aggData.forEach(a => {
+  data.forEach(a => {
     const coors = getCoordsAlongArc(a, rScale)
     a.x = +coors[0]
     a.y = +coors[1]
-    a.size = nodeRadiusScale(a.count)
+    //a.size = nodeRadiusScale(a.count)
+    a.size = 2
   })
 
   const simulation = d3
     .forceSimulation()
-    .nodes(aggData)
+    .nodes(data)
     .force('charge', d3.forceManyBody().strength(-20))
     .force('x', d3.forceX().x(d => d.x).strength(window.innerHeight < 800 ? 0.7 : 0.5))
     .force('y', d3.forceY().y(d => d.y).strength(window.innerHeight < 800 ? 0.7 : 0.5))
     .force(
       'collision',
-      d3.forceCollide().radius((d) => d.size * 0.75)
+      d3.forceCollide().radius((d) => d.size * 0.5)
     )
     .stop();
 
@@ -84,7 +59,7 @@ const getPolarScatterCoords = (data, rScale) => {
       simulation.tick();
     }
 
-  return aggData
+  return data
 
 }
 const Radar = ({ data, search, ...props }) => {
@@ -93,7 +68,7 @@ const Radar = ({ data, search, ...props }) => {
   const radius = Math.min(dimensions.width/2, dimensions.height/2) - 50
 
   const rScale = d3.scaleBand()
-    .range([radius, radius/tagCategories.length])
+    .range([radius, (radius/tagCategories.length)* 0.6])
     .domain(tagCategories)
 
   // Calculate the placement of each axis arc label
@@ -115,9 +90,10 @@ const Radar = ({ data, search, ...props }) => {
   const nodeKeyAccessor = d => "entity-" + d.entity
   const xAccessor = d => d.x
   const yAccessor = d => d.y
-  const fillAccessor = d => fillScale(d.unit)
-  const strokeAccessor = d => colorScale(d.unit)
+  const fillAccessor = d => fillScale(d.category)
+  const strokeAccessor = d => colorScale(d.category)
   const radiusAccessor = d => nodeRadiusScale(d.size)
+  const opacityAccessor = d => nodeOpacityScale(d.value)
   const accessors = { 
     key: nodeKeyAccessor,
     x: xAccessor,
@@ -125,6 +101,7 @@ const Radar = ({ data, search, ...props }) => {
     fill: fillAccessor,
     stroke: strokeAccessor,
     size: radiusAccessor,
+    opacity: opacityAccessor,
     strokeWidth: 1
   }
 
@@ -141,6 +118,7 @@ const Radar = ({ data, search, ...props }) => {
             data={topicCategories} 
             keyAccessor={(d, i) => 'axis-' + i}
             radius={radius + 20}
+            innerRadius = {(radius/tagCategories.length)* 0.5}
           />
           {labels.map((label, i) => (
             <text {...props}
@@ -154,7 +132,6 @@ const Radar = ({ data, search, ...props }) => {
           ))}
           <Nodes
             data={radialData} 
-            dataAll={data}
             accessors={accessors}
             search={search}
           />

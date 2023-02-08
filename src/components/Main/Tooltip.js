@@ -17,49 +17,41 @@ const Tooltip = ({...props }) => {
       <circle
         className="Tooltip__circle"
         r={60}
-        fill={colorScale(info.unit)}  
+        fill={colorScale(info.category)}  
         fillOpacity={0.2}
       />  
       <text {...props}
         className="Tooltip__unit"
-        y={-40}  
-        fill={colorScale(info.unit)}  
+        y={-20}  
+        fill={colorScale(info.category)}  
         fontSize={18}    
       >
-        { "Unit Type: " + info.unit }
+        { "Paper: " + info.unit }
       </text>
       <text {...props}
         className="Tooltip__entity"
-        y={-20}  
-        fill={colorScale(info.unit)}  
+        y={0}  
+        fill={colorScale(info.category)}  
         fontSize={18}    
       >
         { "Topic: " + info.topic }
       </text> 
       <text {...props}
         className="Tooltip__category"
-        y={0}  
-        fill={colorScale(info.unit)}  
+        y={20}  
+        fill={colorScale(info.category)}  
         fontSize={18}  
       >
         { "Category: " + info.category }
       </text> 
       <text {...props}
         className="Tooltip__score"
-        y={20}  
-        fill='white'  
-        fontSize={16}  
-      >
-        { "Score: " + info.value }
-      </text> 
-      <text {...props}
-        className="Tooltip__count"
         y={40}  
         fill='white'  
         fontSize={16}  
       >
-        { "No. of papers: " + info.count }
-      </text> 
+        { "Score: " + info.value }
+      </text>  
     </g>
   )
 }

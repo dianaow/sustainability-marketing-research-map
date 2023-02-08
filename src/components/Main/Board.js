@@ -15,11 +15,18 @@ const Board = ({ data, keyAccessor, scale, ...props }) => {
             className="Board__circle"
             r={callAccessor(scale, d, i) + scale.bandwidth()}
           />
+          <circle
+            className="Board__circle_stroke"
+            r={callAccessor(scale, d, i) + scale.bandwidth()}
+            fill='none'
+            stroke='white'
+            strokeWidth='0.5'
+          />
           <text {...props}
             className="Board__label"
-            textAnchor="end"
-            x={-10}
-            y={-callAccessor(scale, d, i) - scale.bandwidth() / 2}   
+            textAnchor="start"
+            x={5}
+            y={-callAccessor(scale, d, i) - scale.bandwidth() * 0.8} 
           >
             { d === 'Self-Profit-Growth' ? 'Profit' : d}
           </text> 
@@ -29,8 +36,8 @@ const Board = ({ data, keyAccessor, scale, ...props }) => {
       <text {...props}
         className="Board__label"
         textAnchor="start"
-        x={scale.bandwidth() * 1.25}
-        y={-scale.bandwidth() * 0.2}   
+        x={scale.bandwidth()* 0.8}
+        y={10}   
       >
         { "Self" }
       </text> 
@@ -39,8 +46,8 @@ const Board = ({ data, keyAccessor, scale, ...props }) => {
       <text {...props}
         className="Board__label"
         textAnchor="end"
-        x={-scale.bandwidth() * 1.25}
-        y={scale.bandwidth() * 0.25}     
+        x={-scale.bandwidth()* 0.8}
+        y={-10}     
       >
         { "Growth" }
       </text> 

@@ -45,18 +45,9 @@ const invisibleArc = (axis, radius) => {
   return newArc
 }
 
-const Axis = ({ data, radius, keyAccessor, ...props }) => {
+const Axis = ({ data, radius, innerRadius, keyAccessor, ...props }) => {
   return (
     <g className="Axis">
-      <text 
-        className="Axis__line_label"
-        fill={props.textColor}
-        fontSize={9}
-        textAnchor={props.textAnchor}
-        transform="translate(10,-150)rotate(-90)"
-      >
-        CATEGORY
-      </text>
       {data.map((axis, i) => (
         <g key={keyAccessor(axis, i)}>
           <line
@@ -72,7 +63,7 @@ const Axis = ({ data, radius, keyAccessor, ...props }) => {
           <path
             className="Axis__invisible_arc"
             id={"Axis__arc_" + i}
-            d={invisibleArc(i, radius)}
+            d={invisibleArc(i, innerRadius)}
             strokeOpacity={0}
             fill='none'
           />
@@ -86,7 +77,7 @@ const Axis = ({ data, radius, keyAccessor, ...props }) => {
               textAnchor={props.textAnchor}
               xlinkHref={"#Axis__arc_" + i}
             >
-            { axis }
+            { axis.toUpperCase() }
             </textPath>
           </text>
         </g>    
