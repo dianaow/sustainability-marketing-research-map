@@ -1,4 +1,5 @@
 import PropTypes from 'prop-types'
+import { useEffect, useRef } from "react"
 
 export const accessorPropsType = (
   PropTypes.oneOfType([
@@ -59,3 +60,11 @@ export function cleanUnit(topic) {
   if(topic === 'O') return 'Overall'
   return topic
 } 
+
+export function usePrevious(value) {
+  const ref = useRef();
+  useEffect(() => {
+    ref.current = value; //assign the value of ref to the argument
+  },[value]); //this code will run when the value of 'value' changes
+  return ref.current; //in the end, return the current ref value.
+}

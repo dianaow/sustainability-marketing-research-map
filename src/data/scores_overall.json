@@ -1,7 +1,7 @@
 [
  {
   "Order": "42",
-  "UnitID": "LNIR_10_2",
+  "UnitID": "LNIR_10",
   "CoderID": "RG",
   "TVO_Cons_SP": "1",
   "TVO_Busi_SP": "",
@@ -39,7 +39,7 @@
  },
  {
   "Order": "42",
-  "UnitID": "LNIR_10_2",
+  "UnitID": "LNIR_10",
   "CoderID": "SP",
   "TVO_Cons_SP": "1",
   "TVO_Busi_SP": "",
@@ -77,7 +77,7 @@
  },
  {
   "Order": "43",
-  "UnitID": "KB_15_2",
+  "UnitID": "KB_15",
   "CoderID": "RG",
   "TVO_Cons_SP": "0",
   "TVO_Busi_SP": "",
@@ -115,7 +115,7 @@
  },
  {
   "Order": "43",
-  "UnitID": "KB_15_2",
+  "UnitID": "KB_15",
   "CoderID": "SP",
   "TVO_Cons_SP": "0",
   "TVO_Busi_SP": "",
@@ -153,7 +153,7 @@
  },
  {
   "Order": "44",
-  "UnitID": "HKRWJ_16_2",
+  "UnitID": "HKRWJ_16",
   "CoderID": "RG",
   "TVO_Cons_SP": "",
   "TVO_Busi_SP": "0",
@@ -191,7 +191,7 @@
  },
  {
   "Order": "44",
-  "UnitID": "HKRWJ_16_2",
+  "UnitID": "HKRWJ_16",
   "CoderID": "SP",
   "TVO_Cons_SP": "",
   "TVO_Busi_SP": "0",
@@ -229,7 +229,7 @@
  },
  {
   "Order": "45",
-  "UnitID": "GCCH_16_2",
+  "UnitID": "GCCH_16",
   "CoderID": "RG",
   "TVO_Cons_SP": "2",
   "TVO_Busi_SP": "3",
@@ -267,7 +267,7 @@
  },
  {
   "Order": "45",
-  "UnitID": "GCCH_16_2",
+  "UnitID": "GCCH_16",
   "CoderID": "SP",
   "TVO_Cons_SP": "2",
   "TVO_Busi_SP": "3",
@@ -305,7 +305,7 @@
  },
  {
   "Order": "46",
-  "UnitID": "ESSMW_18_2",
+  "UnitID": "ESSMW_18",
   "CoderID": "RG",
   "TVO_Cons_SP": "0",
   "TVO_Busi_SP": "",
@@ -343,7 +343,7 @@
  },
  {
   "Order": "46",
-  "UnitID": "ESSMW_18_2",
+  "UnitID": "ESSMW_18",
   "CoderID": "SP",
   "TVO_Cons_SP": "0",
   "TVO_Busi_SP": "",
@@ -381,7 +381,7 @@
  },
  {
   "Order": "47",
-  "UnitID": "CB_21_2",
+  "UnitID": "CB_21",
   "CoderID": "RG",
   "TVO_Cons_SP": "",
   "TVO_Busi_SP": "3",
@@ -419,7 +419,7 @@
  },
  {
   "Order": "47",
-  "UnitID": "CB_21_2",
+  "UnitID": "CB_21",
   "CoderID": "SP",
   "TVO_Cons_SP": "",
   "TVO_Busi_SP": "3",
@@ -457,7 +457,7 @@
  },
  {
   "Order": "48",
-  "UnitID": "CGLZ_19_2",
+  "UnitID": "CGLZ_19",
   "CoderID": "RG",
   "TVO_Cons_SP": "0",
   "TVO_Busi_SP": "",
@@ -495,7 +495,7 @@
  },
  {
   "Order": "48",
-  "UnitID": "CGLZ_19_2",
+  "UnitID": "CGLZ_19",
   "CoderID": "SP",
   "TVO_Cons_SP": "0",
   "TVO_Busi_SP": "",
@@ -533,7 +533,7 @@
  },
  {
   "Order": "49",
-  "UnitID": "CW_13_2",
+  "UnitID": "CW_13",
   "CoderID": "RG",
   "TVO_Cons_SP": "2",
   "TVO_Busi_SP": "",
@@ -571,7 +571,7 @@
  },
  {
   "Order": "49",
-  "UnitID": "CW_13_2",
+  "UnitID": "CW_13",
   "CoderID": "SP",
   "TVO_Cons_SP": "2",
   "TVO_Busi_SP": "",
@@ -609,7 +609,7 @@
  },
  {
   "Order": "50",
-  "UnitID": "FHN_22_2",
+  "UnitID": "FHN_22",
   "CoderID": "RG",
   "TVO_Cons_SP": "",
   "TVO_Busi_SP": "3",
@@ -647,7 +647,7 @@
  },
  {
   "Order": "50",
-  "UnitID": "FHN_22_2",
+  "UnitID": "FHN_22",
   "CoderID": "SP",
   "TVO_Cons_SP": "",
   "TVO_Busi_SP": "3",
@@ -685,7 +685,7 @@
  },
  {
   "Order": "51",
-  "UnitID": "BWMIG_16_2",
+  "UnitID": "BWMIG_16",
   "CoderID": "RG",
   "TVO_Cons_SP": "2",
   "TVO_Busi_SP": "",
@@ -723,7 +723,7 @@
  },
  {
   "Order": "51",
-  "UnitID": "BWMIG_16_2",
+  "UnitID": "BWMIG_16",
   "CoderID": "SP",
   "TVO_Cons_SP": "2",
   "TVO_Busi_SP": "",

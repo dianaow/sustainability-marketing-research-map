@@ -30,10 +30,10 @@ Axis.defaultProps = {
   scale: null,
   formatTick: d3.format(","),
   label: null,
-  fill: 'white',
+  fill: 'black',
   textAnchor: 'middle',
   fontSize: '9px',
-  stroke: 'white',
+  stroke: 'black',
   strokeWidth: '0.5px'
 }
 

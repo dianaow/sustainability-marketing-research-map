@@ -4,12 +4,13 @@ import { fillScale, colorScale } from "../consts"
 const size = 6
 
 const Legend = ({ ...props }) => {
+  const data = props.data || []
   return (
     <div className="Legend">
        <div className="Legend__color">
-        <h4>Unit Type</h4>
-        <svg height={(fillScale.domain().length-1)*30}>
-          {fillScale.domain().map((d, i) => (
+        <h4>Paper name</h4>
+        <svg height={(data.length)*30}>
+          {data.map((d, i) => (
             <React.Fragment>
               <circle
                 key={d}

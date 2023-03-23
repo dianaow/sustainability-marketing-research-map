@@ -2,14 +2,15 @@ import React, { useEffect, useContext, useState } from "react"
 import PropTypes from "prop-types"
 import * as d3 from "d3"
 
-import { accessorPropsType, callAccessor, onlyUnique } from "../utils";
+import { accessorPropsType, callAccessor, onlyUnique, usePrevious } from "../utils";
 import Tooltip, { TooltipContext } from "./Tooltip";
 
 const Nodes = ({data, accessors, search}) => {
 
   const tooltip = useContext(TooltipContext)
   const [clicked, setClicked] = useState(false)
-  
+  const prevData = usePrevious(data)
+
   const updateCircles = (data, accessors, clicked) => {
     console.log('update circles')
     let { x, y, key, size, fill, stroke, strokeWidth, opacity } = accessors
@@ -37,8 +38,9 @@ const Nodes = ({data, accessors, search}) => {
 
     circles
       .on("click", d => {
-        mouseOver(d, clicked, search)
         setClicked(!clicked)
+        mouseOver(d, clicked, search)
+        //window.open(d.url, '_blank').focus()
       })
       .on("mouseover", d => mouseOver(d, clicked, search))
       .on("mouseout", d => mouseOut(d, clicked, search))
@@ -54,7 +56,7 @@ const Nodes = ({data, accessors, search}) => {
     })
     tooltip.setTooltip({
       show:true,
-      info: {unit: e.unitID, topic: e.topic, category: e.category, value: e.value, entity: e.entity}
+      info: {unit: e.unitID, label: e.label, color: e.color, topic: e.topic, category: e.category, value: e.value, entity: e.entity}
     })
   }
  
@@ -68,14 +70,22 @@ const Nodes = ({data, accessors, search}) => {
   }
 
   useEffect(() => {
-    if(search.isLoading===false & search.isOpen===false && search.results){ // prevents chart from re-rendering each time search value changes and after search
-      if(data.length > 0) updateCircles(data, accessors, clicked, search)
+    updateCircles(data, accessors, clicked, search)
+  }, [clicked])
+
+
+  useEffect(() => {
+    if(search.isLoading===false & search.isOpen===false && prevData !== data){ // prevents chart from re-rendering each time search value changes and after search
+      updateCircles(data, accessors, clicked, search)
     }
-  }, [data, clicked, search])
+    if(prevData !== data){ 
+      d3.select(".Nodes").selectAll('circle').attr('opacity', d => d.opacity)
+    }
+  }, [data, search])
 
   useEffect(() => {
     if(search.isLoading===false & search.isOpen===false && search.results && search.results.length > 0){ // prevents chart from re-rendering each time search value changes. only runs after one search result is chosen
-      const filtered = data.filter(d => d.unitID === search.value).map(d => d.entity).filter(onlyUnique)
+      const filtered = data.filter(d => d.label === search.value).map(d => d.entity).filter(onlyUnique)
       d3.select(".Nodes").selectAll('circle').attr('opacity', 0.1)
       filtered.map(d => {
         d3.select(".Nodes").selectAll(".entity-" + d).attr('opacity', 1)

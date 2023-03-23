@@ -5,40 +5,31 @@ import "./table.css"
 
 const tableActive = (data, value) => {
 
-  const samePapers = data.filter(d => d.unitID === value)
-
+  const samePapers = data.filter(d => d.label === value)
+  if(samePapers.length === 0) return
   return(
     <div className = 'table-container'>
       <div className="table-row">
-        <div className="wrapper text-4">
-          <div className="wrapper text-2">
-            <div className="text">PAPER</div>
-            <div className="text">ACTOR</div>
-          </div>
-        </div>
-        <div className="wrapper text-4">
-          <div className="wrapper text-2">
-            <div className="text">CATEGORY</div>
-            <div className="num">VALUE</div>
-          </div>
-        </div>
+        <div><a href={ samePapers[0].url }>Click here to view paper</a></div>
       </div>
-      {samePapers.map((d, i) => (
-        <div className={"table-row" }>
-          <div className="wrapper text-4">
-            <div className="wrapper text-2">
-              <div className="text">{d.unitID}</div>
-              <div className="text">{d.topic}</div>
-            </div>
-          </div>
-          <div className="wrapper text-4">
-            <div className="wrapper text-2">
-              <div className="text">{d.category}</div>
-              <div className="num">{d.value}</div>
-            </div>
-          </div>
-        </div>
-      ))}  
+      <div className="table-row">
+        <div><b>Title of paper: </b>{ samePapers[0].title }</div>
+      </div>
+      <div className="table-row">
+        <div><b>Authors: </b>{ samePapers[0].authors }</div>
+      </div>
+      <div className="table-row">
+        <div><b>Journal: </b>{ samePapers[0].sourcetitle }</div>
+      </div> 
+      <div className="table-row">
+        <div><b>Year: </b>{ samePapers[0].year }</div>
+      </div> 
+      <div className="table-row">
+        <div><b>Cited by: </b>{ samePapers[0].count }</div>
+      </div> 
+      <div className="table-row">
+        <div><b>Abstract : </b>{ samePapers[0].abstract }</div>
+      </div> 
     </div>
   )
 }
@@ -53,17 +44,20 @@ const tableEntityDefault = () => {
 }
 
 const Table = ({data, search}) => {
-
+  
   const tooltip = useContext(TooltipContext)
-  const value = tooltip.info.unit || search.value
+  const value = tooltip.info.label || search.value
   return (
-    <div className='Table'>
-      { tooltip.show || (search.results && search.results.length > 0) ? tableActive(data, value) : tableEntityDefault() }
+    <>
+     { tooltip.show || (!search.isOpen && search.results && search.results.length > 0) ? <p style={{fontWeight: 900}}>Once clicking on a node for more information, unselect that node by clicking the same node to return to the overall view</p>: <p></p> }
+     <div className='Table'>
+      { tooltip.show || (!search.isOpen && search.results && search.results.length > 0) ? tableActive(data, value) : tableEntityDefault() }
     </div>
+    </>
   )
   
 }
-
+ 
 Table.propTypes = {
 
 }

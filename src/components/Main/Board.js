@@ -1,6 +1,7 @@
 import React from "react"
 import PropTypes from "prop-types"
 import { accessorPropsType, callAccessor } from "../utils";
+import { colors } from "../consts";
 
 const Board = ({ data, keyAccessor, scale, ...props }) => {
   return (
@@ -11,8 +12,17 @@ const Board = ({ data, keyAccessor, scale, ...props }) => {
       />
       {data.map((d, i) => (
         <g key={keyAccessor(d, i)}>
+          <linearGradient id={`linearColors${i}`} x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor={colors[i]} stopOpacity="0.2"></stop>
+            <stop offset="33.3%" stopColor={colors[i]} stopOpacity="1"></stop>
+            <stop offset="33.4%" stopColor={colors[i]} stopOpacity="0.2"></stop>
+            <stop offset="66.6%" stopColor={colors[i]} stopOpacity="1"></stop>
+            <stop offset="66.7%" stopColor={colors[i]} stopOpacity="0.2"></stop>
+            <stop offset="100%" stopColor={colors[i]} stopOpacity="1"></stop>
+          </linearGradient>
           <circle
             className="Board__circle"
+            fill={colors[i] || "none"}
             r={callAccessor(scale, d, i) + scale.bandwidth()}
           />
           <circle
@@ -36,7 +46,7 @@ const Board = ({ data, keyAccessor, scale, ...props }) => {
       <text {...props}
         className="Board__label"
         textAnchor="start"
-        x={scale.bandwidth()* 0.8}
+        x={scale.bandwidth()* 0.5}
         y={10}   
       >
         { "Self" }
@@ -46,7 +56,7 @@ const Board = ({ data, keyAccessor, scale, ...props }) => {
       <text {...props}
         className="Board__label"
         textAnchor="end"
-        x={-scale.bandwidth()* 0.8}
+        x={-scale.bandwidth()* 0.5}
         y={-10}     
       >
         { "Growth" }
