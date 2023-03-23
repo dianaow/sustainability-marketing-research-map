@@ -2,17 +2,18 @@ import React, { useEffect, useContext, useState } from "react"
 import PropTypes from "prop-types"
 import * as d3 from "d3"
 
-import { accessorPropsType, callAccessor, onlyUnique } from "../utils";
+import { accessorPropsType, callAccessor, onlyUnique, usePrevious } from "../utils";
 import Tooltip, { TooltipContext } from "./Tooltip";
 
-const Nodes = ({data, dataAll, accessors, search}) => {
+const Nodes = ({data, accessors, search}) => {
 
   const tooltip = useContext(TooltipContext)
   const [clicked, setClicked] = useState(false)
-  
+  const prevData = usePrevious(data)
+
   const updateCircles = (data, accessors, clicked) => {
     console.log('update circles')
-    let { x, y, key, size, fill, stroke, strokeWidth } = accessors
+    let { x, y, key, size, fill, stroke, strokeWidth, opacity } = accessors
 
     let circles = d3.select(".Nodes").selectAll("circle").data(data, d=>d.entity);
 
@@ -27,7 +28,7 @@ const Nodes = ({data, dataAll, accessors, search}) => {
         .attr('r', (d, i) => callAccessor(size, d, i))
         .attr('fill', (d,i) => callAccessor(fill, d, i))
         .attr('stroke', (d,i) => callAccessor(stroke, d, i))
-        .attr('opacity', 1)
+        .attr('opacity', (d,i) => callAccessor(opacity, d, i))
         .attr('strokeWidth', strokeWidth)
         .style('cursor', 'pointer')
         .attr('pointer-events', 'visible')
@@ -37,8 +38,9 @@ const Nodes = ({data, dataAll, accessors, search}) => {
 
     circles
       .on("click", d => {
-        mouseOver(d, clicked, search)
         setClicked(!clicked)
+        mouseOver(d, clicked, search)
+        //window.open(d.url, '_blank').focus()
       })
       .on("mouseover", d => mouseOver(d, clicked, search))
       .on("mouseout", d => mouseOut(d, clicked, search))
@@ -48,40 +50,49 @@ const Nodes = ({data, dataAll, accessors, search}) => {
   const mouseOver = (e, clicked, search) => {
     if(clicked || search.results.length > 0) return
     d3.select(".Nodes").selectAll('circle').attr('opacity', 0.1)
-    d3.select(".Nodes").selectAll(".entity-" + e.entity).attr('opacity', 1)
+    const filtered = data.filter(d => d.unitID === e.unitID).map(d => d.entity).filter(onlyUnique)
+    filtered.map(d => {
+      d3.select(".Nodes").selectAll(".entity-" + d).attr('opacity', 1)
+    })
     tooltip.setTooltip({
       show:true,
-      info: {unit: e.unit, topic: e.topic, category: e.category, value: e.value, count: e.count, entity: e.entity},
-      details: dataAll.filter(d=>d.entity === e.entity) 
+      info: {unit: e.unitID, label: e.label, color: e.color, topic: e.topic, category: e.category, value: e.value, entity: e.entity}
     })
   }
  
   const mouseOut = (e, clicked) => {
     if(clicked || search.results.length > 0) return
-    d3.select(".Nodes").selectAll('circle').attr('opacity', 1)
+    d3.select(".Nodes").selectAll('circle').attr('opacity', (d,i) => callAccessor(accessors.opacity, d, i))
     tooltip.setTooltip({
       show: false,
-      info: {},
-      details: []
+      info: {}
     })
   }
 
   useEffect(() => {
-    if(search.isLoading===false & search.isOpen===false && search.results){ // prevents chart from re-rendering each time search value changes and after search
-      if(data.length > 0) updateCircles(data, accessors, clicked, search)
+    updateCircles(data, accessors, clicked, search)
+  }, [clicked])
+
+
+  useEffect(() => {
+    if(search.isLoading===false & search.isOpen===false && prevData !== data){ // prevents chart from re-rendering each time search value changes and after search
+      updateCircles(data, accessors, clicked, search)
     }
-  }, [data, clicked, search])
+    if(prevData !== data){ 
+      d3.select(".Nodes").selectAll('circle').attr('opacity', d => d.opacity)
+    }
+  }, [data, search])
 
   useEffect(() => {
     if(search.isLoading===false & search.isOpen===false && search.results && search.results.length > 0){ // prevents chart from re-rendering each time search value changes. only runs after one search result is chosen
-      const filtered = dataAll.filter(d => d.unitID === search.value).map(d => d.entity).filter(onlyUnique)
+      const filtered = data.filter(d => d.label === search.value).map(d => d.entity).filter(onlyUnique)
       d3.select(".Nodes").selectAll('circle').attr('opacity', 0.1)
       filtered.map(d => {
         d3.select(".Nodes").selectAll(".entity-" + d).attr('opacity', 1)
       })
     }
     if(search.results && search.results.length === 0){
-      d3.select(".Nodes").selectAll('circle').attr('opacity', 1)
+      d3.select(".Nodes").selectAll('circle').attr('opacity', (d,i) => callAccessor(accessors.opacity, d, i))
     }
   }, [search])
 

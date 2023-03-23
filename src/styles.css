@@ -7,8 +7,8 @@
 body {
   font-family: 'Karla', sans-serif !important;
   position: relative;
-  background-color: #011C54;  
-  color: white;
+  background-color: #f4f1de; 
+  color: black;
   margin: 0px;
   padding: 0px;
   opacity: 0.85;
@@ -16,32 +16,34 @@ body {
 }
 h1, h2, h3, h4, p, text, a {
   font-family: 'Karla', sans-serif !important;
-  color: white !important;
+  color: black;
 }
 p {
-  font-size: 0.75em;
+  font-size: 0.85em;
   margin: 0px;
 }
 h4 {
   margin: 5px 0px;
-  font-size: 11px;
+  font-size: 12px;
 }
 text {
   pointer-events: none;
-}
-i.icon {
-  margin: 0 !important;
+  fill: black;
 }
 
 
 .Header {
   background-color: black;
-  color: white;
   position: absolute;
   width: 100vw;
   height: 26px;
   z-index: 99;
 }
+
+.Header div {
+  color: white;
+}
+
 .headerWrapper {
   position: relative;
   width: 100%;
@@ -65,54 +67,34 @@ i.icon {
 
 .SideBarLeft {
   width: 25vw;
-  height: 100%;
-  padding: 50px 0px 10px 20px;
+  height: 100%;;
+  padding: 50px 20px 10px 20px;
   display: flex;
   flex-direction: column;
+  z-index:98;
 }
 
 .Title {
   width: 100%;
   height: auto;
+  padding-bottom: 20px;
 }
 
 .Search {
   width: 100%;
-  height: 140px;
-  padding: 20px 0px;
-  z-index: 99;
+  height: 80px;
+  padding-bottom: 10px;
 }
 .ui.input {
   width: 100% !important;
-  color: #fff !important;
-  opacity: 1 !important;
-}
-
-.ui.input >input {
-  background-color: #011C54 !important;
-  border: 1px solid #fff;
-  color: #fff !important;
 }
 
 .ui.search > .results {
   overflow-y: auto;
   max-height: 500px;
-  background-color: #011C54 !important;
+  z-index: 97;
 }
 
-.ui.search>.results>.message .header {
-  color: #fff !important;
-}
-
-.ui.search>.results .result .title {
-   color: inherit !important; 
-}
-.ui.search>.results .result {
-   color: #fff !important; 
-}
-.ui.search>.results .result:hover {
-   color: #011C54 !important; 
-}
 .ToggleButtons {
   height: 40px;
   margin-bottom: 10px;
@@ -120,74 +102,14 @@ i.icon {
 .NavButtons {
   margin: 20px 0px 10px 0px; 
 }
-.btn-large {
-  color: white;
-  padding: 12px 16px;
-  text-align: center;
-  display: inline-block;
-  font-size: 0.8em;
-  margin: 12px 8px 12px 0px;
-  cursor: pointer;
-  text-decoration: none;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  background-color: transparent;   
-  border: 1px solid white;
-  box-shadow: 0px 2px 0 darken(#011C54, 5%), 2px 4px 6px darken(#011C54, 2%);
-  transition: all 150ms linear;
-}
-.btn-large:hover {
-  background-color: white;
-  color: #011C54;
-}
-
-.btn-large.active {
-  background: darken(#011C54, 3%);
-  border: 1px solid rgba(#000, .05);
-  box-shadow: 1px 1px 2px rgba(#fff, .2);
-  color: white;
-  text-decoration: none;
-  transition: all 250ms linear;
-}
-.btn {
-  color: white;
-  padding: 8px 12px;
-  text-align: center;
-  display: inline-block;
-  font-size: 0.7em;
-  margin: 8px 4px 8px 0px;
-  cursor: pointer;
-  text-decoration: none;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-
-  background: lighten(#011C54, 3%);  
-  border: 1px solid darken(#011C54, 4%);
-  box-shadow: 0px 2px 0 darken(#011C54, 5%), 2px 4px 6px darken(#011C54, 2%);
-  transition: all 150ms linear;
-}
-.btn:hover {
-  background-color: white;
-  color: #011C54;
-}
-
-.btn.active {
-  background: darken(#011C54, 3%);
-  border: 1px solid rgba(#000, .05);
-  box-shadow: 1px 1px 2px rgba(#fff, .2);
-  color: white;
-  text-decoration: none;
-  transition: all 250ms linear;
-}
-
 .Legend {
   width: 100%;
-  height: 160px;
+  height: 220px;
 }
 
 .Main {
   width: 50vw;
-  height: 50vh;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -209,7 +131,12 @@ i.icon {
 }
 
 .Board__circle {
-    fill: #9980FA;
-    fill-opacity: 0.1;
+    fill-opacity: 0.5;
 }
 
+.footer {
+  width: 100vw;
+  height: 150px;
+  overflow-y: scroll;
+  padding: 0px 20px;
+}
