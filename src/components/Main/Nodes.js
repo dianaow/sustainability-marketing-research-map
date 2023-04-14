@@ -6,7 +6,7 @@ import { accessorPropsType, callAccessor, onlyUnique, usePrevious } from "../uti
 import Tooltip, { TooltipContext } from "./Tooltip";
 
 const Nodes = ({data, accessors, search}) => {
-
+  console.log(search)
   const tooltip = useContext(TooltipContext)
   const [clicked, setClicked] = useState(false)
   const prevData = usePrevious(data)
@@ -84,7 +84,8 @@ const Nodes = ({data, accessors, search}) => {
   }, [data, search])
 
   useEffect(() => {
-    if(search.isLoading===false & search.isOpen===false && search.results && search.results.length > 0){ // prevents chart from re-rendering each time search value changes. only runs after one search result is chosen
+    //if(search.isLoading===false & search.isOpen===false && search.results && search.results.length > 0){ // prevents chart from re-rendering each time search value changes. only runs after one search result is chosen
+    if(search.isLoading===false & search.isOpen===false){ 
       const filtered = data.filter(d => d.label === search.value).map(d => d.entity).filter(onlyUnique)
       d3.select(".Nodes").selectAll('circle').attr('opacity', 0.1)
       filtered.map(d => {

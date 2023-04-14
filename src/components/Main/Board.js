@@ -10,6 +10,17 @@ const Board = ({ data, keyAccessor, scale, ...props }) => {
         className="Board__circle"
         r={scale.range()[1]}
       />
+      <g transform="rotate(90)">
+        <text {...props}
+          className="Board__label"
+          textAnchor="start"
+          x={scale.bandwidth()* 0.5}
+          y={10} 
+          fontSize={14}  
+        >
+          { "Value Orientation" }
+        </text> 
+      </g>
       {data.map((d, i) => (
         <g key={keyAccessor(d, i)}>
           <linearGradient id={`linearColors${i}`} x1="0" y1="0" x2="1" y2="1">
@@ -75,7 +86,7 @@ Board.propTypes = {
 Board.defaultProps = {
   fill: 'white',
   textAnchor: 'left',
-  fontSize: '10px',
+  fontSize: '12px',
 }
 
 export default Board

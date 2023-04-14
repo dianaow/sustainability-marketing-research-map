@@ -28,6 +28,14 @@ const MainPage = () => {
     }
   })
 
+  const searchResultsOptions = data.map(d => d.label).filter(onlyUnique).map(d => {
+    return {
+      key: d,
+      text: d,
+      value: d
+    }
+  })
+
   const changeThresholds = (lower, upper) => {
     data.forEach(d => {
       if(d.year >= lower && d.year <= upper) {
@@ -64,25 +72,26 @@ const MainPage = () => {
   }
 
   const handleSearchChange = (e, { value }) => {
-    setSearch({ isLoading: true, isSelected: false, isOpen: true, value })
-    setTimeout(() => {
-      if (value.length < 1) {
-        setSearch(initialSearchState)
-      } else {
-        const uniqIDs = data.filter(d=>d.label.toLowerCase().indexOf(value.toLowerCase()) !== -1).map(d => d.label).filter(onlyUnique) // unique unitIDs that are similar or same as search text
-        const results = uniqIDs.map(d => {
-          return {
-            title: d
-          }
-        })
-        setSearch({
-          isLoading: false,
-          isSelected: false, 
-          isOpen: true,
-          results
-        })
-      }
-    }, 300)
+    setSearch({ isLoading: false, isSelected: false, isOpen: false, value })
+    // setSearch({ isLoading: true, isSelected: false, isOpen: true, value })
+    // setTimeout(() => {
+    //   if (value.length < 1) {
+    //     setSearch(initialSearchState)
+    //   } else {
+    //     const uniqIDs = data.filter(d=>d.label.toLowerCase().indexOf(value.toLowerCase()) !== -1).map(d => d.label).filter(onlyUnique) // unique unitIDs that are similar or same as search text
+    //     const results = uniqIDs.map(d => {
+    //       return {
+    //         title: d
+    //       }
+    //     })
+    //     setSearch({
+    //       isLoading: false,
+    //       isSelected: false, 
+    //       isOpen: true,
+    //       results
+    //     })
+    //   }
+    // }, 300)
   }
 
   useEffect(() => {
@@ -161,7 +170,7 @@ const MainPage = () => {
           <h1>The A-VO-SP Map</h1>
         </div>
         <div className="Search">
-          <Search
+          {/* <Search
             icon="search"
             placeholder="SEARCH FOR A PAPER"
             size='large'
@@ -170,7 +179,15 @@ const MainPage = () => {
             onResultSelect={handleResultSelect}
             onSearchChange={handleSearchChange}
             results={results}
-            value={value} />
+            value={value} /> */}
+          <Dropdown
+            placeholder=''
+            fluid
+            search
+            selection
+            options={searchResultsOptions}
+            onChange={handleSearchChange}
+          />
         </div>
         <Slider changeThresholds={changeThresholds} active={true} /> 
         <div className="Search">
