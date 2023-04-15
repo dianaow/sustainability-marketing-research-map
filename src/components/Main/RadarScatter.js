@@ -7,7 +7,7 @@ import Axis from "./RadarAxis"
 import Nodes from "./Nodes"
 
 import { callAccessor, onlyUnique }  from "../utils"
-import { colorScale, fillScale, tagCategories, topicCategories, scoreCategories, nodeRadiusScale, angleSlice, bufferInRad } from "../consts"
+import { invisibleArc, colorScale, fillScale, tagCategories, topicCategories, scoreCategories, nodeRadiusScale, angleSlice, bufferInRad } from "../consts"
 
 const getCoordsAlongArc = (data, rScale, label) => {
 
@@ -68,13 +68,14 @@ const Radar = ({ data, search, ...props }) => {
   colorScale.domain(colorCategories)
 
   const dimensions = {'width': window.innerWidth, 'height': window.innerHeight}
-  const radius = Math.min(dimensions.width/2, dimensions.height/2) - 40
+  const radius = Math.min(dimensions.width/2, dimensions.height/2) - 50
 
   const rScale = d3.scaleBand()
     .range([radius, (radius/tagCategories.length)* 0.3])
     .domain(tagCategories)
 
   // Calculate the placement of each axis arc label
+  const values = ['Not Applicable', 'Very weak', 'Weak', 'Moderate', 'Strong', 'Very Strong']
   const labels = []
   topicCategories.forEach((topic)=>{
     scoreCategories.forEach((score)=>{
@@ -84,7 +85,7 @@ const Radar = ({ data, search, ...props }) => {
         value : score
       } 
       let coors = getCoordsAlongArc(datum, rScale, true)
-      labels.push({text: score, x: +coors[0], y: +coors[1]})
+      labels.push({text: values[score], x: +coors[0], y: +coors[1]})
     })
   })
 
@@ -112,7 +113,7 @@ const Radar = ({ data, search, ...props }) => {
   return (
     <div className="Radar" style={{'width': window.innerWidth, 'height': window.innerHeight}}>
       <Chart dimensions={dimensions}>
-       <g transform={`translate(${dimensions.width/2}, ${dimensions.height/2})`}>
+       <g transform={`translate(${dimensions.width/2}, ${dimensions.height/2 + 20})`}>
           <Board
             data={tagCategories}
             keyAccessor={(d, i) => 'board-' + i}
@@ -125,15 +126,29 @@ const Radar = ({ data, search, ...props }) => {
             innerRadius = {(radius/tagCategories.length)* 0.28}
           />
           {labels.map((label, i) => (
-            <text {...props}
+            <>
+            <path
+              className="Radar__invisible_arc"
+              id={"Radar__arc_" + i}
+              d={invisibleArc(i, radius, (Math.PI * 2) / (labels.length))}
+              strokeOpacity={0}
+              fill='none'
+            />
+            <text 
               className="Radar__arcText"
               key={"Radar__arcText-" + i}
-              x={label.x}
-              y={label.y}
+              fontSize='10px'
             >
+              <textPath
+                startOffset="50%"
+                xlinkHref={"#Radar__arc_" + i}
+              >
               { label.text }
-            </text> 
+              </textPath>
+            </text>
+            </>
           ))}
+          
           <Nodes
             data={radialData} 
             accessors={accessors}
@@ -156,7 +171,7 @@ Radar.defaultProps = {
   strokeOpacity: 0.2,
   fill: 'white',
   textAnchor: 'middle',
-  fontSize: '11px',
+  fontSize: '10px',
 }
 
 export default Radar

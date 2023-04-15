@@ -6,7 +6,7 @@ import { accessorPropsType, callAccessor, onlyUnique, usePrevious } from "../uti
 import Tooltip, { TooltipContext } from "./Tooltip";
 
 const Nodes = ({data, accessors, search}) => {
-  console.log(search)
+
   const tooltip = useContext(TooltipContext)
   const [clicked, setClicked] = useState(false)
   const prevData = usePrevious(data)

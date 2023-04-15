@@ -34,9 +34,9 @@ export const onlyUnique = (value, index, self) => {
 }
 
 export function cleanTopic(topic) {
-  if(topic === 'Bus' || topic === 'Busi') return 'Business'
-  if(topic === 'Ins' || topic === 'Inst') return 'Institution'
-  if(topic === 'Con' || topic === 'Cons') return 'Consumer'
+  if(topic === 'Bus' || topic === 'Busi') return 'Businesses'
+  if(topic === 'Ins' || topic === 'Inst') return 'Institutions'
+  if(topic === 'Con' || topic === 'Cons') return 'Consumers'
   return topic
 } 
 

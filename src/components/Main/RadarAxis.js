@@ -1,49 +1,11 @@
 import React from "react"
 import PropTypes from "prop-types"
-import * as d3 from 'd3'
-import { angleSlice } from "../consts"
+import { invisibleArc, angleSlice } from "../consts"
 
 export const max = Math.max;
 export const sin = Math.sin;
 export const cos = Math.cos;
 export const HALF_PI = Math.PI / 2;
-
-const invisibleArc = (axis, radius) => {
-
-  var arc = d3.arc()
-      .innerRadius(radius)
-      .outerRadius(radius+5)
-      .startAngle(angleSlice*(axis))
-      .endAngle(angleSlice*(axis+1))
-
-  //Search pattern for everything between the start and the first capital L
-  var firstArcSection = /(^.+?)L/;  
-
-  //Grab everything up to the first Line statement
-  var newArc = firstArcSection.exec( arc() )[1];
-
-  //Replace all the comma's so that IE can handle it
-  newArc = newArc.replace(/,/g , " ");
-    
-  //If the end angle lies beyond a quarter of a circle (90 degrees or pi/2) 
-  //flip the end and start position
-  if (axis === 3 || axis === 4) {
-    var startLoc  = /M(.*?)A/,    //Everything between the first capital M and first capital A
-      middleLoc   = /A(.*?)0 0 1/,  //Everything between the first capital A and 0 0 1
-      endLoc    = /0 0 1 (.*?)$/; //Everything between the first 0 0 1 and the end of the string (denoted by $)
-    //Flip the direction of the arc by switching the start en end point (and sweep flag)
-    //of those elements that are below the horizontal line
-    var newStart = endLoc.exec( newArc )[1];
-    var newEnd = startLoc.exec( newArc )[1];
-    var middleSec = middleLoc.exec( newArc )[1];
-    
-    //Build up the new arc notation, set the sweep-flag to 0
-    newArc = "M" + newStart + "A" + middleSec + "0 0 0 " + newEnd;
-
-  }//if
-
-  return newArc
-}
 
 const Axis = ({ data, radius, innerRadius, keyAccessor, ...props }) => {
   return (
@@ -63,7 +25,7 @@ const Axis = ({ data, radius, innerRadius, keyAccessor, ...props }) => {
           <path
             className="Axis__invisible_arc"
             id={"Axis__arc_" + i}
-            d={invisibleArc(i, innerRadius)}
+            d={invisibleArc(i, innerRadius, angleSlice)}
             strokeOpacity={0}
             fill='none'
           />
@@ -82,6 +44,16 @@ const Axis = ({ data, radius, innerRadius, keyAccessor, ...props }) => {
           </text>
         </g>    
       ))}
+        <text 
+          className="Axis__arcText"
+          fill={props.textColor}
+          fontSize='14px'
+          fontWeight='900'
+          y={-radius}
+          textAnchor="middle"
+        >
+          { 'Sustainability Positioning' }
+        </text>
     </g>
   )
 }

@@ -12,7 +12,7 @@ import html2canvas from "html2canvas";
 
 const popupContent = [
   {
-    key: 'Consumer', 
+    key: 'Consumers', 
     tag: 'Self-Oriented',
     values: [
       'Self-Oriented here means that Consumers are making their consumption decisions while concerned with beneficial outcomes towards themselves. This can range from hedonic motivations, getting the best product at the best price for themselves, purchasing a certain product to boost their self-concept and identity, or consumption that involves impure altruism and the warm glow.',
@@ -21,7 +21,7 @@ const popupContent = [
     ]
   },
   {
-    key: 'Business', 
+    key: 'Businesses', 
     tag: 'Profit-Oriented',
     values: [
       'Profit-Oriented here means that Businesses are engaging in exchange of a product or service while concerned with profit maximization outcomes and the needs of direct consumers, shareholders and the (financial) health and competitiveness of the business. For example, prioritizing value creation over environmental initiatives, utilizing green marketing for competitive reasons, and cutting costs on labour to maximise profits.',
@@ -30,7 +30,7 @@ const popupContent = [
     ]
   },
   {
-    key: 'Institution', 
+    key: 'Institutions', 
     tag: 'Growth-Oriented',
     values: [
       'Growth-Oriented here means that Institutions are facilitating exchange while concerned with maximizing the growth of key performance indicators that are relevant to the type of institutional actor concerned, such as GDP for government and constituency support for politicians, within existing structures. For example, continuing policies that enhance development and economic prosperity despite potential negative impact on society or the environment.',
@@ -39,6 +39,7 @@ const popupContent = [
     ]
   }
 ]
+
 const boolOptions = [
   {
     key: "Yes",
@@ -59,6 +60,20 @@ const valueOptions = ['Not Applicable', 'Very weak', 'Weak', 'Moderate', 'Strong
     value: i
   }
 })
+
+const RBOptions = [
+  {
+    key: "Researcher",
+    text: "Researcher",
+    value: "Researcher"
+  },
+  {
+    key: "Business",
+    text: "Business",
+    value: "Business"
+  }
+]
+
 
 const TIYPage = () => {
 
@@ -141,11 +156,11 @@ const TIYPage = () => {
   }
 
   const handleChange = (value, key) => {
-    setForm({ ...form, [key]: value });
+     setForm({ ...form, [key]: value });
     let newData = []
-    topicCategories.forEach(topic => {
+    topicCategories.forEach((topic,t) => {
       if(key === topic + '_SP'){
-        tagCategories.forEach(category => {
+        tagCategories.forEach((category,c) => {
           if(form[topic + '_' + category] && value > 0){
             newData.push({
               entity: key,
@@ -157,17 +172,29 @@ const TIYPage = () => {
               opacity: 1,
               color: 'New paper'     
             })
-            setData([...data, ...newData])
+            setForm({ ...form, [t + '_' + c]: newData})
           }
         })
       }
     })
   }
 
+  const handleSubmit = () => {
+    let newData = []
+    topicCategories.forEach((topic,t) => {
+      tagCategories.forEach((category,c) => {
+        if(form[t + '_' + c]) newData.push(...form[t + '_' + c])
+      })
+    })
+    setData([...data, ...newData])
+  }
+
   const handleReset = (key) => {
-    const newData = data.filter(d => !(d.color === 'New paper' && d.topic === key))
-    setData(newData)
-    setForm({ ...form, [key]: 0, [key + '_SP']: null, [key + '_Self-Profit-Growth']: null,  [key + '_Society']: null, [key + '_Environment']: null });
+    setData(data.filter(d => !(d.color === 'New paper')))
+    setForm({})
+    //const newData = data.filter(d => !(d.color === 'New paper' && d.topic === key))
+    //setData(newData)
+    //setForm({ ...form, [key]: 0, [key + '_SP']: null, [key + '_Self-Profit-Growth']: null,  [key + '_Society']: null, [key + '_Environment']: null });
   }
 
   const downloadAsImage = async() => {
@@ -192,65 +219,143 @@ const TIYPage = () => {
             <h4>Click on canvas to download it as an image</h4>
           </div>
           <div style={{overflow: 'scroll', height: '90vh'}}>
-          {topicCategories.map(topic => {
-            return(<div style={{display: 'flex'}}>
-              <div style={{marginRight: '30px', marginTop: '20px'}}>
-                <h4>Does your work involve {topic}s as an Actor?</h4>
-                <Dropdown placeholder='' selection options={boolOptions} disabled={form[topic + '_SP'] > 0 ? true : false} onChange={(e,{value})=>handleChange(value, topic)}/>
-              </div>
-              {form[topic] ?
-              <div>
-                <div style={{margin: '20px 0px'}}>
-                  <div style={{display: 'flex'}}>
-                    <h4>Are {topic} {popupContent.find(d => d.key === topic).tag} in your work?</h4>
-                    <Popup
-                      trigger={<Icon name='question circle' />}
-                      content={popupContent.find(d => d.key === topic).values[0]}
-                      size='mini'
-                      position='top right'
-                    />
-                  </div>
-                  <Dropdown placeholder='' selection options={boolOptions} disabled={form[topic + '_SP'] > 0 ? true : false} onChange={(e,{value})=>handleChange(value, topic + '_Self-Profit-Growth')}/>
-                </div>
-                <div style={{margin: '20px 0px'}}>
-                  <div style={{display: 'flex'}}>
-                    <h4>Are {topic} Societally-Oriented in your work?</h4>
-                    <Popup
-                      trigger={<Icon name='question circle' />}
-                      content={popupContent.find(d => d.key === topic).values[1]}
-                      size='mini'
-                      position='top right'
-                    />
-                  </div>
-                  <Dropdown placeholder='' selection options={boolOptions} disabled={form[topic + '_SP'] > 0 ? true : false} onChange={(e,{value})=>handleChange(value, topic + '_Society')} />
-                </div>
-                <div style={{margin: '20px 0px'}}>
-                  <div style={{display: 'flex'}}>
-                    <h4>Are {topic} Environmentally-Oriented in your work?</h4>
-                    <Popup
-                      trigger={<Icon name='question circle' />}
-                      content={popupContent.find(d => d.key === topic).values[2]}
-                      size='mini'
-                      position='top right'
-                    />
-                  </div>
-                  <Dropdown placeholder='' selection options={boolOptions} disabled={form[topic + '_SP'] > 0 ? true : false} onChange={(e,{value})=>handleChange(value, topic + '_Environment')} />
-                </div>
-                <div style={{margin: '20px 0px'}}>
-                  <h4>Choose the appropriate Sustainability Positioning for the {topic} as defined in the codebook. If not, please choose Not Applicable. </h4>
-                  <Dropdown placeholder='' selection options={valueOptions} disabled={form[topic + '_SP'] > 0 ? true : false} onChange={(e,{value})=>handleChange(value, topic + '_SP')} />
-                </div>
-                <div style={{margin: '0px 0px 30px 0px'}}>
-                  <Button size='mini' onClick={(e)=> handleReset(topic)}>Reset</Button>
-                </div>
-              </div> : <div></div>
-              }
-            </div>)
-          })}
-          <div style={{margin: '20px 0px'}}>
-            <h4>If you want to export the A-VO-SP Map, please give your work a name of your choice.</h4>
-            <Input name='name' placeholder='Name of your work' onChange={handleNameChange}></Input>
+          <div style={{marginRight: '30px', marginTop: '20px'}}>
+            <h4>Are you a Researcher or a Business?</h4>
+            <Dropdown placeholder='' selection options={RBOptions} onChange={(e,{value})=>handleChange(value, 'researcher_or_biz')}/>
           </div>
+
+          {form['researcher_or_biz'] === 'Researcher' && 
+          <>
+            <div style={{margin: '20px 0px', width: '50%'}}>
+              <h4>How would you like to name your research in the A-VO-SP Map? </h4>
+              <Input name='name' placeholder='Author names, Working title, Dependent variables, etc.' onChange={handleNameChange}></Input>
+            </div>
+            { topicCategories.map(topic => {
+              return(
+              <div style={{display: 'flex'}}>
+                <div style={{marginRight: '30px', marginTop: '20px'}}>
+                  <h4>Does your work involve {topic} as an Actor?</h4>
+                  <Dropdown placeholder='' selection options={boolOptions} disabled={form[topic + '_SP'] > 0 ? true : false} onChange={(e,{value})=>handleChange(value, topic)}/>
+                </div>
+                {form[topic] ?
+                  <div>
+                    <div style={{margin: '20px 0px'}}>
+                      <div style={{display: 'flex'}}>
+                        <h4>Are {topic} {popupContent.find(d => d.key === topic).tag} in your research?</h4>
+                        <Popup
+                          trigger={<Icon name='question circle' />}
+                          content={popupContent.find(d => d.key === topic).values[0]}
+                          size='mini'
+                          position='top right'
+                        />
+                      </div>
+                      <Dropdown placeholder='' selection options={boolOptions} disabled={form[topic + '_SP'] > 0 ? true : false} onChange={(e,{value})=>handleChange(value, topic + '_Self-Profit-Growth')}/>
+                    </div>
+                    <div style={{margin: '20px 0px'}}>
+                      <div style={{display: 'flex'}}>
+                        <h4>Are {topic} Societally-Oriented in your research?</h4>
+                        <Popup
+                          trigger={<Icon name='question circle' />}
+                          content={popupContent.find(d => d.key === topic).values[1]}
+                          size='mini'
+                          position='top right'
+                        />
+                      </div>
+                      <Dropdown placeholder='' selection options={boolOptions} disabled={form[topic + '_SP'] > 0 ? true : false} onChange={(e,{value})=>handleChange(value, topic + '_Society')} />
+                    </div>
+                    <div style={{margin: '20px 0px'}}>
+                      <div style={{display: 'flex'}}>
+                        <h4>Are {topic} Environmentally-Oriented in your research?</h4>
+                        <Popup
+                          trigger={<Icon name='question circle' />}
+                          content={popupContent.find(d => d.key === topic).values[2]}
+                          size='mini'
+                          position='top right'
+                        />
+                      </div>
+                      <Dropdown placeholder='' selection options={boolOptions} disabled={form[topic + '_SP'] > 0 ? true : false} onChange={(e,{value})=>handleChange(value, topic + '_Environment')} />
+                    </div>
+                    <div style={{margin: '20px 0px'}}>
+                      <h4>If using the full codebook, please also choose the appropriate Sustainability Positioning for the {topic} as defined in the codebook. If not, please choose Not Applicable and your work will be placed automatically based on your previous answers.</h4>
+                      <Dropdown placeholder='' selection options={valueOptions} disabled={form[topic + '_SP'] > 0 ? true : false} onChange={(e,{value})=>handleChange(value, topic + '_SP')} />
+                    </div>
+                  </div> : <div></div>
+                }
+              </div>)
+            })}  
+            <div style={{margin: '20px 0px'}}>
+              <Button size='mini' onClick={(e)=> handleSubmit()}>Submit</Button>
+              <Button size='mini' onClick={(e)=> handleReset()}>Reset</Button>
+            </div>
+            </>
+          }     
+
+          {form['researcher_or_biz'] === 'Business' && 
+          <>
+            <div style={{margin: '20px 0px', width: '50%'}}>
+              <h4>How would you like to name your work in the A-VO-SP Map? </h4>
+              <Input name='name' placeholder='Brand X’s Mission Statement, Initiative, Advertisement, etc' onChange={handleNameChange}></Input>
+            </div>
+            {topicCategories.map(topic => {
+              return(
+              <div style={{display: 'flex'}}>
+                <div style={{marginRight: '30px', marginTop: '20px'}}>
+                  <h4>Does your work involve {topic} taking action?</h4>
+                  <Dropdown placeholder='' selection options={boolOptions} disabled={form[topic + '_SP'] > 0 ? true : false} onChange={(e,{value})=>handleChange(value, topic)}/>
+                </div>
+                {form[topic] ?
+                <div>
+                  <div style={{margin: '20px 0px'}}>
+                    <div style={{display: 'flex'}}>
+                      <h4>Are your {topic} {topic === 'Consumers' ? '(required to be) ' : ''} {popupContent.find(d => d.key === topic).tag} in your work?</h4>
+                      <Popup
+                        trigger={<Icon name='question circle' />}
+                        content={popupContent.find(d => d.key === topic).values[0]}
+                        size='mini'
+                        position='top right'
+                      />
+                    </div>
+                    <Dropdown placeholder='' selection options={boolOptions} disabled={form[topic + '_SP'] > 0 ? true : false} onChange={(e,{value})=>handleChange(value, topic + '_Self-Profit-Growth')}/>
+                  </div>
+                  <div style={{margin: '20px 0px'}}>
+                    <div style={{display: 'flex'}}>
+                      <h4>Are your {topic} {topic === 'Consumers' ? '(required to be) ' : ''} Societally-Oriented in your work?</h4>
+                      <Popup
+                        trigger={<Icon name='question circle' />}
+                        content={popupContent.find(d => d.key === topic).values[1]}
+                        size='mini'
+                        position='top right'
+                      />
+                    </div>
+                    <Dropdown placeholder='' selection options={boolOptions} disabled={form[topic + '_SP'] > 0 ? true : false} onChange={(e,{value})=>handleChange(value, topic + '_Society')} />
+                  </div>
+                  <div style={{margin: '20px 0px'}}>
+                    <div style={{display: 'flex'}}>
+                      <h4>Are your {topic} {topic === 'Consumers' ? '(required to be) ' : ''} Environmentally-Oriented in your work?</h4>
+                      <Popup
+                        trigger={<Icon name='question circle' />}
+                        content={popupContent.find(d => d.key === topic).values[2]}
+                        size='mini'
+                        position='top right'
+                      />
+                    </div>
+                    <Dropdown placeholder='' selection options={boolOptions} disabled={form[topic + '_SP'] > 0 ? true : false} onChange={(e,{value})=>handleChange(value, topic + '_Environment')} />
+                  </div>
+                  <div style={{margin: '20px 0px'}}>
+                    <h4>If using the full codebook, please also choose the appropriate Sustainability Positioning for the {topic} as defined in the codebook. If not, please choose Not Applicable and your work will be placed automatically based on your previous answers.</h4>
+                    <Dropdown placeholder='' selection options={valueOptions} disabled={form[topic + '_SP'] > 0 ? true : false} onChange={(e,{value})=>handleChange(value, topic + '_SP')} />
+                  </div>
+                </div> : <div></div>
+                }
+              </div>)
+            })}
+            <div style={{margin: '0px 0px 30px 0px'}}>
+              <Button size='mini' onClick={(e)=> handleReset()}>Reset</Button>
+              <Button size='mini' onClick={(e)=> handleSubmit()}>Submit</Button>
+            </div>
+          </>
+          }
+
         </div>
       </div>
       <div className ='Main' onClick={downloadAsImage}>
