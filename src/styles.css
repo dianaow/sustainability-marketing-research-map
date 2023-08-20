@@ -65,8 +65,17 @@ text {
   align-items: center;
 }
 
-.SideBarLeft {
+.SideBarLeft1 {
   width: 40vw;
+  height: 100%;;
+  padding: 50px 20px 10px 20px;
+  display: flex;
+  flex-direction: column;
+  z-index:98;
+}
+
+.SideBarLeft {
+  width: 28vw;
   height: 100%;;
   padding: 50px 20px 10px 20px;
   display: flex;
@@ -82,7 +91,7 @@ text {
 
 .Search {
   width: 100%;
-  height: 80px;
+  height: 120px;
   padding-bottom: 10px;
 }
 .ui.input {

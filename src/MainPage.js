@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react"
 import * as d3 from "d3"
-import { Search, Dropdown } from "semantic-ui-react";
+import { Popup, Button, Dropdown } from "semantic-ui-react";
 import scores from './data/scores.json';
 import papers from './data/final_papers.json';
 
@@ -11,6 +11,32 @@ import { TooltipContext } from "./components/Main/Tooltip";
 import Legend from './components/Main/Legend'
 import Table from "./components/Main/Table"
 import { getPropertyName, cleanTopic, cleanCategory, onlyUnique }  from "./components/utils"
+
+function renderLegendContent(name) {
+  if (name === 'Actors') {
+    return <div>
+    <p>This dimension encompasses agents with varying capacities for sustainability action. We found three Actors:</p>
+    <p>i. Consumers, functioning at the individual and micro-level</p>
+    <p>ii. Businesses, operating as a group at the meso-level in capacity and agency</p>
+    <p>iii. Institutions. covering the network of actors that function at the macro-level of capacity and agency, including policymakers, governments, non-governmental institutions, educational institutions, and researchers, amongst others</p>
+    <p>Please refer to Our Process for more in-depth information.</p>
+    </div>
+  } else if (name === 'Value Orientations') {
+    return <div>
+    <p>Value Orientations reflect motivations, personal values, identity, collective norms, and feelings of responsibility. This dimension is split into three levels of abstraction. At the inner-most circle, each Actor is Self-Oriented in different capacities. </p>
+    <p>At the base level, Consumers are found to be Self-Oriented. Here, Consumers pursue sustainable action for a variety of self-benefiting outcomes, including financial benefit, identity expression, altruism and the warm glow effect, feelings of agency, individualism, and convenience.</p>
+    <p>Businesses are at their most self-benefitting at the Profit-Orientation, wherein if Businesses engage in sustainability practices, it ultimately increases their company's profitability. Here, Businesses use sustainability as a platform to maximise their profitability without actively engaging in the sustainability agenda, with any positive effects a by-product of profit maximisation. </p>
+    <p>Institutions’ values are Growth-Oriented. Since our Institutional actor is a network of macro actors, Growth is a flexible concept synthesised across the sustainability marketing research that differs depending on the specific actor within this network.</p>
+    <p>At the middle level, all Actors are Societally-Oriented; where Actors go beyond thinking of the most beneficial outcome for themselves, but for larger society. Environmental-Orientation lies in the outer circle, where Actors are oriented towards caring for non-human life and the environment.</p>
+    </div>
+  } else if (name === 'Sustainability Positioning') {
+    return <div>
+    <p>Finally, we propose Sustainability Positioning, a continuum from Very Weak to Very Strong. Weak Sustainability argues that natural capital is fully replaceable by manufactured capital and provides no more well-being to humans or non-humans than manufactured capital does. </p>
+    <p>In this view, the loss of natural capital at the expense of economic growth is acceptable, allowing for capitalistic goals to be achieved without hindrance. Strong Sustainability argues that natural capital cannot be substituted by manufactured capital. When critical natural capital, for example, rare earth resources, are entirely consumed or lost in the case of extinct species, they can never be regained, regardless of the level of artificial capital invested. </p>
+    <p>Therefore, strong sustainability argues that since some functions of society can only be achieved by the natural capital of the earth’s ecosystem, it deserves special protection. Please refer to Our Process for more in-depth information.</p>
+    </div>
+  }
+}
 
 const MainPage = () => {
 
@@ -28,7 +54,7 @@ const MainPage = () => {
     }
   })
 
-  const searchResultsOptions = data.map(d => d.label).filter(onlyUnique).map(d => {
+  const searchResultsOptions = data.sort((a, b) => a.label.trim() - b.label.trim()).map(d => d.label).filter(onlyUnique).map(d => {
     return {
       key: d,
       text: d,
@@ -180,18 +206,20 @@ const MainPage = () => {
             onSearchChange={handleSearchChange}
             results={results}
             value={value} /> */}
+          <h3>Search for a paper</h3>
           <Dropdown
-            placeholder=''
+            placeholder='Search for a paper'
             fluid
             search
             selection
+            clearable
             options={searchResultsOptions}
             onChange={handleSearchChange}
           />
         </div>
         <Slider changeThresholds={changeThresholds} active={true} /> 
         <div className="Search">
-        <h4 style={{margin: '10px 0px', textAlign: 'left'}}>Filter by Journal: </h4>
+        <h3 style={{margin: '10px 0px', textAlign: 'left'}}>Filter by Journal</h3>
           <Dropdown
             placeholder=''
             fluid
@@ -214,6 +242,18 @@ const MainPage = () => {
             data={data} 
             search={search}
           />
+          <div style={{display: "flex"}}>
+            {['Actors', 'Value Orientations', 'Sustainability Positioning'].map((item) => (
+              <Popup
+                position='top center'
+                key={item}
+                header={item}
+                trigger={<Button>{item}</Button>}
+              >
+                {renderLegendContent(item)}
+              </Popup>
+            ))}
+          </div>
         </TooltipContext.Provider>
       </div>
 

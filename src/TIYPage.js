@@ -141,7 +141,7 @@ const TIYPage = () => {
       d.color = papersToColor.indexOf(d.unitID) !== -1 ? d.label : 'Other papers'
     })
     
-    setData(aggData)
+    setData([])
   }, [])
 
   const handleNameChange = (e, { name, value }) => {
@@ -154,6 +154,13 @@ const TIYPage = () => {
 		}
 		debounce()
   }
+  
+  //IF	Self	Society	Environment	THEN
+  //YES	NO	NO	VERY WEAK
+  //YES	NO	YES	WEAK
+  //YES	YES	NO	WEAK
+  //YES	YES	YES	MODERATE
+  //NO	YES	YES	STRONG
 
   const handleChange = (value, key) => {
      setForm({ ...form, [key]: value });
@@ -161,7 +168,13 @@ const TIYPage = () => {
     topicCategories.forEach((topic,t) => {
       if(key === topic + '_SP'){
         tagCategories.forEach((category,c) => {
-          if(form[topic + '_' + category] && value > 0){
+          if(form[topic + '_' + category]){
+            console.log('value more 0', form, key, topic, category, value)
+            if(value === 0 & form[topic + '_Self-Profit-Growth'] === 1 && form[topic + '_Society'] === 0 && form[topic + '_Environment'] === 0) value = 1
+            if(value === 0 & form[topic + '_Self-Profit-Growth'] === 1 && form[topic + '_Society'] === 0 && form[topic + '_Environment'] === 1) value = 2
+            if(value === 0 & form[topic + '_Self-Profit-Growth'] === 1 && form[topic + '_Society'] === 1 && form[topic + '_Environment'] === 0) value = 2
+            if(value === 0 & form[topic + '_Self-Profit-Growth'] === 1 && form[topic + '_Society'] === 1 && form[topic + '_Environment'] === 1) value = 3
+            if(value === 0 & form[topic + '_Self-Profit-Growth'] === 0 && form[topic + '_Society'] === 1 && form[topic + '_Environment'] === 1) value = 4
             newData.push({
               entity: key,
               topic,
@@ -175,6 +188,8 @@ const TIYPage = () => {
             setForm({ ...form, [t + '_' + c]: newData})
           }
         })
+      } else {
+
       }
     })
   }
@@ -213,7 +228,7 @@ const TIYPage = () => {
     <React.Fragment>
       <Header/>
       <div className="App__wrapper">
-        <div className ='SideBarLeft'>
+        <div className ='SideBarLeft1'>
           <h4>Following this, you will be shown a simplified version of the codebook used by the researchers that allows you to get a rough idea of where your paper falls. However, if you’re interested in the nuance of your paper’s placement on the A-VO-SP Map, including the accurate Sustainability Positioning, please follow this link to the full codebook.</h4>
           <div style={{margin: '20px 0px'}}>
             <h4>Click on canvas to download it as an image</h4>

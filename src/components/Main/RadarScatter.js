@@ -68,7 +68,7 @@ const Radar = ({ data, search, ...props }) => {
   colorScale.domain(colorCategories)
 
   const dimensions = {'width': window.innerWidth, 'height': window.innerHeight}
-  const radius = Math.min(dimensions.width/2, dimensions.height/2) - 50
+  const radius = Math.min(dimensions.width/2, dimensions.height/2) - 70
 
   const rScale = d3.scaleBand()
     .range([radius, (radius/tagCategories.length)* 0.3])
@@ -111,9 +111,9 @@ const Radar = ({ data, search, ...props }) => {
   }
 
   return (
-    <div className="Radar" style={{'width': window.innerWidth, 'height': window.innerHeight}}>
+    <div className="Radar" style={{'width': window.innerWidth, 'height': window.innerHeight - 90}}>
       <Chart dimensions={dimensions}>
-       <g transform={`translate(${dimensions.width/2}, ${dimensions.height/2 + 20})`}>
+       <g transform={`translate(${dimensions.width/2}, ${dimensions.height/2 - 30})`}>
           <Board
             data={tagCategories}
             keyAccessor={(d, i) => 'board-' + i}
