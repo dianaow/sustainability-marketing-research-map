@@ -34,7 +34,7 @@ class Example extends Component {
     } = this
 
     return (
-      <div style={{ height: '80px', width: '100%', marginTop: '0px', opacity: this.props.active ? '1' : '0.5' }}>
+      <div style={{ height: '120px', width: '100%', marginTop: '0px', opacity: this.props.active ? '1' : '0.5' }}>
        <h3 style={{margin: '0px 0px 20px 0px', textAlign: 'left'}}>Filter by Year</h3>
         <Slider
           step={1}
