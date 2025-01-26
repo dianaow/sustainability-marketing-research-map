@@ -6,8 +6,8 @@ import { Dropdown, Button, Popup, Icon, Input, } from "semantic-ui-react";
 import { tagCategories, topicCategories } from "./components/consts"
 import { getPropertyName, cleanTopic, cleanCategory }  from "./components/utils"
 
-import scores from './data/scores.json';
-import papers from './data/final_papers.json';
+import scores from './data/scores_full.json';
+import papers from './data/final_papers_full_citations.json';
 import html2canvas from "html2canvas";
 
 const popupContent = [
@@ -80,20 +80,19 @@ const TIYPage = () => {
   let timer
   const [form, setForm] = useState({})
   const [data, setData] = useState([])
+  const [journals, setJournals] = useState([])
 
   useEffect(() => {
     const keys = Object.keys(scores[0])
     const data = scores.map(d => {
       return keys.map(key => {
+        if(key === 'SP') return
         let result = getPropertyName(d, o => o[key]).split('_')
-        if(result[0] !== 'OVO' || result[2] === 'SP') return
         return {
-          unitID: d.UnitID,
-          coderID: d.CoderID,
-          order: d.Order,
+          unitID: d.Unit,
           topic: cleanTopic(result[1]),
           category: cleanCategory(result[2]),
-          value: d['OVO_' + result[1] + '_' + result[2]] === "1" ? d['OVO_' + result[1] + '_SP'] : "" 
+          value: d[key] === "1" ? d['SP'] : "" 
         }
       })
     }).flat().filter(d => d && d.category && d.topic && d.value !== "")
@@ -108,40 +107,45 @@ const TIYPage = () => {
     let aggData = []
     nested.forEach(a =>{
       const paper = papers.find(el => el.Code === a.key) || {}
-      a.values.forEach(b => {
-        b.values.forEach(c => {
-          if(c.value )
-          aggData.push({
-            entity: a.key + '-' + b.key + '-' + c.key,
-            unitID: a.key,
-            topic: b.key,
-            category: c.key,
-            value: c.value,
-            count: +paper.Citedby,
-            label: paper.InGraphLabel.replace('|', ','),
-            authors: paper.Authors.replace('|', ','),
-            url: paper.Link,
-            sourcetitle: paper.Sourcetitle,
-            year: +paper.Year,
-            opacity: 0.5
+      if(Object.keys(paper).length > 0) {
+        a.values.forEach(b => {
+          b.values.forEach(c => {
+            if(c.value )
+            aggData.push({
+              entity: a.key + '-' + b.key + '-' + c.key,
+              unitID: a.key,
+              topic: b.key,
+              category: c.key,
+              value: c.value,
+              count: +paper.citationCount,
+              label: paper.Authors.replaceAll('|', ','),
+              authors: paper.Authors.replaceAll('|', ','),
+              abstract: paper.Abstract.replaceAll('|', ','),
+              title: paper.Title.replaceAll('|', ','),
+              url: paper.Link,
+              sourcetitle: paper['Source title'],
+              year: +paper.Year,
+              opacity: 1
+            })
           })
         })
-      })
+      }
     })
 
-    const papersToColor = d3.nest()
-      .key(d => d.unitID)
+    const journalsToColor = d3.nest()
+      .key(d => d.sourcetitle)
       .rollup(d => d.length)
       .entries(aggData)
       .sort(function(a,b) {return d3.descending(a.value,b.value);})
       .map(d => d.key)
-      .slice(0, 10)
+      .slice(0, 8)
 
     aggData.forEach(d => {
-      d.color = papersToColor.indexOf(d.unitID) !== -1 ? d.label : 'Other papers'
+      d.color = journalsToColor.indexOf(d.sourcetitle) !== -1 ? d.label : 'Other journals'
     })
-    
+
     setData([])
+    setJournals(journalsToColor.concat('Other journals'))
   }, [])
 
   const handleNameChange = (e, { name, value }) => {
@@ -180,7 +184,7 @@ const TIYPage = () => {
               topic,
               category,
               value,
-              count: 10,
+              count: 20,
               label: form["name"],
               opacity: 1,
               color: 'New paper'     
@@ -378,6 +382,7 @@ const TIYPage = () => {
         <RadarChart 
           data={data} 
           search={{ isSelected: false, isLoading: false, isOpen: false, results: [], value: '' }}
+          journals={journals}
         />
       </div>
     </div>

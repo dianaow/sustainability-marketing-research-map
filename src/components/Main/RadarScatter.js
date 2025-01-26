@@ -18,7 +18,13 @@ const getCoordsAlongArc = (data, rScale, label) => {
     .domain(data.topic === topicCategories.slice(-1) ? [5, 1] : [1, 5])
 
   const line = d3.lineRadial()
-    .radius(function(d,i) { return label ? callAccessor(rScale, d.category, i) + rScale.bandwidth() + 8 : callAccessor(rScale, d.category, i) + rScale.bandwidth() / 2})
+    .radius(function(d,i) { 
+      const index = tagCategories.indexOf(d.category)
+      const start = rScale.range()[index - 1] || 0
+      return label ? 
+      callAccessor(rScale, d.category, i) + 8 : 
+      ((callAccessor(rScale, d.category, i) - (callAccessor(rScale, d.category, i) - start)/2 ) + ((index === 2 || index == 1) ? -50 : 30))
+    })
     .angle(function(d,i) { return angleScale(+d.value) })
 
   return line([data]).slice(1).slice(0, -1).split(',')
@@ -32,18 +38,20 @@ const getPolarScatterCoords = (data, rScale) => {
     a.x = +coors[0]
     a.y = +coors[1]
     a.size = nodeRadiusScale(a.count)
+    a.radius = rScale(a.category)
   })
 
   const simulation = d3
     .forceSimulation()
     .nodes(data)
-    .force('charge', d3.forceManyBody().strength(-20))
-    .force('x', d3.forceX().x(d => d.x).strength(window.innerHeight < 800 ? 0.75 : 0.55))
-    .force('y', d3.forceY().y(d => d.y).strength(window.innerHeight < 800 ? 0.75 : 0.55))
+    .force('charge', d3.forceManyBody().strength(-30))
+    .force('x', d3.forceX().x(d => d.x).strength(window.innerHeight < 800 ? 0.85 : 0.75))
+    .force('y', d3.forceY().y(d => d.y).strength(window.innerHeight < 800 ? 0.85 : 0.75))
     .force(
       'collision',
-      d3.forceCollide().radius((d) => d.size * 0.45)
+      d3.forceCollide().radius((d) => d.size * 0.4)
     )
+    .force("r", d3.forceRadial(d => d.radius, 0, 0).strength(0.25))
     .stop();
 
     for (
@@ -61,18 +69,24 @@ const getPolarScatterCoords = (data, rScale) => {
   return data
 
 }
-const Radar = ({ data, search, ...props }) => {
+const Radar = ({ data, search, journals, ...props }) => {
 
-  const colorCategories = data.map(d => d.color).filter(onlyUnique).filter(d => d !== 'Other papers').sort()
-  fillScale.domain(colorCategories)
-  colorScale.domain(colorCategories)
+  fillScale.domain(journals)
+  colorScale.domain(journals)
 
-  const dimensions = {'width': window.innerWidth * 0.8 * 0.6, 'height': window.innerHeight*0.9}
-  const radius = Math.min(dimensions.width/2, dimensions.height/2) - 18
+  const dimensions = {'width': window.innerWidth, 'height': window.innerHeight}
+  const radius = Math.min(dimensions.width/2, dimensions.height/2) - 70
 
-  const rScale = d3.scaleBand()
-    .range([radius, (radius/tagCategories.length)* 0.3])
+  const customBands = [
+    { category: tagCategories[0], start: 0, end: radius * 0.5 },
+    { category: tagCategories[1], start: radius * 0.55, end: radius * 0.7}, 
+    { category: tagCategories[2], start: radius * 0.7, end: radius },
+  ];
+  
+  // Create a custom scale mapping categories to their respective radii
+  const rScale = d3.scaleOrdinal()
     .domain(tagCategories)
+    .range(customBands.map((band) => band.end));
 
   // Calculate the placement of each axis arc label
   const values = ['Not Applicable', 'Very weak', 'Weak', 'Moderate', 'Strong', 'Very Strong']
@@ -94,8 +108,9 @@ const Radar = ({ data, search, ...props }) => {
   const nodeKeyAccessor = d => "entity-" + d.entity
   const xAccessor = d => d.x
   const yAccessor = d => d.y
-  const fillAccessor = d => d.color === 'New paper' ? 'black' : (d.color === 'Other papers' ? 'transparent' : fillScale(d.color))
-  const strokeAccessor = d => (d.color === 'Other papers' || d.color === 'New paper') ? 'black' : colorScale(d.color)
+  const fillAccessor = d => fillScale(d.color)
+  //const strokeAccessor = d => (d.color === 'Other journals' || d.color === 'New paper') ? 'black' : colorScale(d.color)
+  const strokeAccessor = d => 'none'
   const radiusAccessor = d => nodeRadiusScale(d.size)
   //const opacityAccessor = d => nodeOpacityScale(d.value)
   const opacityAccessor = d => d.opacity
@@ -113,7 +128,7 @@ const Radar = ({ data, search, ...props }) => {
   return (
     <div className="Radar">
       <Chart dimensions={dimensions}>
-       <g transform={`translate(${dimensions.width/2}, ${dimensions.height/2 + 30})`}>
+       <g transform={`translate(${dimensions.width/2}, ${dimensions.height/2})`}>
           <Board
             data={tagCategories}
             keyAccessor={(d, i) => 'board-' + i}
@@ -137,7 +152,7 @@ const Radar = ({ data, search, ...props }) => {
             <text 
               className="Radar__arcText"
               key={"Radar__arcText-" + i}
-              fontSize='10px'
+              fontSize='11px'
             >
               <textPath
                 startOffset="50%"

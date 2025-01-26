@@ -47,7 +47,7 @@ const Axis = ({ data, radius, innerRadius, keyAccessor, ...props }) => {
         <text 
           className="Axis__arcText"
           fill={props.textColor}
-          fontSize='14px'
+          fontSize='18px'
           fontWeight='900'
           y={-radius}
           textAnchor="middle"

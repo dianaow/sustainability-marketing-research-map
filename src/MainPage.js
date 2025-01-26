@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react"
 import * as d3 from "d3"
 import { Popup, Button, Dropdown } from "semantic-ui-react";
-import scores from './data/scores.json';
-import papers from './data/final_papers.json';
+import scores from './data/scores_full.json';
+import papers from './data/final_papers_full_citations.json';
 
 import Slider from "./components/Shared/slider/Slider"
 import Header from "./components/Shared/Header"
@@ -44,6 +44,7 @@ const MainPage = () => {
   const initialSearchState = { isSelected: false, isLoading: false, isOpen: false, results: [], value: '' }
   const [tooltip, setTooltip] = useState(initialTooltipState)
   const [data, setData] = useState([])
+  const [journals, setJournals] = useState([])
   const [search, setSearch] = useState(initialSearchState)
 
   const journalOptions = data.map(d => d.sourcetitle).filter(onlyUnique).map(d => {
@@ -124,15 +125,13 @@ const MainPage = () => {
     const keys = Object.keys(scores[0])
     const data = scores.map(d => {
       return keys.map(key => {
+        if(key === 'SP') return
         let result = getPropertyName(d, o => o[key]).split('_')
-        if(result[0] !== 'OVO' || result[2] === 'SP') return
         return {
-          unitID: d.UnitID,
-          coderID: d.CoderID,
-          order: d.Order,
+          unitID: d.Unit,
           topic: cleanTopic(result[1]),
           category: cleanCategory(result[2]),
-          value: d['OVO_' + result[1] + '_' + result[2]] === "1" ? d['OVO_' + result[1] + '_SP'] : "" 
+          value: d[key] === "1" ? d['SP'] : "" 
         }
       })
     }).flat().filter(d => d && d.category && d.topic && d.value !== "")
@@ -147,45 +146,48 @@ const MainPage = () => {
     let aggData = []
     nested.forEach(a =>{
       const paper = papers.find(el => el.Code === a.key) || {}
-      a.values.forEach(b => {
-        b.values.forEach(c => {
-          if(c.value )
-          aggData.push({
-            entity: a.key + '-' + b.key + '-' + c.key,
-            unitID: a.key,
-            topic: b.key,
-            category: c.key,
-            value: c.value,
-            count: +paper.Citedby,
-            label: paper.InGraphLabel.replaceAll('|', ','),
-            authors: paper.Authors.replaceAll('|', ','),
-            abstract: paper.Abstract.replaceAll('|', ','),
-            title: paper.Title.replaceAll('|', ','),
-            url: paper.Link,
-            sourcetitle: paper.Sourcetitle,
-            year: +paper.Year,
-            opacity: 1
+      if(Object.keys(paper).length > 0) {
+        a.values.forEach(b => {
+          b.values.forEach(c => {
+            if(c.value )
+            aggData.push({
+              entity: a.key + '-' + b.key + '-' + c.key,
+              unitID: a.key,
+              topic: b.key,
+              category: c.key,
+              value: c.value,
+              count: +paper.citationCount,
+              label: paper.Authors.replaceAll('|', ','),
+              authors: paper.Authors.replaceAll('|', ','),
+              abstract: paper.Abstract.replaceAll('|', ','),
+              title: paper.Title.replaceAll('|', ','),
+              url: paper.Link,
+              sourcetitle: paper['Source title'],
+              year: +paper.Year,
+              opacity: 1
+            })
           })
         })
-      })
+      }
     })
 
-    const papersToColor = d3.nest()
-      .key(d => d.unitID)
+    const journalsToColor = d3.nest()
+      .key(d => d.sourcetitle)
       .rollup(d => d.length)
       .entries(aggData)
       .sort(function(a,b) {return d3.descending(a.value,b.value);})
       .map(d => d.key)
-      .slice(0, 10)
+      .slice(0, 8)
 
     aggData.forEach(d => {
-      d.color = papersToColor.indexOf(d.unitID) !== -1 ? d.label : 'Other papers'
+      d.color = journalsToColor.indexOf(d.sourcetitle) !== -1 ? d.sourcetitle : 'Other journals'
     })
-    
+
     setData(aggData)
+    setJournals(journalsToColor.concat('Other journals'))
   }, [])
 
-  const { isLoading, value, results } = search
+  //const { isLoading, value, results } = search
 
   return(
     <React.Fragment>
@@ -242,20 +244,26 @@ const MainPage = () => {
             <RadarChart 
               data={data} 
               search={search}
+              journals={journals}
             />
-            <div style={{display: "flex", padding: '10px'}}>
-              {['Actors', 'Value Orientations', 'Sustainability Positioning'].map((item) => (
-                <Popup
-                  position='top center'
-                  key={item}
-                  header={item}
-                  trigger={<Button>{item}</Button>}
-                >
-                  {renderLegendContent(item)}
-                </Popup>
-              ))}
+            <div style={{position: 'absolute', bottom: '10px'}}>
+              <div style={{display: "flex"}}>
+                {['Actors', 'Value Orientations', 'Sustainability Positioning'].map((item) => (
+                  <Popup
+                    position='top center'
+                    key={item}
+                    header={item}
+                    trigger={<Button>{item}</Button>}
+                  >
+                    {renderLegendContent(item)}
+                  </Popup>
+                ))}
+              </div>
             </div>
           </TooltipContext.Provider>
+          <div style={{position: 'absolute', top: '10px', right: '-50px'}}>
+            <Legend data={journals}/>
+          </div>
         </div>
       </div>
     </div>

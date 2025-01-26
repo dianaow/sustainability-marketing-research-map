@@ -7,11 +7,11 @@ const sliderStyle = {
   width: '100%',
 }
 
-const defaultValues = [2010, 2022]
+const defaultValues = [2010, 2024]
 
 class Example extends Component {
   state = {
-    domain: [2010, 2022],
+    domain: [2010, 2024],
     values: defaultValues.slice(),
     update: defaultValues.slice(),
     reversed: false,
@@ -76,7 +76,7 @@ class Example extends Component {
               </div>
             )}
           </Tracks>
-          <Ticks count={12}>
+          <Ticks count={6}>
             {({ ticks }) => (
               <div className="slider-ticks">
                 {ticks.map(tick => (

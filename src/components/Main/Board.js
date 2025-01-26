@@ -10,10 +10,10 @@ const Board = ({ data, keyAccessor, scale, ...props }) => {
     <React.Fragment>
       <circle
         className="Board__circle"
-        r={scale.range()[1]}
+        r={50}
       />
       {
-        data.map((d, i) => {
+        data.reverse().map((d, i) => {
           return (
             <g key={keyAccessor(d, i)}>
               {/* <linearGradient id={`linearColors${i}`} x1="0" y1="0" x2="1" y2="1">
@@ -27,22 +27,31 @@ const Board = ({ data, keyAccessor, scale, ...props }) => {
               <circle
                 className="Board__circle"
                 fill={colors[i] || "none"}
-                r={callAccessor(scale, d, i) + scale.bandwidth()}
+                r={callAccessor(scale, d, i)}
               />
               <circle
                 className="Board__circle_stroke"
-                r={callAccessor(scale, d, i) + scale.bandwidth()}
+                r={callAccessor(scale, d, i)}
                 fill='none'
                 stroke='white'
                 strokeWidth='0.5'
               />
+            </g>
+          )
+        })
+      }
+      {
+        data.reverse().map((d, i) => {
+          return (
+            <g key={keyAccessor(d, i)}>
               {
                 texts.map((text, t) => {
                   return (<g transform={`rotate(${-120 + (t* 120)})`}>
                     <text {...props}
                       className="Board__label"
-                      textAnchor="start"
-                      transform={`translate(${10},${-callAccessor(scale, d, i) - scale.bandwidth() * (t=== 2 ? 0.15 : 0.85)})rotate(${t === 2 ? 270 : 90})`}
+                      textAnchor={t === 2 ? "end ": "start"}
+                      transform={`translate(${10},${-callAccessor(scale, d, i) + 10})rotate(${t === 2 ? 270 : 90})`}
+                      fontSize={"13px"}
                     >
                       { d === 'Self-Profit-Growth' ? text : d}
                     </text> 
@@ -57,9 +66,9 @@ const Board = ({ data, keyAccessor, scale, ...props }) => {
         <text {...props}
           className="Board__label"
           textAnchor="start"
-          x={scale.bandwidth()}
+          x={(scale.range()[2] - scale.range()[0])/2}
           y={-10} 
-          fontSize='14px'
+          fontSize='15px'
           fontWeight='900' 
         >
           { "Value Orientations" }
