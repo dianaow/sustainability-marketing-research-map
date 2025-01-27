@@ -19,7 +19,7 @@ const Legend = ({ ...props }) => {
                 cy={15 + i*20}
                 r={size}
                 fill={fillScale(d)}
-                stroke={colorScale(d)}
+                stroke={d === 'Other journals' ? 'black' : colorScale(d)}
                 strokeWidth={props.strokeWidth}
                 strokeOpacity={props.strokeOpacity}
               />

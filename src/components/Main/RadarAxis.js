@@ -52,7 +52,7 @@ const Axis = ({ data, radius, innerRadius, keyAccessor, ...props }) => {
           y={-radius}
           textAnchor="middle"
         >
-          { 'Sustainability Positioning' }
+          { 'Scope of Sustainability' }
         </text>
     </g>
   )

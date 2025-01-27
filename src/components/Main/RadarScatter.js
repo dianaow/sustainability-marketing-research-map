@@ -194,7 +194,7 @@ Radar.defaultProps = {
   strokeOpacity: 0.2,
   fill: 'white',
   textAnchor: 'middle',
-  fontSize: '10px',
+  fontSize: '12px',
 }
 
 export default Radar

@@ -233,7 +233,7 @@ const TIYPage = () => {
       <Header/>
       <div className="App__wrapper">
         <div className ='SideBarLeft1'>
-          <h4>Following this, you will be shown a simplified version of the codebook used by the researchers that allows you to get a rough idea of where your paper falls. However, if you’re interested in the nuance of your paper’s placement on the A-VO-SP Map, including the accurate Sustainability Positioning, please follow this link to the full codebook.</h4>
+          <h4>Following this, you will be shown a simplified version of the codebook used by the researchers that allows you to get a rough idea of where your paper falls. However, if you’re interested in the nuance of your paper’s placement on the A-VO-S Map, including the accurate Sustainability Positioning, please follow this link to the full codebook.</h4>
           <div style={{margin: '20px 0px'}}>
             <h4>Click on canvas to download it as an image</h4>
           </div>
@@ -246,7 +246,7 @@ const TIYPage = () => {
           {form['researcher_or_biz'] === 'Researcher' && 
           <>
             <div style={{margin: '20px 0px', width: '50%'}}>
-              <h4>How would you like to name your research in the A-VO-SP Map? </h4>
+              <h4>How would you like to name your research in the A-VO-S Map? </h4>
               <Input name='name' placeholder='Author names, Working title, Dependent variables, etc.' onChange={handleNameChange}></Input>
             </div>
             { topicCategories.map(topic => {
@@ -312,7 +312,7 @@ const TIYPage = () => {
           {form['researcher_or_biz'] === 'Business' && 
           <>
             <div style={{margin: '20px 0px', width: '50%'}}>
-              <h4>How would you like to name your work in the A-VO-SP Map? </h4>
+              <h4>How would you like to name your work in the A-VO-S Map? </h4>
               <Input name='name' placeholder='Brand X’s Mission Statement, Initiative, Advertisement, etc' onChange={handleNameChange}></Input>
             </div>
             {topicCategories.map(topic => {

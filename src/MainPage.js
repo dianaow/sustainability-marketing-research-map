@@ -196,7 +196,7 @@ const MainPage = () => {
       <div className='App_container'>
         <div className ='SideBarLeft'>
           <div className="Title">
-            <h1>The A-VO-SP Map</h1>
+            <h1>The A-VO-S Map</h1>
           </div>
           <Slider changeThresholds={changeThresholds} active={true} /> 
           <div className="Search">
