@@ -1,13 +1,9 @@
-import React, { useState, useEffect } from "react"
-import * as d3 from "d3"
+import React, { useState } from "react"
 import Header from "./components/Shared/Header"
 import RadarChart from "./components/Main/RadarScatter"
 import { Dropdown, Button, Popup, Icon, Input, } from "semantic-ui-react";
-import { tagCategories, topicCategories } from "./components/consts"
-import { getPropertyName, cleanTopic, cleanCategory }  from "./components/utils"
+import { tagCategories, topicCategories, values } from "./components/consts"
 
-import scores from './data/scores_full.json';
-import papers from './data/final_papers_full_citations.json';
 import html2canvas from "html2canvas";
 
 const popupContent = [
@@ -53,7 +49,7 @@ const boolOptions = [
   }
 ]
 
-const valueOptions = ['Not Applicable', 'Very weak', 'Weak', 'Moderate', 'Strong', 'Very Strong'].map((d,i) => {
+const valueOptions = values.map((d,i) => {
   return {
     key: d,
     text: d,
@@ -80,73 +76,6 @@ const TIYPage = () => {
   let timer
   const [form, setForm] = useState({})
   const [data, setData] = useState([])
-  const [journals, setJournals] = useState([])
-
-  useEffect(() => {
-    const keys = Object.keys(scores[0])
-    const data = scores.map(d => {
-      return keys.map(key => {
-        if(key === 'SP') return
-        let result = getPropertyName(d, o => o[key]).split('_')
-        return {
-          unitID: d.Unit,
-          topic: cleanTopic(result[1]),
-          category: cleanCategory(result[2]),
-          value: d[key] === "1" ? d['SP'] : "" 
-        }
-      })
-    }).flat().filter(d => d && d.category && d.topic && d.value !== "")
-    
-    const nested = d3.nest()
-      .key(d => d.unitID)
-      .key(d => d.topic)
-      .key(d => d.category)
-      .rollup(function(v) { return d3.mean(v, function(d) { return +d.value; }); })
-      .entries(data)
-
-    let aggData = []
-    nested.forEach(a =>{
-      const paper = papers.find(el => el.Code === a.key) || {}
-      if(Object.keys(paper).length > 0) {
-        a.values.forEach(b => {
-          b.values.forEach(c => {
-            if(c.value )
-            aggData.push({
-              entity: a.key + '-' + b.key + '-' + c.key,
-              unitID: a.key,
-              topic: b.key,
-              category: c.key,
-              value: c.value,
-              count: +paper.citationCount,
-              label: paper.Authors.replaceAll('|', ','),
-              authors: paper.Authors.replaceAll('|', ','),
-              abstract: paper.Abstract.replaceAll('|', ','),
-              title: paper.Title.replaceAll('|', ','),
-              url: paper.Link,
-              sourcetitle: paper['Source title'],
-              year: +paper.Year,
-              opacity: 1
-            })
-          })
-        })
-      }
-    })
-
-    const journalsToColor = d3.nest()
-      .key(d => d.sourcetitle)
-      .rollup(d => d.length)
-      .entries(aggData)
-      .sort(function(a,b) {return d3.descending(a.value,b.value);})
-      .map(d => d.key)
-      .slice(0, 8)
-
-    aggData.forEach(d => {
-      d.color = journalsToColor.indexOf(d.sourcetitle) !== -1 ? d.label : 'Other journals'
-    })
-
-    setData([])
-    setJournals(journalsToColor.concat('Other journals'))
-  }, [])
 
   const handleNameChange = (e, { name, value }) => {
     const debounce = () => {
@@ -160,7 +89,7 @@ const TIYPage = () => {
   }
   
   //IF	Self	Society	Environment	THEN
-  //YES	NO	NO	VERY WEAK
+  //YES	NO	NO	Very Peripheral
   //YES	NO	YES	WEAK
   //YES	YES	NO	WEAK
   //YES	YES	YES	MODERATE
@@ -209,7 +138,7 @@ const TIYPage = () => {
   }
 
   const handleReset = (key) => {
-    setData(data.filter(d => !(d.color === 'New paper')))
+    setData([])
     setForm({})
     //const newData = data.filter(d => !(d.color === 'New paper' && d.topic === key))
     //setData(newData)
@@ -233,7 +162,7 @@ const TIYPage = () => {
       <Header/>
       <div className="App__wrapper">
         <div className ='SideBarLeft1'>
-          <h4>Following this, you will be shown a simplified version of the codebook used by the researchers that allows you to get a rough idea of where your paper falls. However, if you’re interested in the nuance of your paper’s placement on the A-VO-S Map, including the accurate Sustainability Positioning, please follow this link to the full codebook.</h4>
+          <h4>Following this, you will be shown a simplified version of the codebook used by the researchers that allows you to get a rough idea of where your paper falls. However, if you’re interested in the nuance of your paper’s placement on the A-VO-S Map, including the accurate Scope of Sustainability, please follow this link to the full codebook.</h4>
           <div style={{margin: '20px 0px'}}>
             <h4>Click on canvas to download it as an image</h4>
           </div>
@@ -295,7 +224,7 @@ const TIYPage = () => {
                       <Dropdown placeholder='' selection options={boolOptions} disabled={form[topic + '_SP'] > 0 ? true : false} onChange={(e,{value})=>handleChange(value, topic + '_Environment')} />
                     </div>
                     <div style={{margin: '20px 0px'}}>
-                      <h4>If using the full codebook, please also choose the appropriate Sustainability Positioning for the {topic} as defined in the codebook. If not, please choose Not Applicable and your work will be placed automatically based on your previous answers.</h4>
+                      <h4>If using the full codebook, please also choose the appropriate Scope of Sustainability for the {topic} as defined in the codebook. If not, please choose Not Applicable and your work will be placed automatically based on your previous answers.</h4>
                       <Dropdown placeholder='' selection options={valueOptions} disabled={form[topic + '_SP'] > 0 ? true : false} onChange={(e,{value})=>handleChange(value, topic + '_SP')} />
                     </div>
                   </div> : <div></div>
@@ -361,7 +290,7 @@ const TIYPage = () => {
                     <Dropdown placeholder='' selection options={boolOptions} disabled={form[topic + '_SP'] > 0 ? true : false} onChange={(e,{value})=>handleChange(value, topic + '_Environment')} />
                   </div>
                   <div style={{margin: '20px 0px'}}>
-                    <h4>If using the full codebook, please also choose the appropriate Sustainability Positioning for the {topic} as defined in the codebook. If not, please choose Not Applicable and your work will be placed automatically based on your previous answers.</h4>
+                    <h4>If using the full codebook, please also choose the appropriate Scope of Sustainability for the {topic} as defined in the codebook. If not, please choose Not Applicable and your work will be placed automatically based on your previous answers.</h4>
                     <Dropdown placeholder='' selection options={valueOptions} disabled={form[topic + '_SP'] > 0 ? true : false} onChange={(e,{value})=>handleChange(value, topic + '_SP')} />
                   </div>
                 </div> : <div></div>
@@ -382,7 +311,7 @@ const TIYPage = () => {
         <RadarChart 
           data={data} 
           search={{ isSelected: false, isLoading: false, isOpen: false, results: [], value: '' }}
-          journals={journals}
+          journals={[]}
         />
       </div>
     </div>

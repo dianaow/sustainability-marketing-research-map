@@ -7,7 +7,7 @@ import Axis from "./RadarAxis"
 import Nodes from "./Nodes"
 
 import { callAccessor, onlyUnique }  from "../utils"
-import { invisibleArc, colorScale, fillScale, tagCategories, topicCategories, scoreCategories, nodeRadiusScale, angleSlice, bufferInRad } from "../consts"
+import { invisibleArc, colorScale, fillScale, tagCategories, topicCategories, scoreCategories, values, nodeRadiusScale, angleSlice, bufferInRad } from "../consts"
 
 const getCoordsAlongArc = (data, rScale, label) => {
 
@@ -23,7 +23,7 @@ const getCoordsAlongArc = (data, rScale, label) => {
       const start = rScale.range()[index - 1] || 0
       return label ? 
       callAccessor(rScale, d.category, i) + 8 : 
-      ((callAccessor(rScale, d.category, i) - (callAccessor(rScale, d.category, i) - start)/2 ) + ((index === 2 || index == 1) ? -50 : 30))
+      ((callAccessor(rScale, d.category, i) - (callAccessor(rScale, d.category, i) - start)/2 ) + ((index === 2 || index == 1) ? -50 : 40))
     })
     .angle(function(d,i) { return angleScale(+d.value) })
 
@@ -44,14 +44,14 @@ const getPolarScatterCoords = (data, rScale) => {
   const simulation = d3
     .forceSimulation()
     .nodes(data)
-    .force('charge', d3.forceManyBody().strength(-30))
-    .force('x', d3.forceX().x(d => d.x).strength(window.innerHeight < 800 ? 0.85 : 0.75))
-    .force('y', d3.forceY().y(d => d.y).strength(window.innerHeight < 800 ? 0.85 : 0.75))
+    .force('charge', d3.forceManyBody().strength(-35))
+    .force('x', d3.forceX().x(d => d.x).strength(0.9))
+    .force('y', d3.forceY().y(d => d.y).strength(0.9))
     .force(
       'collision',
       d3.forceCollide().radius((d) => d.size * 0.4)
     )
-    .force("r", d3.forceRadial(d => d.radius, 0, 0).strength(0.25))
+    .force("r", d3.forceRadial(d => d.radius, 0, 0).strength(0.3))
     .stop();
 
     for (
@@ -78,9 +78,9 @@ const Radar = ({ data, search, journals, ...props }) => {
   const radius = Math.min(dimensions.width/2, dimensions.height/2) - 70
 
   const customBands = [
-    { category: tagCategories[0], start: 0, end: radius * 0.5 },
-    { category: tagCategories[1], start: radius * 0.55, end: radius * 0.7}, 
-    { category: tagCategories[2], start: radius * 0.7, end: radius },
+    { category: tagCategories[0], start: 0, end: radius * 0.6 },
+    { category: tagCategories[1], start: radius * 0.6, end: radius * 0.75}, 
+    { category: tagCategories[2], start: radius * 0.75, end: radius },
   ];
   
   // Create a custom scale mapping categories to their respective radii
@@ -89,7 +89,6 @@ const Radar = ({ data, search, journals, ...props }) => {
     .range(customBands.map((band) => band.end));
 
   // Calculate the placement of each axis arc label
-  const values = ['Not Applicable', 'Very weak', 'Weak', 'Moderate', 'Strong', 'Very Strong']
   const labels = []
   topicCategories.forEach((topic)=>{
     scoreCategories.forEach((score)=>{
@@ -108,7 +107,7 @@ const Radar = ({ data, search, journals, ...props }) => {
   const nodeKeyAccessor = d => "entity-" + d.entity
   const xAccessor = d => d.x
   const yAccessor = d => d.y
-  const fillAccessor = d => fillScale(d.color)
+  const fillAccessor = d => d.color === 'New paper' ? 'black' :fillScale(d.color)
   //const strokeAccessor = d => (d.color === 'Other journals' || d.color === 'New paper') ? 'black' : colorScale(d.color)
   const strokeAccessor = d => 'none'
   const radiusAccessor = d => nodeRadiusScale(d.size)
@@ -133,6 +132,7 @@ const Radar = ({ data, search, journals, ...props }) => {
             data={tagCategories}
             keyAccessor={(d, i) => 'board-' + i}
             scale={rScale}
+            range
           />
           <Axis
             data={topicCategories} 
@@ -153,6 +153,7 @@ const Radar = ({ data, search, journals, ...props }) => {
               className="Radar__arcText"
               key={"Radar__arcText-" + i}
               fontSize='11px'
+              textAnchor="middle"
             >
               <textPath
                 startOffset="50%"

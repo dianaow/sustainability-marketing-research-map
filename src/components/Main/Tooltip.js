@@ -50,7 +50,7 @@ const Tooltip = ({...props }) => {
         fill='black'  
         fontSize={16}  
       >
-        { "Score: " + info.value }
+        { "Scope of Sustainability: " + info.value }
       </text>  
     </g>
   )
