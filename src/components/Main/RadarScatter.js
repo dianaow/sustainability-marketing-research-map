@@ -7,7 +7,7 @@ import Axis from "./RadarAxis"
 import Nodes from "./Nodes"
 
 import { callAccessor, onlyUnique }  from "../utils"
-import { colorScale, fillScale, tagCategories, topicCategories, scoreCategories, nodeRadiusScale, angleSlice, bufferInRad } from "../consts"
+import { invisibleArc, colorScale, fillScale, tagCategories, topicCategories, scoreCategories, values, nodeRadiusScale, angleSlice, bufferInRad } from "../consts"
 
 const getCoordsAlongArc = (data, rScale, label) => {
 
@@ -18,7 +18,13 @@ const getCoordsAlongArc = (data, rScale, label) => {
     .domain(data.topic === topicCategories.slice(-1) ? [5, 1] : [1, 5])
 
   const line = d3.lineRadial()
-    .radius(function(d,i) { return label ? callAccessor(rScale, d.category, i) + rScale.bandwidth() + 8 : callAccessor(rScale, d.category, i) + rScale.bandwidth() / 2})
+    .radius(function(d,i) { 
+      const index = tagCategories.indexOf(d.category)
+      const start = rScale.range()[index - 1] || 0
+      return label ? 
+      callAccessor(rScale, d.category, i) + 8 : 
+      ((callAccessor(rScale, d.category, i) - (callAccessor(rScale, d.category, i) - start)/2 ) + ((index === 2 || index == 1) ? -50 : 40))
+    })
     .angle(function(d,i) { return angleScale(+d.value) })
 
   return line([data]).slice(1).slice(0, -1).split(',')
@@ -32,18 +38,20 @@ const getPolarScatterCoords = (data, rScale) => {
     a.x = +coors[0]
     a.y = +coors[1]
     a.size = nodeRadiusScale(a.count)
+    a.radius = rScale(a.category)
   })
 
   const simulation = d3
     .forceSimulation()
     .nodes(data)
-    .force('charge', d3.forceManyBody().strength(-20))
-    .force('x', d3.forceX().x(d => d.x).strength(window.innerHeight < 800 ? 0.75 : 0.55))
-    .force('y', d3.forceY().y(d => d.y).strength(window.innerHeight < 800 ? 0.75 : 0.55))
+    .force('charge', d3.forceManyBody().strength(-35))
+    .force('x', d3.forceX().x(d => d.x).strength(0.9))
+    .force('y', d3.forceY().y(d => d.y).strength(0.9))
     .force(
       'collision',
-      d3.forceCollide().radius((d) => d.size * 0.45)
+      d3.forceCollide().radius((d) => d.size * 0.4)
     )
+    .force("r", d3.forceRadial(d => d.radius, 0, 0).strength(0.3))
     .stop();
 
     for (
@@ -61,18 +69,24 @@ const getPolarScatterCoords = (data, rScale) => {
   return data
 
 }
-const Radar = ({ data, search, ...props }) => {
+const Radar = ({ data, search, journals, ...props }) => {
 
-  const colorCategories = data.map(d => d.color).filter(onlyUnique).filter(d => d !== 'Other papers').sort()
-  fillScale.domain(colorCategories)
-  colorScale.domain(colorCategories)
+  fillScale.domain(journals)
+  colorScale.domain(journals)
 
   const dimensions = {'width': window.innerWidth, 'height': window.innerHeight}
-  const radius = Math.min(dimensions.width/2, dimensions.height/2) - 40
+  const radius = Math.min(dimensions.width/2, dimensions.height/2) - 70
 
-  const rScale = d3.scaleBand()
-    .range([radius, (radius/tagCategories.length)* 0.3])
+  const customBands = [
+    { category: tagCategories[0], start: 0, end: radius * 0.6 },
+    { category: tagCategories[1], start: radius * 0.6, end: radius * 0.75}, 
+    { category: tagCategories[2], start: radius * 0.75, end: radius },
+  ];
+  
+  // Create a custom scale mapping categories to their respective radii
+  const rScale = d3.scaleOrdinal()
     .domain(tagCategories)
+    .range(customBands.map((band) => band.end));
 
   // Calculate the placement of each axis arc label
   const labels = []
@@ -84,7 +98,7 @@ const Radar = ({ data, search, ...props }) => {
         value : score
       } 
       let coors = getCoordsAlongArc(datum, rScale, true)
-      labels.push({text: score, x: +coors[0], y: +coors[1]})
+      labels.push({text: values[score], x: +coors[0], y: +coors[1]})
     })
   })
 
@@ -93,8 +107,9 @@ const Radar = ({ data, search, ...props }) => {
   const nodeKeyAccessor = d => "entity-" + d.entity
   const xAccessor = d => d.x
   const yAccessor = d => d.y
-  const fillAccessor = d => d.color === 'New paper' ? 'black' : (d.color === 'Other papers' ? 'transparent' : fillScale(d.color))
-  const strokeAccessor = d => (d.color === 'Other papers' || d.color === 'New paper') ? 'black' : colorScale(d.color)
+  const fillAccessor = d => d.color === 'New paper' ? 'black' :fillScale(d.color)
+  //const strokeAccessor = d => (d.color === 'Other journals' || d.color === 'New paper') ? 'black' : colorScale(d.color)
+  const strokeAccessor = d => 'none'
   const radiusAccessor = d => nodeRadiusScale(d.size)
   //const opacityAccessor = d => nodeOpacityScale(d.value)
   const opacityAccessor = d => d.opacity
@@ -110,13 +125,14 @@ const Radar = ({ data, search, ...props }) => {
   }
 
   return (
-    <div className="Radar" style={{'width': window.innerWidth, 'height': window.innerHeight}}>
+    <div className="Radar">
       <Chart dimensions={dimensions}>
        <g transform={`translate(${dimensions.width/2}, ${dimensions.height/2})`}>
           <Board
             data={tagCategories}
             keyAccessor={(d, i) => 'board-' + i}
             scale={rScale}
+            range
           />
           <Axis
             data={topicCategories} 
@@ -125,15 +141,38 @@ const Radar = ({ data, search, ...props }) => {
             innerRadius = {(radius/tagCategories.length)* 0.28}
           />
           {labels.map((label, i) => (
-            <text {...props}
+            <>
+            <path
+              className="Radar__invisible_arc"
+              id={"Radar__arc_" + i}
+              d={invisibleArc(i, radius, (Math.PI * 2) / (labels.length))}
+              strokeOpacity={0}
+              fill='none'
+            />
+            <text 
               className="Radar__arcText"
               key={"Radar__arcText-" + i}
-              x={label.x}
-              y={label.y}
+              fontSize='11px'
+              textAnchor="middle"
             >
+              <textPath
+                startOffset="50%"
+                xlinkHref={"#Radar__arc_" + i}
+              >
               { label.text }
-            </text> 
+              </textPath>
+            </text>
+            </>
           ))}
+          <text 
+            className="Radar__centerText"
+            key={"Radar__centerText"}
+            fontSize='14px'
+            textAlign='center'
+            x={-20}
+          >
+            ACTORS
+          </text>
           <Nodes
             data={radialData} 
             accessors={accessors}
@@ -156,7 +195,7 @@ Radar.defaultProps = {
   strokeOpacity: 0.2,
   fill: 'white',
   textAnchor: 'middle',
-  fontSize: '11px',
+  fontSize: '12px',
 }
 
 export default Radar

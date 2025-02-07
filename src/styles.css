@@ -7,7 +7,7 @@
 body {
   font-family: 'Karla', sans-serif !important;
   position: relative;
-  background-color: #f4f1de; 
+  background-color: #fff; 
   color: black;
   margin: 0px;
   padding: 0px;
@@ -65,10 +65,44 @@ text {
   align-items: center;
 }
 
-.SideBarLeft {
-  width: 25vw;
+.App_container {
+  width: 80%;
+  height: 100%;
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.App_container-textonly {
+  width: 80%;
+  height: 100%;
+  padding: 40px;
+}
+
+.App_container-textonly p {
+  font-size: 1em;
+  margin: 20px 0px;
+}
+
+.App_container-textonly b {
+  font-size: 1.2em;
+  margin: 20px 0px;
+}
+
+.SideBarLeft1 {
+  width: 40vw;
   height: 100%;;
   padding: 50px 20px 10px 20px;
+  display: flex;
+  flex-direction: column;
+  z-index:98;
+}
+
+.SideBarLeft {
+  width: 35%;
+  height: 100%;;
+  padding: 30px 40px 10px 10px;
   display: flex;
   flex-direction: column;
   z-index:98;
@@ -82,7 +116,7 @@ text {
 
 .Search {
   width: 100%;
-  height: 80px;
+  height: 120px;
   padding-bottom: 10px;
 }
 .ui.input {
@@ -108,7 +142,7 @@ text {
 }
 
 .Main {
-  width: 50vw;
+  width: 65%;
   height: 100vh;
   display: flex;
   flex-direction: column;

@@ -17,8 +17,8 @@ const Tooltip = ({...props }) => {
       <circle
         className="Tooltip__circle"
         r={60}
-        fill='blacck'  
-        fillOpacity={0.2}
+        fill='#f5f5f5'  
+        fillOpacity={0.9}
       />  
       <text {...props}
         className="Tooltip__unit"
@@ -50,7 +50,7 @@ const Tooltip = ({...props }) => {
         fill='black'  
         fontSize={16}  
       >
-        { "Score: " + info.value }
+        { "Scope of Sustainability: " + info.value }
       </text>  
     </g>
   )

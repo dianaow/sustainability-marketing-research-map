@@ -5,16 +5,20 @@ import { SliderRail, Handle, Track, Tick } from './components' // example render
 const sliderStyle = {
   position: 'relative',
   width: '100%',
-}
-
-const defaultValues = [2010, 2022]
+} 
 
 class Example extends Component {
-  state = {
-    domain: [2010, 2022],
-    values: defaultValues.slice(),
-    update: defaultValues.slice(),
-    reversed: false,
+  constructor(props) {
+    super(props);
+    
+    const domain = props.range || [2010, 2024]; // Fallback to default range
+
+    this.state = {
+      domain,
+      values: domain.slice(), // Set default values to the full range
+      update: domain.slice(),
+      reversed: false,
+    };
   }
 
   onUpdate = update => {
@@ -34,8 +38,8 @@ class Example extends Component {
     } = this
 
     return (
-      <div style={{ height: '80px', width: '100%', marginTop: '0px', opacity: this.props.active ? '1' : '0.5' }}>
-       <h4 style={{margin: '0px 0px 10px 0px', textAlign: 'left'}}>Filter by Year</h4>
+      <div style={{ height: '120px', width: '100%', marginTop: '0px', opacity: this.props.active ? '1' : '0.5' }}>
+       <h3 style={{margin: '0px 0px 20px 0px', textAlign: 'left'}}>Filter by Year</h3>
         <Slider
           step={1}
           domain={domain}
@@ -76,7 +80,7 @@ class Example extends Component {
               </div>
             )}
           </Tracks>
-          <Ticks count={12}>
+          <Ticks count={8}>
             {({ ticks }) => (
               <div className="slider-ticks">
                 {ticks.map(tick => (
